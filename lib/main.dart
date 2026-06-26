@@ -12,6 +12,7 @@ class AniYokaApp extends StatelessWidget {
     return MaterialApp(
       title: 'AniYoka',
       debugShowCheckedModeBanner: false,
+      home: const Placeholder(),
     );
   }
 }
