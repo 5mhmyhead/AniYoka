@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'home_viewmodel.dart';
 
-class HomeView extends StackedView<HomeViewModel> {
-  const HomeView({Key? key}) : super(key: key);
+import 'bookmarks_viewmodel.dart';
+
+class BookmarksView extends StackedView<BookmarksViewModel> {
+  const BookmarksView({Key? key}) : super(key: key);
 
   @override
-  Widget builder(BuildContext context, HomeViewModel viewModel, Widget? child) {
+  Widget builder(BuildContext context, BookmarksViewModel viewModel, Widget? child) {
     return const Scaffold(
       body: SafeArea(
         child: Padding(
@@ -16,7 +17,7 @@ class HomeView extends StackedView<HomeViewModel> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Home', style: TextStyle(fontSize: 35, fontWeight: FontWeight.w900)),
+                Text('Bookmarks', style: TextStyle(fontSize: 35, fontWeight: FontWeight.w900)),
               ],
             ),
           ),
@@ -26,5 +27,5 @@ class HomeView extends StackedView<HomeViewModel> {
   }
 
   @override
-  HomeViewModel viewModelBuilder(BuildContext context) => HomeViewModel();
+  BookmarksViewModel viewModelBuilder(BuildContext context,) => BookmarksViewModel();
 }

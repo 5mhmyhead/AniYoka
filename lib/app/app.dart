@@ -4,13 +4,23 @@ import 'package:aniyoka/ui/views/home/home_view.dart';
 import 'package:aniyoka/ui/views/startup/startup_view.dart';
 import 'package:stacked/stacked_annotations.dart';
 import 'package:stacked_services/stacked_services.dart';
+import 'package:aniyoka/ui/views/main/main_view.dart';
+import 'package:aniyoka/ui/views/explore/explore_view.dart';
+import 'package:aniyoka/ui/views/watchlist/watchlist_view.dart';
+import 'package:aniyoka/ui/views/bookmarks/bookmarks_view.dart';
+import 'package:aniyoka/ui/views/profile/profile_view.dart';
 // @stacked-import
 
 @StackedApp(
   routes: [
+    MaterialRoute(page: StartupView, initial: true),
+    MaterialRoute(page: MainView),
     MaterialRoute(page: HomeView),
-    MaterialRoute(page: StartupView),
-    // @stacked-route
+    MaterialRoute(page: ExploreView),
+    MaterialRoute(page: WatchlistView),
+    MaterialRoute(page: BookmarksView),
+    MaterialRoute(page: ProfileView),
+// @stacked-route
   ],
   dependencies: [
     LazySingleton(classType: BottomSheetService),

@@ -6,21 +6,41 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:aniyoka/ui/views/bookmarks/bookmarks_view.dart' as _i7;
+import 'package:aniyoka/ui/views/explore/explore_view.dart' as _i5;
 import 'package:aniyoka/ui/views/home/home_view.dart' as _i2;
+import 'package:aniyoka/ui/views/main/main_view.dart' as _i4;
+import 'package:aniyoka/ui/views/profile/profile_view.dart' as _i8;
 import 'package:aniyoka/ui/views/startup/startup_view.dart' as _i3;
-import 'package:flutter/material.dart' as _i4;
+import 'package:aniyoka/ui/views/watchlist/watchlist_view.dart' as _i6;
+import 'package:flutter/material.dart' as _i9;
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart' as _i1;
-import 'package:stacked_services/stacked_services.dart' as _i5;
+import 'package:stacked_services/stacked_services.dart' as _i10;
 
 class Routes {
   static const homeView = '/home-view';
 
   static const startupView = '/startup-view';
 
+  static const mainView = '/main-view';
+
+  static const exploreView = '/explore-view';
+
+  static const watchlistView = '/watchlist-view';
+
+  static const bookmarksView = '/bookmarks-view';
+
+  static const profileView = '/profile-view';
+
   static const all = <String>{
     homeView,
     startupView,
+    mainView,
+    exploreView,
+    watchlistView,
+    bookmarksView,
+    profileView,
   };
 }
 
@@ -34,6 +54,26 @@ class StackedRouter extends _i1.RouterBase {
       Routes.startupView,
       page: _i3.StartupView,
     ),
+    _i1.RouteDef(
+      Routes.mainView,
+      page: _i4.MainView,
+    ),
+    _i1.RouteDef(
+      Routes.exploreView,
+      page: _i5.ExploreView,
+    ),
+    _i1.RouteDef(
+      Routes.watchlistView,
+      page: _i6.WatchlistView,
+    ),
+    _i1.RouteDef(
+      Routes.bookmarksView,
+      page: _i7.BookmarksView,
+    ),
+    _i1.RouteDef(
+      Routes.profileView,
+      page: _i8.ProfileView,
+    ),
   ];
 
   final _pagesMap = <Type, _i1.StackedRouteFactory>{
@@ -41,7 +81,7 @@ class StackedRouter extends _i1.RouterBase {
       final args = data.getArgs<HomeViewArguments>(
         orElse: () => const HomeViewArguments(),
       );
-      return _i4.MaterialPageRoute<dynamic>(
+      return _i9.MaterialPageRoute<dynamic>(
         builder: (context) => _i2.HomeView(key: args.key),
         settings: data,
       );
@@ -50,8 +90,53 @@ class StackedRouter extends _i1.RouterBase {
       final args = data.getArgs<StartupViewArguments>(
         orElse: () => const StartupViewArguments(),
       );
-      return _i4.MaterialPageRoute<dynamic>(
+      return _i9.MaterialPageRoute<dynamic>(
         builder: (context) => _i3.StartupView(key: args.key),
+        settings: data,
+      );
+    },
+    _i4.MainView: (data) {
+      final args = data.getArgs<MainViewArguments>(
+        orElse: () => const MainViewArguments(),
+      );
+      return _i9.MaterialPageRoute<dynamic>(
+        builder: (context) => _i4.MainView(key: args.key),
+        settings: data,
+      );
+    },
+    _i5.ExploreView: (data) {
+      final args = data.getArgs<ExploreViewArguments>(
+        orElse: () => const ExploreViewArguments(),
+      );
+      return _i9.MaterialPageRoute<dynamic>(
+        builder: (context) => _i5.ExploreView(key: args.key),
+        settings: data,
+      );
+    },
+    _i6.WatchlistView: (data) {
+      final args = data.getArgs<WatchlistViewArguments>(
+        orElse: () => const WatchlistViewArguments(),
+      );
+      return _i9.MaterialPageRoute<dynamic>(
+        builder: (context) => _i6.WatchlistView(key: args.key),
+        settings: data,
+      );
+    },
+    _i7.BookmarksView: (data) {
+      final args = data.getArgs<BookmarksViewArguments>(
+        orElse: () => const BookmarksViewArguments(),
+      );
+      return _i9.MaterialPageRoute<dynamic>(
+        builder: (context) => _i7.BookmarksView(key: args.key),
+        settings: data,
+      );
+    },
+    _i8.ProfileView: (data) {
+      final args = data.getArgs<ProfileViewArguments>(
+        orElse: () => const ProfileViewArguments(),
+      );
+      return _i9.MaterialPageRoute<dynamic>(
+        builder: (context) => _i8.ProfileView(key: args.key),
         settings: data,
       );
     },
@@ -67,7 +152,7 @@ class StackedRouter extends _i1.RouterBase {
 class HomeViewArguments {
   const HomeViewArguments({this.key});
 
-  final _i4.Key? key;
+  final _i9.Key? key;
 
   @override
   String toString() {
@@ -89,7 +174,7 @@ class HomeViewArguments {
 class StartupViewArguments {
   const StartupViewArguments({this.key});
 
-  final _i4.Key? key;
+  final _i9.Key? key;
 
   @override
   String toString() {
@@ -108,9 +193,119 @@ class StartupViewArguments {
   }
 }
 
-extension NavigatorStateExtension on _i5.NavigationService {
+class MainViewArguments {
+  const MainViewArguments({this.key});
+
+  final _i9.Key? key;
+
+  @override
+  String toString() {
+    return '{"key": "$key"}';
+  }
+
+  @override
+  bool operator ==(covariant MainViewArguments other) {
+    if (identical(this, other)) return true;
+    return other.key == key;
+  }
+
+  @override
+  int get hashCode {
+    return key.hashCode;
+  }
+}
+
+class ExploreViewArguments {
+  const ExploreViewArguments({this.key});
+
+  final _i9.Key? key;
+
+  @override
+  String toString() {
+    return '{"key": "$key"}';
+  }
+
+  @override
+  bool operator ==(covariant ExploreViewArguments other) {
+    if (identical(this, other)) return true;
+    return other.key == key;
+  }
+
+  @override
+  int get hashCode {
+    return key.hashCode;
+  }
+}
+
+class WatchlistViewArguments {
+  const WatchlistViewArguments({this.key});
+
+  final _i9.Key? key;
+
+  @override
+  String toString() {
+    return '{"key": "$key"}';
+  }
+
+  @override
+  bool operator ==(covariant WatchlistViewArguments other) {
+    if (identical(this, other)) return true;
+    return other.key == key;
+  }
+
+  @override
+  int get hashCode {
+    return key.hashCode;
+  }
+}
+
+class BookmarksViewArguments {
+  const BookmarksViewArguments({this.key});
+
+  final _i9.Key? key;
+
+  @override
+  String toString() {
+    return '{"key": "$key"}';
+  }
+
+  @override
+  bool operator ==(covariant BookmarksViewArguments other) {
+    if (identical(this, other)) return true;
+    return other.key == key;
+  }
+
+  @override
+  int get hashCode {
+    return key.hashCode;
+  }
+}
+
+class ProfileViewArguments {
+  const ProfileViewArguments({this.key});
+
+  final _i9.Key? key;
+
+  @override
+  String toString() {
+    return '{"key": "$key"}';
+  }
+
+  @override
+  bool operator ==(covariant ProfileViewArguments other) {
+    if (identical(this, other)) return true;
+    return other.key == key;
+  }
+
+  @override
+  int get hashCode {
+    return key.hashCode;
+  }
+}
+
+extension NavigatorStateExtension on _i10.NavigationService {
   Future<dynamic> navigateToHomeView({
-    _i4.Key? key,
+    _i9.Key? key,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -126,7 +321,7 @@ extension NavigatorStateExtension on _i5.NavigationService {
   }
 
   Future<dynamic> navigateToStartupView({
-    _i4.Key? key,
+    _i9.Key? key,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -141,8 +336,88 @@ extension NavigatorStateExtension on _i5.NavigationService {
         transition: transition);
   }
 
+  Future<dynamic> navigateToMainView({
+    _i9.Key? key,
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  }) async {
+    return navigateTo<dynamic>(Routes.mainView,
+        arguments: MainViewArguments(key: key),
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> navigateToExploreView({
+    _i9.Key? key,
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  }) async {
+    return navigateTo<dynamic>(Routes.exploreView,
+        arguments: ExploreViewArguments(key: key),
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> navigateToWatchlistView({
+    _i9.Key? key,
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  }) async {
+    return navigateTo<dynamic>(Routes.watchlistView,
+        arguments: WatchlistViewArguments(key: key),
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> navigateToBookmarksView({
+    _i9.Key? key,
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  }) async {
+    return navigateTo<dynamic>(Routes.bookmarksView,
+        arguments: BookmarksViewArguments(key: key),
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> navigateToProfileView({
+    _i9.Key? key,
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  }) async {
+    return navigateTo<dynamic>(Routes.profileView,
+        arguments: ProfileViewArguments(key: key),
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
   Future<dynamic> replaceWithHomeView({
-    _i4.Key? key,
+    _i9.Key? key,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -158,7 +433,7 @@ extension NavigatorStateExtension on _i5.NavigationService {
   }
 
   Future<dynamic> replaceWithStartupView({
-    _i4.Key? key,
+    _i9.Key? key,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -167,6 +442,86 @@ extension NavigatorStateExtension on _i5.NavigationService {
   }) async {
     return replaceWith<dynamic>(Routes.startupView,
         arguments: StartupViewArguments(key: key),
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> replaceWithMainView({
+    _i9.Key? key,
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  }) async {
+    return replaceWith<dynamic>(Routes.mainView,
+        arguments: MainViewArguments(key: key),
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> replaceWithExploreView({
+    _i9.Key? key,
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  }) async {
+    return replaceWith<dynamic>(Routes.exploreView,
+        arguments: ExploreViewArguments(key: key),
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> replaceWithWatchlistView({
+    _i9.Key? key,
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  }) async {
+    return replaceWith<dynamic>(Routes.watchlistView,
+        arguments: WatchlistViewArguments(key: key),
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> replaceWithBookmarksView({
+    _i9.Key? key,
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  }) async {
+    return replaceWith<dynamic>(Routes.bookmarksView,
+        arguments: BookmarksViewArguments(key: key),
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> replaceWithProfileView({
+    _i9.Key? key,
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  }) async {
+    return replaceWith<dynamic>(Routes.profileView,
+        arguments: ProfileViewArguments(key: key),
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,
