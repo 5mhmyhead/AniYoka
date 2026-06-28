@@ -1,3 +1,4 @@
+import 'package:aniyoka/ui/common/app_colors.dart';
 import 'package:aniyoka/ui/views/home/home_view.dart';
 import 'package:aniyoka/ui/views/explore/explore_view.dart';
 import 'package:aniyoka/ui/views/profile/profile_view.dart';
@@ -25,18 +26,40 @@ class MainView extends StackedView<MainViewModel> {
       },
       bottomNavigationBar: SizedBox(
         height: 80,
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.pinkAccent,
-          unselectedItemColor: Colors.grey, 
-          currentIndex: viewModel.currentPage,
-          onTap: viewModel.setPage,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
-            BottomNavigationBarItem(icon: Icon(Icons.tv), label: "Watchlist"),
-            BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: "Bookmarks"),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile")
+        child: NavigationBar(
+          // bottom nav bar styling
+          indicatorColor: kcAccentShadePink,
+          backgroundColor: kcSurfaceColor,
+          indicatorShape: const NarrowPillIndicator(), 
+          // bottom nav bar directory
+          selectedIndex: viewModel.currentPage,
+          onDestinationSelected: viewModel.setPage,
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home, color: kcPrimaryPink),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.explore_outlined),
+              selectedIcon: Icon(Icons.explore, color: kcPrimaryPink),
+              label: 'Explore',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.tv_outlined),
+              selectedIcon: Icon(Icons.connected_tv, color: kcPrimaryPink),
+              label: 'Watch List',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.bookmark_outline),
+              selectedIcon: Icon(Icons.bookmark, color: kcPrimaryPink),
+              label: 'Bookmarks',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.person_outline),
+              selectedIcon: Icon(Icons.person, color: kcPrimaryPink),
+              label: 'Profile',
+            ),
           ],
         ),
       ),
@@ -45,4 +68,34 @@ class MainView extends StackedView<MainViewModel> {
 
   @override
   MainViewModel viewModelBuilder(BuildContext context,) => MainViewModel();
+}
+
+// custom pill that is smaller than default
+class NarrowPillIndicator extends ShapeBorder {
+  final double customWidth;
+  const NarrowPillIndicator({this.customWidth = 46.0}); // Enforce a 46px narrow width
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => Path();
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    final double center = rect.left + (rect.width / 2);
+    final Rect narrowedRect = Rect.fromCenter(
+      center: Offset(center, rect.center.dy),
+      width: customWidth,
+      height: rect.height,
+    );
+    
+    return Path()..addRRect(RRect.fromRectAndRadius(narrowedRect, Radius.circular(rect.height / 2)));
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
+
+  @override
+  ShapeBorder scale(double t) => this;
 }

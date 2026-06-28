@@ -16,7 +16,9 @@ class HomeView extends StackedView<HomeViewModel> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Home', style: TextStyle(fontSize: 35, fontWeight: FontWeight.w900)),
+                Text('Home',
+                    style:
+                        TextStyle(fontSize: 35, fontWeight: FontWeight.w900)),
               ],
             ),
           ),
