@@ -9,6 +9,8 @@ import 'package:aniyoka/ui/views/explore/explore_view.dart';
 import 'package:aniyoka/ui/views/watchlist/watchlist_view.dart';
 import 'package:aniyoka/ui/views/bookmarks/bookmarks_view.dart';
 import 'package:aniyoka/ui/views/profile/profile_view.dart';
+
+import 'package:aniyoka/services/anilist_service.dart';
 // @stacked-import
 
 @StackedApp(
@@ -26,6 +28,7 @@ import 'package:aniyoka/ui/views/profile/profile_view.dart';
     LazySingleton(classType: BottomSheetService),
     LazySingleton(classType: DialogService),
     LazySingleton(classType: NavigationService),
+    LazySingleton(classType: AniListService),
     // @stacked-service
   ],
   bottomsheets: [
