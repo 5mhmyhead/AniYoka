@@ -1,4 +1,5 @@
 import 'package:aniyoka/ui/common/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:aniyoka/app/app.bottomsheets.dart';
 import 'package:aniyoka/app/app.dialogs.dart';
@@ -20,12 +21,14 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false, 
       initialRoute: Routes.startupView,
       onGenerateRoute: StackedRouter().onGenerateRoute,
       navigatorKey: StackedService.navigatorKey,
       navigatorObservers: [StackedService.routeObserver],
       theme: ThemeData(
         useMaterial3: true,
+        textTheme: GoogleFonts.interTextTheme(),
         // theme data to change navigation bar styling
         navigationBarTheme: NavigationBarThemeData(
           iconTheme: WidgetStateProperty.resolveWith((states) {
@@ -36,9 +39,16 @@ class MainApp extends StatelessWidget {
           }),
           labelTextStyle: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return const TextStyle(color: kcPrimaryPink, fontSize: 12, fontWeight: FontWeight(600));
+              return GoogleFonts.nunito(
+                color: kcPrimaryPink,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              );
             }
-            return const TextStyle(color: kcLightGrey, fontSize: 12);
+            return GoogleFonts.nunito(
+              color: kcLightGrey,
+              fontSize: 12,
+            );
           }),
         ),
       ),
