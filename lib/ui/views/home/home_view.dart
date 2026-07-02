@@ -110,7 +110,6 @@ class HomeView extends StackedView<HomeViewModel> {
   Widget _buildDiscoverTab(HomeViewModel viewModel) {
     final sections = [
       (SeasonHelper.currentSeasonLabel, viewModel.thisSeason),
-      ('Popular Now', viewModel.popularAnime),
       ('Next Season', viewModel.nextSeason),
       ('Newly Added', viewModel.newlyAdded),
       ('Airing Soon', viewModel.airingSoon),
@@ -119,6 +118,10 @@ class HomeView extends StackedView<HomeViewModel> {
     return ListView(
       children: [
         const SizedBox(height: 20),
+        _buildSectionHeader('Popular Now'),
+        const SizedBox(height: 10),
+        _buildPopularSection(viewModel.popularAnime),
+        const SizedBox(height: 10),
         ...sections.map((section) => _buildSection(section.$1, section.$2)),
         const SizedBox(height: 20),
       ],
@@ -134,6 +137,96 @@ class HomeView extends StackedView<HomeViewModel> {
       ],
     );
   }
+
+  Widget _buildPopularSection(List<dynamic> animeList) {
+  if (animeList.isEmpty) {
+    return const SizedBox(
+      height: 220,
+      child: Center(
+        child: Text('No anime found', style: TextStyle(color: kcLightGrey)),
+      ),
+    );
+  }
+
+  final PageController controller = PageController(viewportFraction: 0.88);
+
+  return SizedBox(
+    height: 220,
+    child: PageView.builder(
+      controller: controller,
+      itemCount: animeList.length,
+      itemBuilder: (context, index) {
+        final anime = animeList[index];
+        final title = anime['title']['english'] ?? anime['title']['romaji'] ?? '';
+        final format = anime['format'] ?? '';
+        final year = anime['startDate']?['year']?.toString() ?? '';
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // background cover image
+                Image.network(
+                  anime['coverImage']['large'] ?? '',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(color: kcSurfaceColor),
+                ),
+                // gradient overlay so text is readable
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black87,
+                      ],
+                      stops: [0.2, 1.0],
+                    ),
+                  ),
+                ),
+                // title and subtitle
+                Positioned(
+                  bottom: 20,
+                  left: 16,
+                  right: 16,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.nunito(
+                          color: kcOffWhite,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          height: 1.1,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        year.isNotEmpty ? '$format • $year' : format,
+                        style: GoogleFonts.nunito(
+                          color: kcSecondaryPink,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
 
   // section header with arrow
   Widget _buildSectionHeader(String title) {

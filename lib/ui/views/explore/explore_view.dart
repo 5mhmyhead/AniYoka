@@ -26,7 +26,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
                 decoration: InputDecoration(
                   hintText: 'Search anime...',
                   hintStyle: TextStyle(
-                    color: kcPrimaryPink.withOpacity(0.6),
+                    color: kcPrimaryPink.withValues(alpha: 0.6),
                   ),
                   prefixIcon: const Icon(
                     Icons.search,
@@ -105,7 +105,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
       children: [
         ...viewModel.searchResults.map((anime) {
           return _buildAnimeListTile(anime);
-        }).toList(),
+        }),
         if (viewModel.relatedResults.isNotEmpty) ...[
           const SizedBox(height: 20),
           Text(
@@ -118,7 +118,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
           const SizedBox(height: 10),
           ...viewModel.relatedResults.map((anime) {
             return _buildAnimeListTile(anime);
-          }).toList(),
+          }),
         ],
       ],
     );
