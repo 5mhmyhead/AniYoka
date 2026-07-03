@@ -11,6 +11,58 @@ class ExploreViewModel extends BaseViewModel {
   final TextEditingController searchController = TextEditingController();
 
   Timer? _debounce;
+  int _searchRequestId = 0;
+
+  final Map<String, String?> _statusOptions = {
+    'Any Status': null,
+    'Airing': 'RELEASING',
+    'Finished': 'FINISHED',
+    'Not Yet Released': 'NOT_YET_RELEASED',
+    'Cancelled': 'CANCELLED',
+    'Hiatus': 'HIATUS',
+  };
+
+  final Map<String, String?> _genreOptions = {
+    'Any Genre': null,
+    'Action': 'Action',
+    'Adventure': 'Adventure',
+    'Comedy': 'Comedy',
+    'Drama': 'Drama',
+    'Fantasy': 'Fantasy',
+    'Horror': 'Horror',
+    'Mahou Shoujo': 'Mahou Shoujo',
+    'Mecha': 'Mecha',
+    'Music': 'Music',
+    'Mystery': 'Mystery',
+    'Psychological': 'Psychological',
+    'Romance': 'Romance',
+    'Sci-Fi': 'Sci-Fi',
+    'Slice of Life': 'Slice of Life',
+    'Sports': 'Sports',
+    'Supernatural': 'Supernatural',
+    'Thriller': 'Thriller',
+  };
+
+  final Map<String, String?> _formatOptions = {
+    'Any Format': null,
+    'TV': 'TV',
+    'TV Short': 'TV_SHORT',
+    'Movie': 'MOVIE',
+    'Special': 'SPECIAL',
+    'OVA': 'OVA',
+    'ONA': 'ONA',
+    'Music': 'MUSIC',
+  };
+
+  final Map<String, String> _sortOptions = {
+    'Default': 'SEARCH_MATCH',
+    'Popular': 'POPULARITY_DESC',
+    'Trending': 'TRENDING_DESC',
+    'Highest Rated': 'SCORE_DESC',
+    'Newest': 'START_DATE_DESC',
+    'Oldest': 'START_DATE',
+    'Title A-Z': 'TITLE_ROMAJI',
+  };
 
   String _searchText = '';
   String get searchText => _searchText;
@@ -24,6 +76,58 @@ class ExploreViewModel extends BaseViewModel {
   bool _hasSearched = false;
   bool get hasSearched => _hasSearched;
 
+  bool _onMyListOnly = false;
+  bool get onMyListOnly => _onMyListOnly;
+
+  String? _selectedStatusLabel;
+  String? get selectedStatusLabel => _selectedStatusLabel;
+
+  String? _selectedGenreLabel;
+  String? get selectedGenreLabel => _selectedGenreLabel;
+
+  String? _selectedFormatLabel;
+  String? get selectedFormatLabel => _selectedFormatLabel;
+
+  String? _selectedSortLabel;
+  String? get selectedSortLabel => _selectedSortLabel;
+
+  List<String> get statusOptionLabels => _statusOptions.keys.toList();
+  List<String> get genreOptionLabels => _genreOptions.keys.toList();
+  List<String> get formatOptionLabels => _formatOptions.keys.toList();
+  List<String> get sortOptionLabels => _sortOptions.keys.toList();
+
+  String get statusFilterLabel => _selectedStatusLabel ?? 'Status';
+  String get genreFilterLabel => _selectedGenreLabel ?? 'Genre';
+  String get formatFilterLabel => _selectedFormatLabel ?? 'Format';
+  String get sortFilterLabel => _selectedSortLabel ?? 'Default';
+
+  bool get hasActiveFilters {
+    return _onMyListOnly ||
+        _selectedStatusLabel != null ||
+        _selectedGenreLabel != null ||
+        _selectedFormatLabel != null ||
+        _selectedSortLabel != null;
+  }
+
+  String? get _apiStatus {
+    if (_selectedStatusLabel == null) return null;
+    return _statusOptions[_selectedStatusLabel];
+  }
+
+  String? get _apiGenre {
+    if (_selectedGenreLabel == null) return null;
+    return _genreOptions[_selectedGenreLabel];
+  }
+
+  String? get _apiFormat {
+    if (_selectedFormatLabel == null) return null;
+    return _formatOptions[_selectedFormatLabel];
+  }
+
+  String get _apiSort {
+    return _sortOptions[_selectedSortLabel ?? 'Default'] ?? 'SEARCH_MATCH';
+  }
+
   ExploreViewModel() {
     searchController.addListener(_onSearchChanged);
   }
@@ -35,9 +139,11 @@ class ExploreViewModel extends BaseViewModel {
     _debounce?.cancel();
 
     if (input.isEmpty) {
+      _searchRequestId++;
       _searchResults = [];
       _relatedResults = [];
       _hasSearched = false;
+      clearErrors();
       setBusy(false);
       notifyListeners();
       return;
@@ -55,50 +161,29 @@ class ExploreViewModel extends BaseViewModel {
 
   Future<void> searchAnime(String input) async {
     final currentInput = input.trim();
+    final int requestId = ++_searchRequestId;
+
+    if (currentInput.isEmpty) {
+      return;
+    }
 
     try {
       clearErrors();
 
-      final normalSearchResults =
-          await _anilistService.searchAnime(currentInput);
-
-      final popularAnimeResults =
-          await _anilistService.getPopularAnimeForSearchSuggestions();
-
-      if (currentInput != _searchText) {
-        return;
-      }
-
-      final firstCombinedResults = _removeDuplicateAnime([
-        ...normalSearchResults,
-        ...popularAnimeResults,
-      ]);
-
-      final bestPrefixTitle = _findBestPrefixTitle(
-        firstCombinedResults,
+      final results = await _anilistService.searchAnime(
         currentInput,
+        status: _apiStatus,
+        genre: _apiGenre,
+        format: _apiFormat,
+        sort: _apiSort,
       );
 
-      List<dynamic> expandedSearchResults = [];
-
-      if (bestPrefixTitle != null &&
-          _cleanText(bestPrefixTitle) != _cleanText(currentInput)) {
-        expandedSearchResults =
-            await _anilistService.searchAnime(bestPrefixTitle);
-      }
-
-      if (currentInput != _searchText) {
+      if (requestId != _searchRequestId || currentInput != _searchText) {
         return;
       }
 
-      final combinedResults = _removeDuplicateAnime([
-        ...expandedSearchResults,
-        ...normalSearchResults,
-        ...popularAnimeResults,
-      ]);
-
       final groupedResults = _groupSearchResults(
-        combinedResults,
+        _removeDuplicateAnime(results),
         currentInput,
       );
 
@@ -106,42 +191,66 @@ class ExploreViewModel extends BaseViewModel {
       _relatedResults = groupedResults['contains']!;
       _hasSearched = true;
     } catch (e) {
-      if (currentInput == _searchText) {
+      if (requestId == _searchRequestId && currentInput == _searchText) {
+        _searchResults = [];
+        _relatedResults = [];
+        _hasSearched = true;
         setError(e.toString());
       }
     }
 
-    if (currentInput == _searchText) {
+    if (requestId == _searchRequestId && currentInput == _searchText) {
       setBusy(false);
     }
   }
 
-  String? _findBestPrefixTitle(
-    List<dynamic> results,
-    String input,
-  ) {
-    final matchingTitles = <String>[];
+  void clearFilters() {
+    _onMyListOnly = false;
+    _selectedStatusLabel = null;
+    _selectedGenreLabel = null;
+    _selectedFormatLabel = null;
+    _selectedSortLabel = null;
+    _rerunSearchWithCurrentFilters();
+  }
 
-    for (final anime in results) {
-      final displayedTitle = _getDisplayedTitle(anime);
+  void toggleOnMyListFilter() {
+    _onMyListOnly = !_onMyListOnly;
 
-      if (_titleStartsWithSearch(displayedTitle, input)) {
-        matchingTitles.add(displayedTitle);
-      }
+    // This is currently visual only. Connect this later to your own
+    // watchlist/bookmark storage or AniList user list.
+    notifyListeners();
+  }
+
+  void setStatusFilterByLabel(String value) {
+    _selectedStatusLabel = _statusOptions[value] == null ? null : value;
+    _rerunSearchWithCurrentFilters();
+  }
+
+  void setGenreFilterByLabel(String value) {
+    _selectedGenreLabel = _genreOptions[value] == null ? null : value;
+    _rerunSearchWithCurrentFilters();
+  }
+
+  void setFormatFilterByLabel(String value) {
+    _selectedFormatLabel = _formatOptions[value] == null ? null : value;
+    _rerunSearchWithCurrentFilters();
+  }
+
+  void setSortFilterByLabel(String value) {
+    _selectedSortLabel = value == 'Default' ? null : value;
+    _rerunSearchWithCurrentFilters();
+  }
+
+  void _rerunSearchWithCurrentFilters() {
+    _debounce?.cancel();
+
+    if (_searchText.trim().isEmpty) {
+      notifyListeners();
+      return;
     }
 
-    if (matchingTitles.isEmpty) {
-      return null;
-    }
-
-    matchingTitles.sort((a, b) {
-      final titleA = _cleanText(a);
-      final titleB = _cleanText(b);
-
-      return titleA.length.compareTo(titleB.length);
-    });
-
-    return matchingTitles.first;
+    setBusy(true);
+    searchAnime(_searchText);
   }
 
   Map<String, List<dynamic>> _groupSearchResults(
