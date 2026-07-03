@@ -163,6 +163,10 @@ class AniListService {
           }
           description(asHtml: false)
           genres
+          duration
+          startDate { year month day }
+          endDate { year month day }
+          source
           recommendations(perPage: 10) {
             nodes {
               mediaRecommendation {
