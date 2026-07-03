@@ -13,11 +13,16 @@ class SeasonHelper {
 
   static String get nextSeason {
     switch (currentSeason) {
-      case 'WINTER': return 'SPRING';
-      case 'SPRING': return 'SUMMER';
-      case 'SUMMER': return 'FALL';
-      case 'FALL': return 'WINTER';
-      default: return 'WINTER';
+      case 'WINTER':
+        return 'SPRING';
+      case 'SPRING':
+        return 'SUMMER';
+      case 'SUMMER':
+        return 'FALL';
+      case 'FALL':
+        return 'WINTER';
+      default:
+        return 'WINTER';
     }
   }
 

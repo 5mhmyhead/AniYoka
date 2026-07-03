@@ -1,0 +1,342 @@
+import 'package:flutter/material.dart';
+import 'package:stacked/stacked.dart';
+import 'package:aniyoka/ui/common/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'anime_info_viewmodel.dart';
+
+class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
+  final int animeId;
+  const AnimeInfoView({super.key, required this.animeId});
+
+  @override
+  Widget builder(BuildContext context, AnimeInfoViewModel viewModel, Widget? child) {
+    if (viewModel.isBusy) {
+      return const Scaffold(
+        backgroundColor: kcBackgroundColor,
+        body: Center(child: CircularProgressIndicator(color: kcPrimaryPink)),
+      );
+    }
+
+    final anime = viewModel.anime;
+    if (anime == null) return const SizedBox();
+
+    final title = anime['title']['english'] ?? anime['title']['romaji'] ?? '';
+    final format = anime['format'] ?? '';
+
+    final seasonYear = anime['seasonYear']?.toString() ?? '';
+    final season = anime['season'] != null
+        ? '${anime['season'][0]}${anime['season'].substring(1).toLowerCase()}'
+        : '';
+
+    final status = anime['status'] != null
+        ? '${anime['status'][0]}${anime['status'].substring(1).toLowerCase()}'
+        : '';
+
+    final subtitle = '$format • $season $seasonYear • $status';
+
+    final meanScore = anime['meanScore'];
+    final episodes = anime['episodes'];
+    final description = anime['description'] ?? '';
+    final genres = anime['genres'] as List? ?? [];
+    final coverImage = anime['coverImage']['extraLarge'] ?? '';
+    
+    return Scaffold(
+      backgroundColor: kcBackgroundColor,
+      body: CustomScrollView(
+        slivers: [
+          // top gradient area with back + bookmark
+          SliverToBoxAdapter(
+            child: _buildTopSection(context, viewModel, coverImage, title, subtitle),
+          ),
+          // stats row
+          SliverToBoxAdapter(
+            child: _buildStatsRow(meanScore, viewModel.ranked, viewModel.popularity, episodes),
+          ),
+          // synopsis
+          SliverToBoxAdapter(
+            child: _buildSynopsis(viewModel, description),
+          ),
+          // genres
+          SliverToBoxAdapter(
+            child: _buildGenres(genres),
+          ),
+          // recommendations
+          SliverToBoxAdapter(
+            child: _buildSectionHeader('Recommendations'),
+          ),
+          SliverToBoxAdapter(
+            child: _buildAnimeRow(viewModel.recommendations),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTopSection(BuildContext context, AnimeInfoViewModel viewModel,
+      String coverImage, String title, String subtitle) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [kcAccentSurfaceColor, kcBackgroundColor],
+          stops: [0.0, 1.0],
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // back and bookmark row
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: kcOffWhite, size: 32),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.bookmark_outline, color: kcPrimaryPink, size: 32),
+                    onPressed: () {}, // TODO: IMPLEMENT BOOKMARK FUNCTIONALITY
+                  ),
+                ],
+              ),
+            ),
+            // cover image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                coverImage,
+                width: 180,
+                height: 250,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  width: 180,
+                  height: 250,
+                  color: kcSurfaceColor,
+                ),
+              ),
+            ),
+            const SizedBox(height: 15),
+            // anime title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: kcPrimaryPink,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.3,
+                  height: 1.2,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            // subtitle
+            Text(
+              subtitle,
+              style: GoogleFonts.nunito(
+                color: kcLightGrey,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatsRow(int? meanScore, int? ranked, int? popularity, int? episodes) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildStatPill(meanScore != null ? '$meanScore%' : '?', 'mean score'),
+          _buildStatPill(ranked != null ? '#$ranked' : '?', 'ranked'),
+          _buildStatPill(popularity != null ? '#$popularity' : '?', 'popularity'),
+          _buildStatPill('${episodes ?? '?'}', 'episodes'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatPill(String value, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: kcSurfaceColor,
+        borderRadius: BorderRadius.circular(50),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: GoogleFonts.nunito(
+              color: kcPrimaryPink,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: GoogleFonts.nunito(
+              color: kcTertiaryPink,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSynopsis(AnimeInfoViewModel viewModel, String description) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader('Synopsis'),
+          const SizedBox(height: 8),
+          Text(
+            description,
+            maxLines: viewModel.isDescriptionExpanded ? null : 4,
+            overflow: viewModel.isDescriptionExpanded ? null : TextOverflow.ellipsis,
+            style: GoogleFonts.nunito(
+              color: kcOffWhite,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GestureDetector(
+                onTap: viewModel.toggleDescription,
+                child: Icon(
+                  viewModel.isDescriptionExpanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: kcOffWhite,
+                ),
+              ),
+              Icon(Icons.copy, color: kcOffWhite, size: 18),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenres(List<dynamic> genres) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: genres.map((genre) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              border: Border.all(color: kcPrimaryPink),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              genre,
+              style: GoogleFonts.nunito(
+                color: kcPrimaryPink,
+                fontSize: 13,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+      child: Text(
+        title,
+        style: GoogleFonts.nunito(
+          color: kcPrimaryPink,
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnimeRow(List<dynamic> animeList) {
+    if (animeList.isEmpty) return const SizedBox();
+    return SizedBox(
+      height: 240,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(left: 20),
+        itemCount: animeList.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 15),
+        itemBuilder: (context, index) {
+          final anime = animeList[index];
+          final title = anime['title']['english'] ?? anime['title']['romaji'] ?? '';
+          final format = anime['format'] ?? '';
+          final year = anime['startDate']?['year']?.toString() ?? '';
+          return SizedBox(
+            width: 135,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    anime['coverImage']['large'] ?? '',
+                    width: 125,
+                    height: 175,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 125,
+                      height: 175,
+                      color: kcSurfaceColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    color: kcOffWhite,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  year.isNotEmpty ? '$format - $year' : format,
+                  style: GoogleFonts.nunito(
+                    color: kcLightGrey,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  void onViewModelReady(AnimeInfoViewModel viewModel) => viewModel.loadAnimeDetails(animeId);
+
+  @override
+  AnimeInfoViewModel viewModelBuilder(BuildContext context) => AnimeInfoViewModel();
+}

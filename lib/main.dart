@@ -21,7 +21,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, 
+      debugShowCheckedModeBanner: false,
       initialRoute: Routes.startupView,
       onGenerateRoute: StackedRouter().onGenerateRoute,
       navigatorKey: StackedService.navigatorKey,
@@ -29,6 +29,8 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         textTheme: GoogleFonts.interTextTheme(),
+        scaffoldBackgroundColor: kcBackgroundColor,
+        canvasColor: kcBackgroundColor,
         // theme data to change navigation bar styling
         navigationBarTheme: NavigationBarThemeData(
           iconTheme: WidgetStateProperty.resolveWith((states) {

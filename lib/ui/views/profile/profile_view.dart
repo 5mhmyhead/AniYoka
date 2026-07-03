@@ -7,7 +7,8 @@ class ProfileView extends StackedView<ProfileViewModel> {
   const ProfileView({Key? key}) : super(key: key);
 
   @override
-  Widget builder(BuildContext context, ProfileViewModel viewModel, Widget? child) {
+  Widget builder(
+      BuildContext context, ProfileViewModel viewModel, Widget? child) {
     return const Scaffold(
       body: SafeArea(
         child: Padding(
@@ -17,7 +18,9 @@ class ProfileView extends StackedView<ProfileViewModel> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Profile', style: TextStyle(fontSize: 35, fontWeight: FontWeight.w900)),
+                Text('Profile',
+                    style:
+                        TextStyle(fontSize: 35, fontWeight: FontWeight.w900)),
               ],
             ),
           ),
@@ -27,5 +30,8 @@ class ProfileView extends StackedView<ProfileViewModel> {
   }
 
   @override
-  ProfileViewModel viewModelBuilder(BuildContext context,) => ProfileViewModel();
+  ProfileViewModel viewModelBuilder(
+    BuildContext context,
+  ) =>
+      ProfileViewModel();
 }

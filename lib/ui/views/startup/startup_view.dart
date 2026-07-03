@@ -1,3 +1,4 @@
+import 'package:aniyoka/ui/common/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:stacked/stacked.dart';
@@ -15,6 +16,7 @@ class StartupView extends StackedView<StartupViewModel> {
     Widget? child,
   ) {
     return const Scaffold(
+      backgroundColor: kcBackgroundColor,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

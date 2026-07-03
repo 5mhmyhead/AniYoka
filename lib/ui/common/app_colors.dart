@@ -14,4 +14,5 @@ const Color kcSecondaryPink = Color(0xFFFFB7CB);
 const Color kcTertiaryPink = Color(0xFFFBD8DF);
 
 const Color kcAccentShadePink = Color(0xFF292023);
+const Color kcAccentSurfaceColor = Color(0xFF2D1B2E);
 const Color kcSecondaryShadePink = Color(0xFFDB8DA3);

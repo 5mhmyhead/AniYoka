@@ -14,7 +14,6 @@ class AniListService {
   }
 
   Future<List<dynamic>> getPopularAnime() async {
-
     const query = r'''
       query {
         Page(page: 1, perPage: 10) {
@@ -26,7 +25,9 @@ class AniListService {
             }
             coverImage {
               large
+              extraLarge
             }
+            bannerImage
             episodes
             status
             format
@@ -44,7 +45,6 @@ class AniListService {
   }
 
   Future<List<dynamic>> getNewlyAddedAnime() async {
-    
     const query = r'''
       query {
         Page(page: 1, perPage: 10) {
@@ -65,7 +65,6 @@ class AniListService {
   }
 
   Future<List<dynamic>> getNextSeasonAnime() async {
-
     final query = '''
       query {
         Page(page: 1, perPage: 10) {
@@ -92,7 +91,6 @@ class AniListService {
   }
 
   Future<List<dynamic>> getThisSeasonAnime() async {
-  
     final query = '''
       query {
         Page(page: 1, perPage: 10) {
@@ -119,7 +117,6 @@ class AniListService {
   }
 
   Future<List<dynamic>> getAiringSoonAnime() async {
-
     const query = r'''
       query {
         Page(page: 1, perPage: 10) {
@@ -133,10 +130,57 @@ class AniListService {
         }
       }
     ''';
-    
+
     final result = await _client.query(QueryOptions(document: gql(query)));
     if (result.hasException) throw Exception(result.exception.toString());
     return result.data!['Page']['media'];
+  }
+
+  Future<Map<String, dynamic>> getAnimeDetails(int id) async {
+    
+    final query = '''
+      query {
+        Media(id: $id, type: ANIME) {
+          id
+          title {
+            english
+            romaji
+          }
+          coverImage {
+            extraLarge
+          }
+          bannerImage
+          format
+          season
+          seasonYear
+          status
+          meanScore
+          episodes
+          rankings {
+            rank
+            type
+            allTime
+          }
+          description(asHtml: false)
+          genres
+          recommendations(perPage: 10) {
+            nodes {
+              mediaRecommendation {
+                id
+                title { english romaji }
+                coverImage { large }
+                format
+                startDate { year }
+              }
+            }
+          }
+        }
+      }
+    ''';
+
+    final result = await _client.query(QueryOptions(document: gql(query)));
+    if (result.hasException) throw Exception(result.exception.toString());
+    return result.data!['Media'];
   }
 
   Future<List<dynamic>> searchAnime(String searchText) async {
@@ -152,7 +196,8 @@ class AniListService {
         media(
           search: $search,
           type: ANIME,
-          sort: SEARCH_MATCH
+          sort: SEARCH_MATCH,
+          isAdult: false
         ) {
           id
           title {
@@ -172,7 +217,8 @@ class AniListService {
         media(
           search: $search,
           type: ANIME,
-          sort: SEARCH_MATCH
+          sort: SEARCH_MATCH,
+          isAdult: false
         ) {
           id
           title {
@@ -192,7 +238,8 @@ class AniListService {
         media(
           search: $search,
           type: ANIME,
-          sort: SEARCH_MATCH
+          sort: SEARCH_MATCH,
+          isAdult: false
         ) {
           id
           title {
@@ -241,7 +288,7 @@ class AniListService {
     const query = r'''
     query {
       page1: Page(page: 1, perPage: 50) {
-        media(type: ANIME, sort: POPULARITY_DESC) {
+        media(type: ANIME, sort: POPULARITY_DESC, isAdult: false) {
           id
           title {
             english
@@ -257,7 +304,7 @@ class AniListService {
       }
 
       page2: Page(page: 2, perPage: 50) {
-        media(type: ANIME, sort: POPULARITY_DESC) {
+        media(type: ANIME, sort: POPULARITY_DESC, isAdult: false) {
           id
           title {
             english
@@ -273,7 +320,7 @@ class AniListService {
       }
 
       page3: Page(page: 3, perPage: 50) {
-        media(type: ANIME, sort: POPULARITY_DESC) {
+        media(type: ANIME, sort: POPULARITY_DESC, isAdult: false) {
           id
           title {
             english

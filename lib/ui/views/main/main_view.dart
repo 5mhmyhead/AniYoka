@@ -25,12 +25,13 @@ class MainView extends StackedView<MainViewModel> {
         int() => throw UnimplementedError(),
       },
       bottomNavigationBar: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.11, // 8% of screen height
+        height:
+            MediaQuery.of(context).size.height * 0.11, // 8% of screen height
         child: NavigationBar(
           // bottom nav bar styling
           indicatorColor: kcAccentShadePink,
           backgroundColor: kcSurfaceColor,
-          indicatorShape: const NarrowPillIndicator(), 
+          indicatorShape: const NarrowPillIndicator(),
           // bottom nav bar directory
           selectedIndex: viewModel.currentPage,
           onDestinationSelected: viewModel.setPage,
@@ -67,13 +68,17 @@ class MainView extends StackedView<MainViewModel> {
   }
 
   @override
-  MainViewModel viewModelBuilder(BuildContext context,) => MainViewModel();
+  MainViewModel viewModelBuilder(
+    BuildContext context,
+  ) =>
+      MainViewModel();
 }
 
 // custom pill that is smaller than default
 class NarrowPillIndicator extends ShapeBorder {
   final double customWidth;
-  const NarrowPillIndicator({this.customWidth = 46.0}); // Enforce a 46px narrow width
+  const NarrowPillIndicator(
+      {this.customWidth = 46.0}); // Enforce a 46px narrow width
 
   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
@@ -89,8 +94,10 @@ class NarrowPillIndicator extends ShapeBorder {
       width: customWidth,
       height: rect.height,
     );
-    
-    return Path()..addRRect(RRect.fromRectAndRadius(narrowedRect, Radius.circular(rect.height / 2)));
+
+    return Path()
+      ..addRRect(RRect.fromRectAndRadius(
+          narrowedRect, Radius.circular(rect.height / 2)));
   }
 
   @override
