@@ -29,9 +29,7 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
         ? '${anime['season'][0]}${anime['season'].substring(1).toLowerCase()}'
         : '';
 
-    final status = anime['status'] != null
-        ? '${anime['status'][0]}${anime['status'].substring(1).toLowerCase()}'
-        : '';
+    final status = viewModel.formatEnum(anime['status']);
 
     final subtitle = '$format • $season $seasonYear • $status';
 
@@ -51,14 +49,20 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
           ),
           // stats row
           SliverToBoxAdapter(
-            child: _buildStatsRow(meanScore, viewModel.ranked, viewModel.popularity, episodes),
+            child: _buildStatsRow(viewModel, meanScore, viewModel.ranked, viewModel.popularity, episodes),
           ),
           // synopsis
           SliverToBoxAdapter(
             child: _buildSynopsis(viewModel, description, context),
           ),
           SliverToBoxAdapter(
+            child: _buildSectionHeader('Genres and Tags'),
+          ),
+          SliverToBoxAdapter(
             child: _buildGenres(genres),
+          ),
+          SliverToBoxAdapter(
+            child: _buildTags(viewModel),
           ),
           SliverToBoxAdapter(
             child: _buildSectionHeader('Information'),
@@ -170,32 +174,42 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
     );
   }
 
-  Widget _buildStatsRow(int? meanScore, int? ranked, int? popularity, int? episodes) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Row(
-        children: [
-          Expanded(child: _buildStatPill('${meanScore ?? '?'}%', 'mean score')),
-          const SizedBox(width: 6),
-          Expanded(child: _buildStatPill(ranked != null ? '#$ranked' : '?', 'ranked')),
-          const SizedBox(width: 6),
-          Expanded(child: _buildStatPill(popularity != null ? '#$popularity' : '?', 'popularity')),
-          const SizedBox(width: 6),
-          Expanded(child: _buildStatPill('${episodes ?? '?'}', 'episodes')),
-        ],
+  Widget _buildStatsRow(AnimeInfoViewModel viewModel, int? meanScore, int? ranked, int? popularity, int? episodes) {
+    final pills = [
+      if (viewModel.airingIn != null)
+        (viewModel.airingIn!, 'airing'),
+      if (ranked != null)
+        ('#$ranked', 'ranked'),
+      ('${meanScore ?? '?'}%', 'mean score'),
+      (viewModel.formatPopularity(popularity), 'popularity'),
+      ('${episodes ?? '?'}', 'episodes'),
+      (viewModel.formatPopularity(viewModel.anime?['favourites']), 'favorites'),
+    ];
+
+    return SizedBox(
+      height: 70,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: pills.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          return _buildStatPill(pills[index].$1, pills[index].$2);
+        },
       ),
     );
   }
 
   Widget _buildStatPill(String value, String label) {
-      return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: kcSurfaceColor,
+        color: kcDarkPink,
         borderRadius: BorderRadius.circular(50),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             value,
@@ -287,6 +301,7 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
+              color: kcDarkPink,
               border: Border.all(color: kcPrimaryPink),
               borderRadius: BorderRadius.circular(10),
             ),
@@ -299,6 +314,125 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildTags(AnimeInfoViewModel viewModel) {
+    final hasSpoilers = viewModel.spoilerTags.isNotEmpty;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 8),
+          // tags
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: viewModel.visibleTags.map((tag) {
+              final isSpoiler = tag['isMediaSpoiler'] as bool;
+              final rank = tag['rank'] as int;
+
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSpoiler
+                      ? kcPrimaryPink.withValues(alpha: 0.15)
+                      : kcSurfaceColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isSpoiler) ...[
+                      const Icon(Icons.warning_amber_rounded,
+                          color: kcPrimaryPink, size: 12),
+                      const SizedBox(width: 4),
+                    ],
+                    Text(
+                      tag['name'],
+                      style: GoogleFonts.nunito(
+                        color: isSpoiler ? kcPrimaryPink : kcTertiaryPink,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '$rank%',
+                      style: GoogleFonts.nunito(
+                        color: kcLightGrey,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+          if(hasSpoilers) SizedBox(height: 24),
+          // header with spoiler toggle
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (hasSpoilers)
+                GestureDetector(
+                  onTap: viewModel.toggleSpoilerTags,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: viewModel.showSpoilerTags
+                          ? kcPrimaryPink
+                          : kcSurfaceColor,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: kcPrimaryPink),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          viewModel.showSpoilerTags
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: viewModel.showSpoilerTags
+                              ? kcOffWhite
+                              : kcPrimaryPink,
+                          size: 15,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          viewModel.showSpoilerTags
+                              ? 'Hide spoilers'
+                              : 'Show spoilers',
+                          style: GoogleFonts.nunito(
+                            color: viewModel.showSpoilerTags
+                                ? kcOffWhite
+                                : kcPrimaryPink,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // spoiler count hint when hidden
+              if (!viewModel.showSpoilerTags && viewModel.spoilerTags.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    '${viewModel.spoilerTags.length} spoiler tag${viewModel.spoilerTags.length > 1 ? 's' : ''} hidden',
+                    style: GoogleFonts.nunito(
+                      color: kcLightGrey,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

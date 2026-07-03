@@ -4,7 +4,7 @@ import 'package:stacked/stacked.dart';
 import 'bookmarks_viewmodel.dart';
 
 class BookmarksView extends StackedView<BookmarksViewModel> {
-  const BookmarksView({Key? key}) : super(key: key);
+  const BookmarksView({super.key});
 
   @override
   Widget builder(

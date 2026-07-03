@@ -15,12 +15,20 @@ class AnimeInfoViewModel extends BaseViewModel {
   bool _isDescriptionExpanded = false;
   bool get isDescriptionExpanded => _isDescriptionExpanded;
 
+  bool _showSpoilerTags = false;
+  bool get showSpoilerTags => _showSpoilerTags;
+
   // color for gradient depending on dominant color of anime cover image
   Color _dominantColor = kcAccentSurfaceColor;
   Color get dominantColor => _dominantColor;
 
   void toggleDescription() {
     _isDescriptionExpanded = !_isDescriptionExpanded;
+    rebuildUi();
+  }
+
+  void toggleSpoilerTags() {
+    _showSpoilerTags = !_showSpoilerTags;
     rebuildUi();
   }
 
@@ -40,22 +48,53 @@ class AnimeInfoViewModel extends BaseViewModel {
   }
 
   // helpers to extract rank and popularity from rankings list
-  int? get ranked {
-    final rankings = _anime?['rankings'] as List?;
-    final ranked = rankings?.firstWhere(
+  int? get ranked => _anime?['rankings'] == null ? null : (_anime!['rankings'] as List?)
+    ?.firstWhere(
       (r) => r['type'] == 'RATED' && r['allTime'] == true,
       orElse: () => null,
-    );
-    return ranked?['rank'];
+    )?['rank'];
+
+  int? get popularity => _anime?['popularity'];
+
+  String? get airingIn {
+    final next = _anime?['nextAiringEpisode'];
+    if (next == null) return null;
+
+    final seconds = next['timeUntilAiring'] as int;
+    final episode = next['episode'];
+
+    final duration = Duration(seconds: seconds);
+    final days = duration.inDays;
+    final hours = duration.inHours % 24;
+    final minutes = duration.inMinutes % 60;
+
+    String timeStr;
+    if (days > 0) {
+      timeStr = '${days}d ${hours}h';
+    } else if (hours > 0) {
+      timeStr = '${hours}h ${minutes}m';
+    } else {
+      timeStr = '${minutes}m';
+    }
+
+    return 'Ep $episode in $timeStr';
   }
 
-  int? get popularity {
-    final rankings = _anime?['rankings'] as List?;
-    final popular = rankings?.firstWhere(
-      (r) => r['type'] == 'POPULAR' && r['allTime'] == true,
-      orElse: () => null,
-    );
-    return popular?['rank'];
+  List<dynamic> get tags {
+    final allTags = _anime?['tags'] as List? ?? [];
+    // sort by rank descending, take top 10
+    final sorted = [...allTags]
+      ..sort((a, b) => (b['rank'] as int).compareTo(a['rank'] as int));
+    return sorted.take(10).toList();
+  }
+
+  List<dynamic> get visibleTags {
+    if (_showSpoilerTags) return tags;
+    return tags.where((tag) => tag['isMediaSpoiler'] == false).toList();
+  }
+
+  List<dynamic> get spoilerTags {
+    return tags.where((tag) => tag['isMediaSpoiler'] == true).toList();
   }
 
   List<dynamic> get recommendations {
@@ -102,6 +141,14 @@ class AnimeInfoViewModel extends BaseViewModel {
     Clipboard.setData(ClipboardData(text: description));
   }
 
+  String formatEnum(String? value) {
+    if (value == null) return 'Unknown';
+    return value
+        .split('_')                           
+        .map((word) => '${word[0]}${word.substring(1).toLowerCase()}') 
+        .join(' ');                           
+  }
+
   String formatDate(Map? date) {
     
     if (date == null) return 'Unknown';
@@ -115,9 +162,16 @@ class AnimeInfoViewModel extends BaseViewModel {
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', ''
     ];
     
-    final monthStr = month != null ? months[month] : '';
-    final dayStr = day != null ? '$day' : '';
+    if (month == null) return '$year';                          
+    if (day == null) return '${months[month]} $year';          
+    return '${months[month]} $day, $year';   
+  }
 
-    return '$monthStr $dayStr, $year'.trim();
+  String formatPopularity(int? value) {
+    if (value == null) return '?';
+    return value.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (match) => '${match[1]},',
+    );
   }
 }

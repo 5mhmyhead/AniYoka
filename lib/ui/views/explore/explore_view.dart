@@ -5,7 +5,7 @@ import 'package:aniyoka/ui/common/app_colors.dart';
 import 'explore_viewmodel.dart';
 
 class ExploreView extends StackedView<ExploreViewModel> {
-  const ExploreView({Key? key}) : super(key: key);
+  const ExploreView({super.key});
 
   @override
   Widget builder(

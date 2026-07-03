@@ -3,8 +3,15 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:aniyoka/app/app.router.dart';
 import 'package:stacked/stacked.dart';
 import 'package:aniyoka/app/app.locator.dart';
+import 'package:flutter/material.dart';
+import 'dart:async';
+
 
 class HomeViewModel extends BaseViewModel {
+  // scroll behaviour of popular now in home page
+  PageController pageController = PageController(viewportFraction: 1);
+  Timer? _autoScrollTimer;
+
   final _anilistService = locator<AniListService>();
   final _navigationService = locator<NavigationService>();
 
@@ -40,6 +47,8 @@ class HomeViewModel extends BaseViewModel {
       _nextSeason = results[2];
       _thisSeason = results[3];
       _airingSoon = results[4];
+      // start autoscroll behaviour of popular anime
+      startAutoScroll();
     } catch (e) {
       setError(e.toString());
     }
@@ -48,5 +57,33 @@ class HomeViewModel extends BaseViewModel {
 
   void onAnimeTap(int id) {
     _navigationService.navigateToAnimeInfoView(animeId: id, transition: TransitionsBuilders.fadeIn);
+  }
+
+  void startAutoScroll() {
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!pageController.hasClients) return;
+      final nextPage = (pageController.page!.round() + 1) % _popularAnime.length;
+      pageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  void stopAutoScroll() {
+    _autoScrollTimer?.cancel();
+  }
+
+  @override
+  void dispose() {
+    stopAutoScroll();
+    pageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> refreshData() async {
+    stopAutoScroll();
+    await loadHomeData();
   }
 }

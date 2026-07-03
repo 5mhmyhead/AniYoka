@@ -120,7 +120,7 @@ class AniListService {
     const query = r'''
       query {
         Page(page: 1, perPage: 10) {
-          media(status: NOT_YET_RELEASED, type: ANIME, sort: START_DATE, isAdult: false) {
+          media(status: NOT_YET_RELEASED, type: ANIME, sort: POPULARITY_DESC, isAdult: false) {
             id
             title { english romaji }
             coverImage { large }
@@ -149,19 +149,30 @@ class AniListService {
             extraLarge
           }
           bannerImage
-          format
-          season
-          seasonYear
-          status
           meanScore
           episodes
+          seasonYear
+          season
+          format
+          genres
+          status
+          popularity
+          favourites
+          tags {
+            name
+            isMediaSpoiler
+            rank
+          }
           rankings {
             rank
             type
             allTime
           }
+          nextAiringEpisode {
+            timeUntilAiring
+            episode
+          }
           description(asHtml: false)
-          genres
           duration
           startDate { year month day }
           endDate { year month day }

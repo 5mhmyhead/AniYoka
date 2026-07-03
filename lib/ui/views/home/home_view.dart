@@ -22,21 +22,18 @@ class HomeView extends StackedView<HomeViewModel> {
         length: 3,
         child: Scaffold(
           backgroundColor: kcBackgroundColor,
-          body: viewModel.isBusy
-              ? const Center(
-                  child: CircularProgressIndicator(color: kcPrimaryPink))
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      color: kcSurfaceColor,
-                      child: _buildHeader(),
-                    ),
-                    Expanded(
-                      child: _buildTabContent(viewModel, context),
-                    ),
-                  ],
-                ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                color: kcSurfaceColor,
+                child: _buildHeader(),
+              ),
+              Expanded(
+                child: _buildTabContent(viewModel, context),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -92,6 +89,12 @@ class HomeView extends StackedView<HomeViewModel> {
 
   // tab content switcher
   Widget _buildTabContent(HomeViewModel viewModel, BuildContext context) {
+    if (viewModel.isBusy) {
+      return const Center(
+        child: CircularProgressIndicator(color: kcPrimaryPink),
+      );
+    }
+
     return TabBarView(
       children: [
         _buildDiscoverTab(viewModel, context),
@@ -119,17 +122,22 @@ class HomeView extends StackedView<HomeViewModel> {
       ('Airing Soon', viewModel.airingSoon),
     ];
 
-    return ListView(
-      padding: EdgeInsets.zero,
-      children: [
-        const SizedBox(height: 12),
-        _buildSectionHeader('Popular Now'),
-        const SizedBox(height: 10),
-        _buildPopularSection(viewModel.popularAnime, viewModel),
-        const SizedBox(height: 10),
-        ...sections.map((section) => _buildSection(section.$1, section.$2, viewModel, context)),
-        const SizedBox(height: 12),
-      ],
+    return RefreshIndicator(
+      color: kcPrimaryPink,           
+      backgroundColor: kcSurfaceColor, 
+      onRefresh: viewModel.refreshData, 
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const SizedBox(height: 12),
+          _buildSectionHeader('Popular Now'),
+          const SizedBox(height: 10),
+          _buildPopularSection(viewModel.popularAnime, viewModel),
+          const SizedBox(height: 10),
+          ...sections.map((section) => _buildSection(section.$1, section.$2, viewModel, context)),
+          const SizedBox(height: 12),
+        ],
+      ),
     );
   }
 
@@ -164,12 +172,10 @@ class HomeView extends StackedView<HomeViewModel> {
       );
     }
 
-    final PageController controller = PageController(viewportFraction: 1);
-
     return SizedBox(
       height: 230,
       child: PageView.builder(
-        controller: controller,
+        controller: viewModel.pageController,
         itemCount: animeList.length,
         itemBuilder: (context, index) {
           final anime = animeList[index];
