@@ -351,7 +351,9 @@ class ExploreView extends StackedView<ExploreViewModel> {
   }
 
   Widget _buildSearchBody(ExploreViewModel viewModel) {
-    if (viewModel.searchText.isEmpty) {
+    if (viewModel.searchText.isEmpty &&
+        !viewModel.hasActiveFilters &&
+        !viewModel.hasSearched) {
       return const Center(
         child: Text(
           'Search for anime.',
@@ -395,6 +397,18 @@ class ExploreView extends StackedView<ExploreViewModel> {
     return ListView(
       padding: const EdgeInsets.only(bottom: 30),
       children: [
+        if (viewModel.searchText.isEmpty &&
+            viewModel.activeFilterResultsTitle != null) ...[
+          Text(
+            viewModel.activeFilterResultsTitle!,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
         ...viewModel.searchResults.map((anime) {
           return _buildAnimeListTile(anime);
         }),
