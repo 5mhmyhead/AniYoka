@@ -8,6 +8,9 @@ import 'package:aniyoka/services/anilist_service.dart';
 class ExploreViewModel extends BaseViewModel {
   final _anilistService = locator<AniListService>();
 
+  static const int _minimumSearchLength = 3;
+  static const Duration _searchDebounceDuration = Duration(milliseconds: 900);
+
   final TextEditingController searchController = TextEditingController();
 
   Timer? _debounce;
@@ -138,7 +141,18 @@ class ExploreViewModel extends BaseViewModel {
     _searchText = input;
     _debounce?.cancel();
 
-    if (input.isEmpty) {
+    if (input.isEmpty || input.length < _minimumSearchLength) {
+      _searchRequestId++;
+      _searchResults = [];
+      _relatedResults = [];
+      _hasSearched = false;
+      clearErrors();
+      setBusy(false);
+      notifyListeners();
+      return;
+    }
+
+    if (input.length < _minimumSearchLength) {
       _searchRequestId++;
       _searchResults = [];
       _relatedResults = [];
@@ -152,11 +166,59 @@ class ExploreViewModel extends BaseViewModel {
     setBusy(true);
 
     _debounce = Timer(
-      const Duration(milliseconds: 400),
+      _searchDebounceDuration,
       () {
         searchAnime(input);
       },
     );
+  }
+
+  Future<void> loadAnimeByActiveFilters() async {
+    final int requestId = ++_searchRequestId;
+
+    try {
+      clearErrors();
+      setBusy(true);
+
+      final results = await _anilistService.getAnimeByFilters(
+        status: _apiStatus,
+        genre: _apiGenre,
+        format: _apiFormat,
+        sort: _apiSort,
+        perPage: 30,
+      );
+
+      if (requestId != _searchRequestId) {
+        return;
+      }
+
+      _searchResults = _removeDuplicateAnime(results);
+      _relatedResults = [];
+      _hasSearched = true;
+    } catch (e) {
+      if (requestId == _searchRequestId) {
+        _searchResults = [];
+        _relatedResults = [];
+        _hasSearched = true;
+
+        final errorText = e.toString();
+
+        if (errorText.contains('Too Many Requests') ||
+            errorText.contains('429')) {
+          setError('Too many searches. Please wait a moment, then try again.');
+        } else if (errorText.contains('TimeoutException')) {
+          setError(
+              'Search took too long. Please check your internet and try again.');
+        } else {
+          setError('Something went wrong while loading anime.');
+        }
+      }
+    }
+
+    if (requestId == _searchRequestId) {
+      setBusy(false);
+      notifyListeners();
+    }
   }
 
   Future<void> searchAnime(String input) async {
@@ -170,7 +232,7 @@ class ExploreViewModel extends BaseViewModel {
     try {
       clearErrors();
 
-      final results = await _anilistService.searchAnime(
+      final directResults = await _anilistService.searchAnime(
         currentInput,
         status: _apiStatus,
         genre: _apiGenre,
@@ -178,12 +240,33 @@ class ExploreViewModel extends BaseViewModel {
         sort: _apiSort,
       );
 
+      final suggestionResults =
+          await _anilistService.getPopularAnimeForSearchSuggestions(
+        status: _apiStatus,
+        genre: _apiGenre,
+        format: _apiFormat,
+        sort: _apiSort,
+        maxPages: 3,
+      );
+
       if (requestId != _searchRequestId || currentInput != _searchText) {
         return;
       }
 
+      final matchingSuggestions = suggestionResults.where((anime) {
+        return _anyTitleContainsSearch(anime, currentInput);
+      }).toList();
+
+      debugPrint('Suggestion pool: ${suggestionResults.length}');
+      debugPrint('Partial matches: ${matchingSuggestions.length}');
+
+      final combinedResults = _removeDuplicateAnime([
+        ...directResults,
+        ...matchingSuggestions,
+      ]);
+
       final groupedResults = _groupSearchResults(
-        _removeDuplicateAnime(results),
+        combinedResults,
         currentInput,
       );
 
@@ -195,7 +278,14 @@ class ExploreViewModel extends BaseViewModel {
         _searchResults = [];
         _relatedResults = [];
         _hasSearched = true;
-        setError(e.toString());
+        final errorText = e.toString();
+
+        if (errorText.contains('Too Many Requests') ||
+            errorText.contains('429')) {
+          setError('Too many searches. Please wait a moment, then try again.');
+        } else {
+          setError(errorText);
+        }
       }
     }
 
@@ -241,16 +331,53 @@ class ExploreViewModel extends BaseViewModel {
     _rerunSearchWithCurrentFilters();
   }
 
+  String? get activeFilterResultsTitle {
+    if (_selectedGenreLabel != null) {
+      return '$_selectedGenreLabel Anime';
+    }
+
+    if (_selectedStatusLabel != null) {
+      return '$_selectedStatusLabel Anime';
+    }
+
+    if (_selectedFormatLabel != null) {
+      return '$_selectedFormatLabel Anime';
+    }
+
+    if (_selectedSortLabel != null && _selectedSortLabel != 'Default') {
+      return '$_selectedSortLabel Anime';
+    }
+
+    if (_onMyListOnly) {
+      return 'Anime On My List';
+    }
+
+    return null;
+  }
+
   void _rerunSearchWithCurrentFilters() {
     _debounce?.cancel();
 
-    if (_searchText.trim().isEmpty) {
-      notifyListeners();
+    final input = _searchText.trim();
+
+    if (input.isEmpty || input.length < _minimumSearchLength) {
+      if (hasActiveFilters) {
+        loadAnimeByActiveFilters();
+      } else {
+        _searchRequestId++;
+        _searchResults = [];
+        _relatedResults = [];
+        _hasSearched = false;
+        clearErrors();
+        setBusy(false);
+        notifyListeners();
+      }
+
       return;
     }
 
     setBusy(true);
-    searchAnime(_searchText);
+    searchAnime(input);
   }
 
   Map<String, List<dynamic>> _groupSearchResults(
@@ -261,12 +388,14 @@ class ExploreViewModel extends BaseViewModel {
     final containsResults = <dynamic>[];
 
     for (final anime in results) {
-      final displayedTitle = _getDisplayedTitle(anime);
-
-      if (_titleStartsWithSearch(displayedTitle, input)) {
+      if (_anyTitleStartsWithSearch(anime, input)) {
         startsWithResults.add(anime);
-      } else if (_titleContainsSearch(displayedTitle, input)) {
+      } else if (_anyTitleContainsSearch(anime, input)) {
         containsResults.add(anime);
+      } else {
+        // Keep AniList direct search results even if our local title check
+        // does not find the exact text.
+        startsWithResults.add(anime);
       }
     }
 
@@ -277,10 +406,67 @@ class ExploreViewModel extends BaseViewModel {
       return titleA.length.compareTo(titleB.length);
     });
 
+    containsResults.sort((a, b) {
+      final titleA = _cleanText(_getDisplayedTitle(a));
+      final titleB = _cleanText(_getDisplayedTitle(b));
+
+      return titleA.compareTo(titleB);
+    });
+
     return {
       'startsWith': startsWithResults,
       'contains': containsResults,
     };
+  }
+
+  List<String> _getAllTitles(dynamic anime) {
+    final title = anime['title'];
+
+    final titles = <String>[
+      if (title?['english'] != null) title['english'].toString(),
+      if (title?['romaji'] != null) title['romaji'].toString(),
+      if (title?['native'] != null) title['native'].toString(),
+    ];
+
+    return titles.where((title) => title.trim().isNotEmpty).toSet().toList();
+  }
+
+  String _getDisplayedTitle(dynamic anime) {
+    final titles = _getAllTitles(anime);
+
+    if (titles.isEmpty) {
+      return 'No title';
+    }
+
+    return titles.first;
+  }
+
+  bool _anyTitleStartsWithSearch(dynamic anime, String input) {
+    final cleanedInput = _cleanText(input);
+
+    if (cleanedInput.isEmpty) {
+      return false;
+    }
+
+    return _getAllTitles(anime).any((title) {
+      return _cleanText(title).startsWith(cleanedInput);
+    });
+  }
+
+  bool _anyTitleContainsSearch(dynamic anime, String input) {
+    final cleanedInput = _cleanText(input);
+
+    if (cleanedInput.isEmpty) {
+      return false;
+    }
+
+    return _getAllTitles(anime).any((title) {
+      return _cleanText(title).contains(cleanedInput);
+    });
+  }
+
+  String _cleanText(String value) {
+    return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
   }
 
   List<dynamic> _removeDuplicateAnime(List<dynamic> animeList) {
@@ -298,31 +484,6 @@ class ExploreViewModel extends BaseViewModel {
     }
 
     return uniqueAnime;
-  }
-
-  String _getDisplayedTitle(dynamic anime) {
-    return anime['title']?['english'] ??
-        anime['title']?['romaji'] ??
-        anime['title']?['native'] ??
-        'No title';
-  }
-
-  bool _titleStartsWithSearch(String title, String input) {
-    final cleanedTitle = _cleanText(title);
-    final cleanedInput = _cleanText(input);
-
-    return cleanedTitle.startsWith(cleanedInput);
-  }
-
-  bool _titleContainsSearch(String title, String input) {
-    final cleanedTitle = _cleanText(title);
-    final cleanedInput = _cleanText(input);
-
-    return cleanedTitle.contains(cleanedInput);
-  }
-
-  String _cleanText(String value) {
-    return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
   }
 
   void clearSearch() {
