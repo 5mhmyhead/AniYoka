@@ -117,11 +117,126 @@ class ProfileView extends StackedView<ProfileViewModel> {
     );
   }
 
+  //PROFILE TAB with avatar, name, and email
   Widget _buildMyProfileTab(ProfileViewModel viewModel) {
-    // placeholder — add avatar/stats/favorites content here
-    return const SizedBox.shrink();
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(vertical: 35, horizontal: 15),
+      child: Column(
+        children: [
+          //pink ring avatar
+          Container(
+            width: 200,
+            height: 200,
+            padding: const EdgeInsets.all(3), //thickness
+            decoration: BoxDecoration(
+                shape: BoxShape.circle, color: Color(0xFFF45C82) //ring color
+                ),
+            child: ClipOval(
+              child: Image.network(
+                viewModel.avatarUrl ??
+                    'https://mrwallpaper.com/images/thumbnail/kid-luffy-pfp-one-piece-funny-fanart-denwom1cyqf9spm3.jpg',
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 16,
+          ),
+          //username
+          Text(
+            viewModel.username ?? 'username', //falls back until real data loads
+            style: GoogleFonts.inter(
+              fontSize: 40,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFFFBD8DF),
+            ),
+          ),
+          const SizedBox(height: 4),
+          //email
+          Text(
+            viewModel.email ?? 'name@example.com', //cleaned up fallback
+            style: GoogleFonts.inter(
+              fontSize: 17,
+              color: const Color(0xFF7F7F7F),
+            ),
+          ),
+          const SizedBox(height: 27), //space between the email and grd
+          //stats grid
+          GridView(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 120,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: 1.4,
+            ),
+            children: [
+              _buildStatTile('${viewModel.episodesWatched ?? 0}',
+                  'episodes watched'), //fallback, default
+              _buildStatTile('${viewModel.animeInProgress ?? 0}',
+                  'anime in progress'), //fallback
+              _buildStatTile('${viewModel.animeCompleted ?? 0}',
+                  'anime completed'), //fallback
+              _buildStatTile('${viewModel.longestStreak ?? 0}',
+                  'longest streak'), //fallback
+              _buildStatTile(
+                  '${viewModel.averageRating?.toInt() ?? 0}%', ////fallback
+                  'average rating'),
+            ],
+          ),
+          //favorites section
+          const SizedBox(height: 28),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Favorites',
+              style: GoogleFonts.inter(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFFFBD8DF)),
+            ),
+          )
+        ],
+      ),
+    );
   }
 
+  // Single stat tile (the pink rounded boxes in the grid)
+  Widget _buildStatTile(String value, String label) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF45C82),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 27,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFFFBD8DF),
+            ),
+          ),
+          const SizedBox(height: 1),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              color: Color(0xFFFBD8DF),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void onViewModelReady(ProfileViewModel viewModel) => viewModel.initialise();
   @override
   ProfileViewModel viewModelBuilder(BuildContext context) => ProfileViewModel();
 }
