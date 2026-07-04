@@ -48,11 +48,12 @@ class AnimeInfoViewModel extends BaseViewModel {
   }
 
   // helpers to extract rank and popularity from rankings list
-  int? get ranked => _anime?['rankings'] == null ? null : (_anime!['rankings'] as List?)
-    ?.firstWhere(
-      (r) => r['type'] == 'RATED' && r['allTime'] == true,
-      orElse: () => null,
-    )?['rank'];
+  int? get ranked => _anime?['rankings'] == null
+      ? null
+      : (_anime!['rankings'] as List?)?.firstWhere(
+          (r) => r['type'] == 'RATED' && r['allTime'] == true,
+          orElse: () => null,
+        )?['rank'];
 
   int? get popularity => _anime?['popularity'];
 
@@ -97,6 +98,14 @@ class AnimeInfoViewModel extends BaseViewModel {
     return tags.where((tag) => tag['isMediaSpoiler'] == true).toList();
   }
 
+  List<dynamic> get relatedAnime {
+    final edges = _anime?['relations']?['edges'] as List? ?? [];
+    return edges
+        .where((edge) => edge['node']['type'] == 'ANIME')
+        .map((edge) => edge['node'])
+        .toList();
+  }
+
   List<dynamic> get recommendations {
     final nodes = _anime?['recommendations']?['nodes'] as List? ?? [];
     return nodes
@@ -110,8 +119,10 @@ class AnimeInfoViewModel extends BaseViewModel {
       final paletteGenerator = await PaletteGenerator.fromImageProvider(
         NetworkImage(imageUrl),
         size: const Size(200, 300),
+        maximumColorCount: 5,
       );
-      _dominantColor = paletteGenerator.dominantColor?.color ?? kcAccentSurfaceColor;
+      _dominantColor =
+          paletteGenerator.dominantColor?.color ?? kcAccentSurfaceColor;
       rebuildUi();
     } catch (e) {
       // keep fallback color if extraction fails
@@ -121,18 +132,18 @@ class AnimeInfoViewModel extends BaseViewModel {
   Color get adjustedDominantColor {
     final hsl = HSLColor.fromColor(_dominantColor);
     return hsl
-        .withLightness(0.2)    
-        .withSaturation((hsl.saturation * 0.8).clamp(0.0, 1.0)) 
+        .withLightness(0.2)
+        .withSaturation((hsl.saturation * 0.8).clamp(0.0, 1.0))
         .toColor();
   }
 
   String cleanDescription(String description) {
     return description
-        .replaceAll(RegExp(r'<[^>]*>'), '')   // removes all html tags
-        .replaceAll('&nbsp;', ' ')            // replaces html spaces
-        .replaceAll('&amp;', '&')             // replaces &amp; with &
-        .replaceAll('&lt;', '<')              // replaces &lt; with 
-        .replaceAll('&gt;', '>')              // replaces &gt; with >
+        .replaceAll(RegExp(r'<[^>]*>'), '') // removes all html tags
+        .replaceAll('&nbsp;', ' ') // replaces html spaces
+        .replaceAll('&amp;', '&') // replaces &amp; with &
+        .replaceAll('&lt;', '<') // replaces &lt; with
+        .replaceAll('&gt;', '>') // replaces &gt; with >
         .trim();
   }
 
@@ -144,34 +155,44 @@ class AnimeInfoViewModel extends BaseViewModel {
   String formatEnum(String? value) {
     if (value == null) return 'Unknown';
     return value
-        .split('_')                           
-        .map((word) => '${word[0]}${word.substring(1).toLowerCase()}') 
-        .join(' ');                           
+        .split('_')
+        .map((word) => '${word[0]}${word.substring(1).toLowerCase()}')
+        .join(' ');
   }
 
   String formatDate(Map? date) {
-    
     if (date == null) return 'Unknown';
     final year = date['year'];
     final month = date['month'];
     final day = date['day'];
     if (year == null) return 'Unknown';
-    
+
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', ''
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+      ''
     ];
-    
-    if (month == null) return '$year';                          
-    if (day == null) return '${months[month]} $year';          
-    return '${months[month]} $day, $year';   
+
+    if (month == null) return '$year';
+    if (day == null) return '${months[month]} $year';
+    return '${months[month]} $day, $year';
   }
 
   String formatPopularity(int? value) {
     if (value == null) return '?';
     return value.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (match) => '${match[1]},',
-    );
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (match) => '${match[1]},',
+        );
   }
 }

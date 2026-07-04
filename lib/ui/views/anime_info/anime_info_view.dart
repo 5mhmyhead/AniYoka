@@ -10,7 +10,8 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
   const AnimeInfoView({super.key, required this.animeId});
 
   @override
-  Widget builder(BuildContext context, AnimeInfoViewModel viewModel, Widget? child) {
+  Widget builder(
+      BuildContext context, AnimeInfoViewModel viewModel, Widget? child) {
     if (viewModel.isBusy) {
       return const Scaffold(
         backgroundColor: kcBackgroundColor,
@@ -38,18 +39,20 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
     final description = viewModel.cleanDescription(anime['description'] ?? '');
     final genres = anime['genres'] as List? ?? [];
     final coverImage = anime['coverImage']['extraLarge'] ?? '';
-    
+
     return Scaffold(
       backgroundColor: kcBackgroundColor,
       body: CustomScrollView(
         slivers: [
           // top gradient area with back + bookmark
           SliverToBoxAdapter(
-            child: _buildTopSection(context, viewModel, coverImage, title, subtitle),
+            child: _buildTopSection(
+                context, viewModel, coverImage, title, subtitle),
           ),
           // stats row
           SliverToBoxAdapter(
-            child: _buildStatsRow(viewModel, meanScore, viewModel.ranked, viewModel.popularity, episodes),
+            child: _buildStatsRow(viewModel, meanScore, viewModel.ranked,
+                viewModel.popularity, episodes),
           ),
           // synopsis
           SliverToBoxAdapter(
@@ -70,23 +73,40 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
           SliverToBoxAdapter(
             child: _buildInfoSection(viewModel),
           ),
-          SliverToBoxAdapter(
-            child: _buildSectionHeader('Recommendations'),
-          ),
-          SliverToBoxAdapter(
-            child: AnimeCardRow(
-              animeList: viewModel.recommendations,
-              onAnimeTap: (id) => Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => AnimeInfoView(animeId: id),
-                  transitionDuration: Duration.zero,
-                  reverseTransitionDuration: Duration.zero,
-                  transitionsBuilder: (_, __, ___, child) => child,
+          if (viewModel.relatedAnime.isNotEmpty) ...[
+            SliverToBoxAdapter(child: _buildSectionHeader('Related')),
+            SliverToBoxAdapter(
+              child: AnimeCardRow(
+                animeList: viewModel.relatedAnime,
+                onAnimeTap: (id) => Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => AnimeInfoView(animeId: id),
+                    transitionDuration: Duration.zero,
+                    reverseTransitionDuration: Duration.zero,
+                    transitionsBuilder: (_, __, ___, child) => child,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
+          if (viewModel.recommendations.isNotEmpty) ...[
+            SliverToBoxAdapter(child: _buildSectionHeader('Recommendations')),
+            SliverToBoxAdapter(
+              child: AnimeCardRow(
+                animeList: viewModel.recommendations,
+                onAnimeTap: (id) => Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => AnimeInfoView(animeId: id),
+                    transitionDuration: Duration.zero,
+                    reverseTransitionDuration: Duration.zero,
+                    transitionsBuilder: (_, __, ___, child) => child,
+                  ),
+                ),
+              ),
+            ),
+          ],
           const SliverToBoxAdapter(child: SizedBox(height: 30)),
         ],
       ),
@@ -94,10 +114,9 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
   }
 
   Widget _buildTopSection(BuildContext context, AnimeInfoViewModel viewModel,
-    String coverImage, String title, String subtitle) {
-
+      String coverImage, String title, String subtitle) {
     final Color gradientColor = viewModel.adjustedDominantColor;
-      
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -117,11 +136,13 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: kcOffWhite, size: 32),
+                    icon: const Icon(Icons.arrow_back,
+                        color: kcOffWhite, size: 32),
                     onPressed: () => Navigator.pop(context),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.bookmark_outline, color: kcPrimaryPink, size: 32),
+                    icon: const Icon(Icons.bookmark_outline,
+                        color: kcPrimaryPink, size: 32),
                     onPressed: () {}, // TODO: IMPLEMENT BOOKMARK FUNCTIONALITY
                   ),
                 ],
@@ -174,12 +195,11 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
     );
   }
 
-  Widget _buildStatsRow(AnimeInfoViewModel viewModel, int? meanScore, int? ranked, int? popularity, int? episodes) {
+  Widget _buildStatsRow(AnimeInfoViewModel viewModel, int? meanScore,
+      int? ranked, int? popularity, int? episodes) {
     final pills = [
-      if (viewModel.airingIn != null)
-        (viewModel.airingIn!, 'airing'),
-      if (ranked != null)
-        ('#$ranked', 'ranked'),
+      if (viewModel.airingIn != null) (viewModel.airingIn!, 'airing'),
+      if (ranked != null) ('#$ranked', 'ranked'),
       ('${meanScore ?? '?'}%', 'mean score'),
       (viewModel.formatPopularity(popularity), 'popularity'),
       ('${episodes ?? '?'}', 'episodes'),
@@ -232,7 +252,8 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
     );
   }
 
-  Widget _buildSynopsis(AnimeInfoViewModel viewModel, String description, BuildContext context) {
+  Widget _buildSynopsis(
+      AnimeInfoViewModel viewModel, String description, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -243,7 +264,8 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
             description,
             textAlign: TextAlign.justify,
             maxLines: viewModel.isDescriptionExpanded ? null : 5,
-            overflow: viewModel.isDescriptionExpanded ? null : TextOverflow.ellipsis,
+            overflow:
+                viewModel.isDescriptionExpanded ? null : TextOverflow.ellipsis,
             style: GoogleFonts.nunito(
               color: kcOffWhite,
               fontSize: 14,
@@ -256,7 +278,7 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
           child: Row(
             children: [
               const Expanded(
-                child: SizedBox.shrink(), 
+                child: SizedBox.shrink(),
               ),
               Expanded(
                 child: GestureDetector(
@@ -276,8 +298,8 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                   child: GestureDetector(
                     onTap: viewModel.copyDescription,
                     child: const Icon(
-                      Icons.copy, 
-                      color: kcTertiaryPink, 
+                      Icons.copy,
+                      color: kcTertiaryPink,
                       size: 24,
                     ),
                   ),
@@ -336,7 +358,8 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
               final rank = tag['rank'] as int;
 
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: isSpoiler
                       ? kcPrimaryPink.withValues(alpha: 0.15)
@@ -372,7 +395,7 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
               );
             }).toList(),
           ),
-          if(hasSpoilers) SizedBox(height: 24),
+          if (hasSpoilers) SizedBox(height: 24),
           // header with spoiler toggle
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -381,7 +404,8 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                 GestureDetector(
                   onTap: viewModel.toggleSpoilerTags,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: viewModel.showSpoilerTags
                           ? kcPrimaryPink
@@ -418,8 +442,9 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                     ),
                   ),
                 ),
-                // spoiler count hint when hidden
-              if (!viewModel.showSpoilerTags && viewModel.spoilerTags.isNotEmpty)
+              // spoiler count hint when hidden
+              if (!viewModel.showSpoilerTags &&
+                  viewModel.spoilerTags.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
@@ -452,10 +477,10 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
   }
 
   Widget _buildInfoSection(AnimeInfoViewModel viewModel) {
-    
     final anime = viewModel.anime!;
-    final duration = anime['duration'] != null ? '${anime['duration']} min' : 'Unknown';
-    
+    final duration =
+        anime['duration'] != null ? '${anime['duration']} min' : 'Unknown';
+
     final startDate = viewModel.formatDate(anime['startDate']);
     final endDate = viewModel.formatDate(anime['endDate']);
 
@@ -488,42 +513,44 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
         ],
       ),
     );
-}
+  }
 
-Widget _buildInfoRow(String label, String value) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 6),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 151,
-          child: Text(
-            label,
-            style: GoogleFonts.nunito(
-              color: kcLightGrey,
-              fontSize: 14,
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 151,
+            child: Text(
+              label,
+              style: GoogleFonts.nunito(
+                color: kcLightGrey,
+                fontSize: 14,
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: GoogleFonts.nunito(
-              color: kcOffWhite,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+          Expanded(
+            child: Text(
+              value,
+              style: GoogleFonts.nunito(
+                color: kcOffWhite,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   @override
-  void onViewModelReady(AnimeInfoViewModel viewModel) => viewModel.loadAnimeDetails(animeId);
+  void onViewModelReady(AnimeInfoViewModel viewModel) =>
+      viewModel.loadAnimeDetails(animeId);
 
   @override
-  AnimeInfoViewModel viewModelBuilder(BuildContext context) => AnimeInfoViewModel();
+  AnimeInfoViewModel viewModelBuilder(BuildContext context) =>
+      AnimeInfoViewModel();
 }

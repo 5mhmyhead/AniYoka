@@ -1,3 +1,4 @@
+import 'package:aniyoka/utils/genre_helper.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:aniyoka/utils/season_helper.dart';
 
@@ -177,6 +178,19 @@ class AniListService {
           startDate { year month day }
           endDate { year month day }
           source
+          relations {
+            edges {
+              relationType
+              node {
+                id
+                type
+                title { english romaji }
+                coverImage { large }
+                format
+                startDate { year }
+              }
+            }
+          }
           recommendations(perPage: 10) {
             nodes {
               mediaRecommendation {
@@ -195,6 +209,59 @@ class AniListService {
     final result = await _client.query(QueryOptions(document: gql(query)));
     if (result.hasException) throw Exception(result.exception.toString());
     return result.data!['Media'];
+  }
+
+  Future<List<dynamic>> getAnimeByGenre(
+      String genre, GenreFilter filter) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    String sortParam;
+    String seasonParam = '';
+
+    switch (filter) {
+      case GenreFilter.popularity:
+        sortParam = 'POPULARITY_DESC';
+        break;
+      case GenreFilter.currentSeason:
+        sortParam = 'POPULARITY_DESC';
+        seasonParam = '''
+          season: ${SeasonHelper.currentSeason}
+          seasonYear: ${SeasonHelper.currentYear}
+        ''';
+        break;
+      case GenreFilter.topRated:
+        sortParam = 'SCORE_DESC';
+        break;
+    }
+
+    final query = '''
+      query {
+        Page(page: 1, perPage: 7) {
+          media(
+            genre: "$genre"
+            type: ANIME
+            sort: $sortParam
+            $seasonParam
+            isAdult: false
+          ) {
+            id
+            title { english romaji }
+            coverImage { large }
+            format
+            startDate { year }
+          }
+        }
+      }
+    ''';
+
+    final result = await _client.query(
+      QueryOptions(
+        document: gql(query),
+        fetchPolicy: FetchPolicy.networkOnly,
+      ),
+    );
+    if (result.hasException) throw Exception(result.exception.toString());
+    return result.data!['Page']['media'];
   }
 
   Future<List<dynamic>> searchAnime(
