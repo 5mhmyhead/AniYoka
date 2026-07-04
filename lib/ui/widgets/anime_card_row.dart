@@ -1,4 +1,5 @@
 import 'package:aniyoka/ui/common/app_colors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -41,9 +42,7 @@ class AnimeCardRow extends StatelessWidget {
           final year = anime['startDate']?['year']?.toString() ?? '';
 
           return GestureDetector(
-            onTap: onAnimeTap != null
-                ? () => onAnimeTap!(anime['id'])
-                : null,
+            onTap: onAnimeTap != null ? () => onAnimeTap!(anime['id']) : null,
             child: SizedBox(
               width: 135,
               child: Column(
@@ -51,12 +50,17 @@ class AnimeCardRow extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      anime['coverImage']['large'] ?? '',
+                    child: CachedNetworkImage(
+                      imageUrl: anime['coverImage']['large'] ?? '',
                       width: 125,
                       height: 175,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      placeholder: (context, url) => Container(
+                        width: 125,
+                        height: 175,
+                        color: kcSurfaceColor,
+                      ),
+                      errorWidget: (context, url, error) => Container(
                         width: 125,
                         height: 175,
                         color: kcSurfaceColor,

@@ -82,7 +82,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
       indicatorWeight: 3,
 
       //thin line across the full tab bar width
-      dividerColor: Colors.grey.withOpacity(0.3),
+      dividerColor: Colors.grey.withValues(alpha: 0.3),
       tabs: const [
         Tab(text: 'My Profile'),
         Tab(text: 'Recent Activity'),
