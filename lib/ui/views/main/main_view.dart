@@ -11,7 +11,7 @@ import 'package:stacked/stacked.dart';
 import 'main_viewmodel.dart';
 
 class MainView extends StackedView<MainViewModel> {
-  const MainView({Key? key}) : super(key: key);
+  const MainView({super.key});
 
   @override
   Widget builder(BuildContext context, MainViewModel viewModel, Widget? child) {

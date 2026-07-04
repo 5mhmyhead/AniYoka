@@ -1,4 +1,6 @@
 import 'package:aniyoka/ui/common/app_colors.dart';
+import 'package:aniyoka/ui/views/anime_info/anime_info_view.dart';
+import 'package:aniyoka/ui/widgets/anime_card_row.dart';
 import 'package:aniyoka/utils/season_helper.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
@@ -20,22 +22,17 @@ class HomeView extends StackedView<HomeViewModel> {
         length: 3,
         child: Scaffold(
           backgroundColor: kcBackgroundColor,
-          body: SafeArea(
-            child: viewModel.isBusy
-                ? const Center(
-                    child: CircularProgressIndicator(color: kcPrimaryPink))
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        color: kcSurfaceColor,
-                        child: _buildHeader(),
-                      ),
-                      Expanded(
-                        child: _buildTabContent(viewModel),
-                      ),
-                    ],
-                  ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                color: kcSurfaceColor,
+                child: _buildHeader(),
+              ),
+              Expanded(
+                child: _buildTabContent(viewModel, context),
+              ),
+            ],
           ),
         ),
       ),
@@ -46,14 +43,17 @@ class HomeView extends StackedView<HomeViewModel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-          child: Text(
-            'Home Page',
-            style: GoogleFonts.nunito(
-              color: kcTertiaryPink,
-              fontSize: 42,
-              fontWeight: FontWeight.w700,
+        SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+            child: Text(
+              'Home Page',
+              style: GoogleFonts.nunito(
+                color: kcPrimaryPink,
+                fontSize: 42,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
@@ -88,10 +88,16 @@ class HomeView extends StackedView<HomeViewModel> {
   }
 
   // tab content switcher
-  Widget _buildTabContent(HomeViewModel viewModel) {
+  Widget _buildTabContent(HomeViewModel viewModel, BuildContext context) {
+    if (viewModel.isBusy) {
+      return const Center(
+        child: CircularProgressIndicator(color: kcPrimaryPink),
+      );
+    }
+
     return TabBarView(
       children: [
-        _buildDiscoverTab(viewModel),
+        _buildDiscoverTab(viewModel, context),
         const Center(
           child: Text(
             'Genres',
@@ -108,7 +114,7 @@ class HomeView extends StackedView<HomeViewModel> {
     );
   }
 
-  Widget _buildDiscoverTab(HomeViewModel viewModel) {
+  Widget _buildDiscoverTab(HomeViewModel viewModel, BuildContext context) {
     final sections = [
       (SeasonHelper.currentSeasonLabel, viewModel.thisSeason),
       ('Next Season', viewModel.nextSeason),
@@ -116,25 +122,42 @@ class HomeView extends StackedView<HomeViewModel> {
       ('Airing Soon', viewModel.airingSoon),
     ];
 
-    return ListView(
-      children: [
-        const SizedBox(height: 12),
-        _buildSectionHeader('Popular Now'),
-        const SizedBox(height: 10),
-        _buildPopularSection(viewModel.popularAnime, viewModel),
-        const SizedBox(height: 10),
-        ...sections.map((section) => _buildSection(section.$1, section.$2, viewModel)),
-        const SizedBox(height: 12),
-      ],
+    return RefreshIndicator(
+      color: kcPrimaryPink,           
+      backgroundColor: kcSurfaceColor, 
+      onRefresh: viewModel.refreshData, 
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const SizedBox(height: 12),
+          _buildSectionHeader('Popular Now'),
+          const SizedBox(height: 10),
+          _buildPopularSection(viewModel.popularAnime, viewModel),
+          const SizedBox(height: 10),
+          ...sections.map((section) => _buildSection(section.$1, section.$2, viewModel, context)),
+          const SizedBox(height: 12),
+        ],
+      ),
     );
   }
 
-  Widget _buildSection(String title, List<dynamic> animeList, HomeViewModel viewModel) {
+  Widget _buildSection(String title, List<dynamic> animeList, HomeViewModel viewModel, BuildContext context) {
     return Column(
       children: [
         _buildSectionHeader(title),
         const SizedBox(height: 12),
-        _buildAnimeRow(animeList, viewModel),
+        AnimeCardRow(
+          animeList: animeList,
+          onAnimeTap: (id) => Navigator.push(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (_, __, ___) => AnimeInfoView(animeId: id),
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+              transitionsBuilder: (_, __, ___, child) => child,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -142,19 +165,17 @@ class HomeView extends StackedView<HomeViewModel> {
   Widget _buildPopularSection(List<dynamic> animeList, HomeViewModel viewModel) {
     if (animeList.isEmpty) {
       return const SizedBox(
-        height: 220,
+        height: 230,
         child: Center(
           child: Text('No anime found', style: TextStyle(color: kcLightGrey)),
         ),
       );
     }
 
-    final PageController controller = PageController(viewportFraction: 1);
-
     return SizedBox(
       height: 230,
       child: PageView.builder(
-        controller: controller,
+        controller: viewModel.pageController,
         itemCount: animeList.length,
         itemBuilder: (context, index) {
           final anime = animeList[index];
@@ -246,95 +267,13 @@ class HomeView extends StackedView<HomeViewModel> {
           Text(
             title,
             style: GoogleFonts.nunito(
-              color: kcTertiaryPink,
+              color: kcPrimaryPink,
               fontSize: 24,
               fontWeight: FontWeight.w700,
             ),
           ),
           const Icon(Icons.arrow_forward, color: kcTertiaryPink, size: 24),
         ],
-      ),
-    );
-  }
-
-  // horizontal anime card row
-  Widget _buildAnimeRow(List<dynamic> animeList, HomeViewModel viewModel) {
-    if (animeList.isEmpty) {
-      return const SizedBox(
-        height: 180,
-        child: Center(
-          child: Text(
-            'No anime found',
-            style: TextStyle(color: kcLightGrey),
-          ),
-        ),
-      );
-    }
-
-    return SizedBox(
-      height: 240,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: animeList.length,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-        separatorBuilder: (context, index) => const SizedBox(width: 15),
-        itemBuilder: (context, index) {
-          final anime = animeList[index];
-          final title =
-              anime['title']['english'] ?? anime['title']['romaji'] ?? '';
-          final format = anime['format'] ?? anime['status'] ?? '';
-          final year = anime['startDate']?['year']?.toString() ?? '';
-
-          return GestureDetector(
-            onTap: () => viewModel.onAnimeTap(anime['id']),
-            child: SizedBox(
-              width: 135,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      anime['coverImage']['large'] ?? '',
-                      width: 125,
-                      height: 175,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        width: 125,
-                        height: 175,
-                        decoration: BoxDecoration(
-                          color: kcSurfaceColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      color: kcOffWhite,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    year.isNotEmpty ? '$format • $year' : format,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      color: kcLightGrey,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
       ),
     );
   }

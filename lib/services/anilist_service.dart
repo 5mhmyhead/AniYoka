@@ -3,7 +3,7 @@ import 'package:aniyoka/utils/season_helper.dart';
 
 class AniListService {
   late final GraphQLClient _client;
-  List<dynamic>? _popularAnimeCache;
+  final Map<String, List<dynamic>> _popularAnimeCache = {};
 
   AniListService() {
     final httpLink = HttpLink('https://graphql.anilist.co');
@@ -31,7 +31,7 @@ class AniListService {
             episodes
             status
             format
-            startDate {  
+            startDate {
               year
             }
           }
@@ -72,7 +72,7 @@ class AniListService {
             season: ${SeasonHelper.nextSeason},
             seasonYear: ${SeasonHelper.nextSeasonYear},
             type: ANIME,
-            sort: POPULARITY_DESC, 
+            sort: POPULARITY_DESC,
             isAdult: false
           ) {
             id
@@ -98,7 +98,7 @@ class AniListService {
             season: ${SeasonHelper.currentSeason},
             seasonYear: ${SeasonHelper.currentYear},
             type: ANIME,
-            sort: POPULARITY_DESC, 
+            sort: POPULARITY_DESC,
             isAdult: false
           ) {
             id
@@ -120,7 +120,7 @@ class AniListService {
     const query = r'''
       query {
         Page(page: 1, perPage: 10) {
-          media(status: NOT_YET_RELEASED, type: ANIME, sort: START_DATE, isAdult: false) {
+          media(status: NOT_YET_RELEASED, type: ANIME, sort: POPULARITY_DESC, isAdult: false) {
             id
             title { english romaji }
             coverImage { large }
@@ -137,7 +137,6 @@ class AniListService {
   }
 
   Future<Map<String, dynamic>> getAnimeDetails(int id) async {
-    
     final query = '''
       query {
         Media(id: $id, type: ANIME) {
@@ -150,19 +149,34 @@ class AniListService {
             extraLarge
           }
           bannerImage
-          format
-          season
-          seasonYear
-          status
           meanScore
           episodes
+          seasonYear
+          season
+          format
+          genres
+          status
+          popularity
+          favourites
+          tags {
+            name
+            isMediaSpoiler
+            rank
+          }
           rankings {
             rank
             type
             allTime
           }
+          nextAiringEpisode {
+            timeUntilAiring
+            episode
+          }
           description(asHtml: false)
-          genres
+          duration
+          startDate { year month day }
+          endDate { year month day }
+          source
           recommendations(perPage: 10) {
             nodes {
               mediaRecommendation {
@@ -183,7 +197,13 @@ class AniListService {
     return result.data!['Media'];
   }
 
-  Future<List<dynamic>> searchAnime(String searchText) async {
+  Future<List<dynamic>> searchAnime(
+    String searchText, {
+    String? status,
+    String? genre,
+    String? format,
+    String sort = 'SEARCH_MATCH',
+  }) async {
     final input = searchText.trim();
 
     if (input.isEmpty) {
@@ -191,77 +211,49 @@ class AniListService {
     }
 
     const query = r'''
-    query SearchAnime($search: String) {
-      page1: Page(page: 1, perPage: 50) {
-        media(
-          search: $search,
-          type: ANIME,
-          sort: SEARCH_MATCH,
-          isAdult: false
-        ) {
-          id
-          title {
-            english
-            romaji
-            native
+      query SearchAnime(
+        $search: String
+        $status: MediaStatus
+        $genre: String
+        $format: MediaFormat
+        $sort: [MediaSort]
+      ) {
+        Page(page: 1, perPage: 40) {
+          media(
+            search: $search,
+            type: ANIME,
+            status: $status,
+            genre: $genre,
+            format: $format,
+            sort: $sort,
+            isAdult: false
+          ) {
+            id
+            title {
+              english
+              romaji
+              native
+            }
+            coverImage {
+              large
+            }
+            episodes
+            status
+            format
           }
-          coverImage {
-            large
-          }
-          episodes
-          status
         }
       }
-
-      page2: Page(page: 2, perPage: 50) {
-        media(
-          search: $search,
-          type: ANIME,
-          sort: SEARCH_MATCH,
-          isAdult: false
-        ) {
-          id
-          title {
-            english
-            romaji
-            native
-          }
-          coverImage {
-            large
-          }
-          episodes
-          status
-        }
-      }
-
-      page3: Page(page: 3, perPage: 50) {
-        media(
-          search: $search,
-          type: ANIME,
-          sort: SEARCH_MATCH,
-          isAdult: false
-        ) {
-          id
-          title {
-            english
-            romaji
-            native
-          }
-          coverImage {
-            large
-          }
-          episodes
-          status
-        }
-      }
-    }
-  ''';
+    ''';
 
     final result = await _client.query(
       QueryOptions(
         document: gql(query),
         variables: {
           'search': input,
+          'status': status,
+          'genre': genre,
+          'format': format,
+          'sort': [sort],
         },
         fetchPolicy: FetchPolicy.networkOnly,
       ),
@@ -271,75 +263,60 @@ class AniListService {
       throw Exception(result.exception.toString());
     }
 
-    final data = result.data ?? {};
-
-    return [
-      ...List<dynamic>.from(data['page1']?['media'] ?? []),
-      ...List<dynamic>.from(data['page2']?['media'] ?? []),
-      ...List<dynamic>.from(data['page3']?['media'] ?? []),
-    ];
+    return List<dynamic>.from(result.data?['Page']?['media'] ?? []);
   }
 
-  Future<List<dynamic>> getPopularAnimeForSearchSuggestions() async {
-    if (_popularAnimeCache != null) {
-      return _popularAnimeCache!;
+  Future<List<dynamic>> getPopularAnimeForSearchSuggestions({
+    String? status,
+    String? genre,
+    String? format,
+  }) async {
+    final cacheKey = '${status ?? 'any'}|${genre ?? 'any'}|${format ?? 'any'}';
+
+    if (_popularAnimeCache.containsKey(cacheKey)) {
+      return _popularAnimeCache[cacheKey]!;
     }
 
     const query = r'''
-    query {
-      page1: Page(page: 1, perPage: 50) {
-        media(type: ANIME, sort: POPULARITY_DESC, isAdult: false) {
-          id
-          title {
-            english
-            romaji
-            native
+      query PopularAnimeForSearchSuggestions(
+        $status: MediaStatus
+        $genre: String
+        $format: MediaFormat
+      ) {
+        Page(page: 1, perPage: 40) {
+          media(
+            type: ANIME,
+            status: $status,
+            genre: $genre,
+            format: $format,
+            sort: POPULARITY_DESC,
+            isAdult: false
+          ) {
+            id
+            title {
+              english
+              romaji
+              native
+            }
+            coverImage {
+              large
+            }
+            episodes
+            status
+            format
           }
-          coverImage {
-            large
-          }
-          episodes
-          status
         }
       }
-
-      page2: Page(page: 2, perPage: 50) {
-        media(type: ANIME, sort: POPULARITY_DESC, isAdult: false) {
-          id
-          title {
-            english
-            romaji
-            native
-          }
-          coverImage {
-            large
-          }
-          episodes
-          status
-        }
-      }
-
-      page3: Page(page: 3, perPage: 50) {
-        media(type: ANIME, sort: POPULARITY_DESC, isAdult: false) {
-          id
-          title {
-            english
-            romaji
-            native
-          }
-          coverImage {
-            large
-          }
-          episodes
-          status
-        }
-      }
-    }
-  ''';
+    ''';
 
     final result = await _client.query(
       QueryOptions(
         document: gql(query),
+        variables: {
+          'status': status,
+          'genre': genre,
+          'format': format,
+        },
         fetchPolicy: FetchPolicy.cacheFirst,
       ),
     );
@@ -348,14 +325,9 @@ class AniListService {
       throw Exception(result.exception.toString());
     }
 
-    final data = result.data ?? {};
+    _popularAnimeCache[cacheKey] =
+        List<dynamic>.from(result.data?['Page']?['media'] ?? []);
 
-    _popularAnimeCache = [
-      ...List<dynamic>.from(data['page1']?['media'] ?? []),
-      ...List<dynamic>.from(data['page2']?['media'] ?? []),
-      ...List<dynamic>.from(data['page3']?['media'] ?? []),
-    ];
-
-    return _popularAnimeCache!;
+    return _popularAnimeCache[cacheKey]!;
   }
 }

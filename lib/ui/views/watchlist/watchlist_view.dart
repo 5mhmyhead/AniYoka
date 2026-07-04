@@ -4,7 +4,7 @@ import 'package:stacked/stacked.dart';
 import 'watchlist_viewmodel.dart';
 
 class WatchlistView extends StackedView<WatchlistViewModel> {
-  const WatchlistView({Key? key}) : super(key: key);
+  const WatchlistView({super.key});
 
   @override
   Widget builder(
