@@ -30,18 +30,6 @@ class HomeViewModel extends BaseViewModel {
   List<dynamic> _airingSoon = [];
   List<dynamic> get airingSoon => _airingSoon;
 
-  Map<String, List<dynamic>> _genreAnime = {};
-  Map<String, List<dynamic>> get genreAnime => _genreAnime;
-
-  GenreFilter _genreFilter = GenreFilter.popularity;
-  GenreFilter get genreFilter => _genreFilter;
-
-  bool _genresLoaded = false;
-  bool get genresLoaded => _genresLoaded;
-
-  bool _isGenresBusy = false;
-  bool get isGenresBusy => _isGenresBusy;
-
   Future<void> loadHomeData() async {
     setBusy(true);
     try {
@@ -63,34 +51,6 @@ class HomeViewModel extends BaseViewModel {
       setError(e.toString());
     }
     setBusy(false);
-  }
-
-  Future<void> setGenreFilter(GenreFilter filter) async {
-    if (_genreFilter == filter) return;
-    _genreFilter = filter;
-    resetGenres();
-    await loadGenres();
-  }
-
-  Future<void> loadGenres() async {
-    if (_genresLoaded) return;
-    _isGenresBusy = true;
-
-    try {
-      for (final genre in GenreHelper.topGenres) {
-        await Future.delayed(const Duration(milliseconds: 300));
-        final result =
-            await _anilistService.getAnimeByGenre(genre, _genreFilter);
-        _genreAnime[genre] = result;
-        rebuildUi();
-      }
-    } catch (e) {
-      setError(e.toString());
-    }
-
-    _genresLoaded = true;
-    _isGenresBusy = false;
-    rebuildUi();
   }
 
   void onAnimeTap(int id) {
@@ -130,11 +90,5 @@ class HomeViewModel extends BaseViewModel {
     _airingSoon = [];
     stopAutoScroll();
     await loadHomeData();
-  }
-
-  void resetGenres() {
-    _genresLoaded = false;
-    _genreAnime = {};
-    rebuildUi();
   }
 }

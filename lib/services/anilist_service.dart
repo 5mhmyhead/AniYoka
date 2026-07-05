@@ -211,38 +211,34 @@ class AniListService {
     return result.data!['Media'];
   }
 
-  Future<List<dynamic>> getAnimeByGenre(
-      String genre, GenreFilter filter) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+ Future<List<dynamic>> getAnimeByGenreAndSort({
+    required String genre,
+    required String sort,
+    bool isThisSeason = false,
+    int? year,
+    String? season,
+  }) async {
+    String seasonFilter = '';
 
-    String sortParam;
-    String seasonParam = '';
-
-    switch (filter) {
-      case GenreFilter.popularity:
-        sortParam = 'POPULARITY_DESC';
-        break;
-      case GenreFilter.currentSeason:
-        sortParam = 'POPULARITY_DESC';
-        seasonParam = '''
-          season: ${SeasonHelper.currentSeason}
-          seasonYear: ${SeasonHelper.currentYear}
-        ''';
-        break;
-      case GenreFilter.topRated:
-        sortParam = 'SCORE_DESC';
-        break;
+    if (isThisSeason) {
+      seasonFilter = '''
+        season: ${SeasonHelper.currentSeason}
+        seasonYear: ${SeasonHelper.currentYear}
+      ''';
+    } else {
+      if (season != null) seasonFilter += 'season: $season\n';
+      if (year != null) seasonFilter += 'seasonYear: $year\n';
     }
 
     final query = '''
       query {
-        Page(page: 1, perPage: 7) {
+        Page(page: 1, perPage: 20) {
           media(
             genre: "$genre"
             type: ANIME
-            sort: $sortParam
-            $seasonParam
+            sort: $sort
             isAdult: false
+            $seasonFilter
           ) {
             id
             title { english romaji }
