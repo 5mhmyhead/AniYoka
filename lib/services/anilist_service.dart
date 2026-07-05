@@ -308,17 +308,106 @@ class AniListService {
       }
     ''';
 
+    final variables = <String, dynamic>{
+      'search': input,
+      'sort': [sort],
+    };
+
+    if (status != null) {
+      variables['status'] = status;
+    }
+
+    if (genre != null) {
+      variables['genre'] = genre;
+    }
+
+    if (format != null) {
+      variables['format'] = format;
+    }
+
     final result = await _client.query(
       QueryOptions(
         document: gql(query),
-        variables: {
-          'search': input,
-          'status': status,
-          'genre': genre,
-          'format': format,
-          'sort': [sort],
-        },
+        variables: variables,
         fetchPolicy: FetchPolicy.networkOnly,
+      ),
+    );
+
+    if (result.hasException) {
+      throw Exception(result.exception.toString());
+    }
+
+    return List<dynamic>.from(result.data?['Page']?['media'] ?? []);
+  }
+
+  Future<List<dynamic>> getAnimeByFilters({
+    String? status,
+    String? genre,
+    String? format,
+    String sort = 'POPULARITY_DESC',
+    int page = 1,
+    int perPage = 30,
+  }) async {
+    final safeSort = sort == 'SEARCH_MATCH' ? 'POPULARITY_DESC' : sort;
+
+    const query = r'''
+    query GetAnimeByFilters(
+      $page: Int
+      $perPage: Int
+      $status: MediaStatus
+      $genre: String
+      $format: MediaFormat
+      $sort: [MediaSort]
+    ) {
+      Page(page: $page, perPage: $perPage) {
+        media(
+          type: ANIME,
+          status: $status,
+          genre: $genre,
+          format: $format,
+          sort: $sort,
+          isAdult: false
+        ) {
+          id
+          title {
+            english
+            romaji
+            native
+          }
+          coverImage {
+            large
+          }
+          episodes
+          status
+          format
+        }
+      }
+    }
+  ''';
+
+    final variables = <String, dynamic>{
+      'page': page,
+      'perPage': perPage,
+      'sort': [safeSort],
+    };
+
+    if (status != null) {
+      variables['status'] = status;
+    }
+
+    if (genre != null) {
+      variables['genre'] = genre;
+    }
+
+    if (format != null) {
+      variables['format'] = format;
+    }
+
+    final result = await _client.query(
+      QueryOptions(
+        document: gql(query),
+        variables: variables,
+        fetchPolicy: FetchPolicy.cacheFirst,
       ),
     );
 
@@ -333,64 +422,101 @@ class AniListService {
     String? status,
     String? genre,
     String? format,
+    String sort = 'POPULARITY_DESC',
+    int maxPages = 20,
   }) async {
-    final cacheKey = '${status ?? 'any'}|${genre ?? 'any'}|${format ?? 'any'}';
+    final safeSort = sort == 'SEARCH_MATCH' ? 'POPULARITY_DESC' : sort;
+
+    final cacheKey =
+        '${status ?? 'any'}|${genre ?? 'any'}|${format ?? 'any'}|$safeSort|$maxPages';
 
     if (_popularAnimeCache.containsKey(cacheKey)) {
       return _popularAnimeCache[cacheKey]!;
     }
 
     const query = r'''
-      query PopularAnimeForSearchSuggestions(
-        $status: MediaStatus
-        $genre: String
-        $format: MediaFormat
-      ) {
-        Page(page: 1, perPage: 40) {
-          media(
-            type: ANIME,
-            status: $status,
-            genre: $genre,
-            format: $format,
-            sort: POPULARITY_DESC,
-            isAdult: false
-          ) {
-            id
-            title {
-              english
-              romaji
-              native
-            }
-            coverImage {
-              large
-            }
-            episodes
-            status
-            format
+    query PartialSearchSuggestionPool(
+      $page: Int
+      $perPage: Int
+      $status: MediaStatus
+      $genre: String
+      $format: MediaFormat
+      $sort: [MediaSort]
+    ) {
+      Page(page: $page, perPage: $perPage) {
+        media(
+          type: ANIME,
+          status: $status,
+          genre: $genre,
+          format: $format,
+          sort: $sort,
+          isAdult: false
+        ) {
+          id
+          title {
+            english
+            romaji
+            native
           }
+          coverImage {
+            large
+          }
+          episodes
+          status
+          format
         }
       }
-    ''';
+    }
+  ''';
 
-    final result = await _client.query(
-      QueryOptions(
-        document: gql(query),
-        variables: {
-          'status': status,
-          'genre': genre,
-          'format': format,
-        },
-        fetchPolicy: FetchPolicy.cacheFirst,
-      ),
-    );
+    final allAnime = <dynamic>[];
 
-    if (result.hasException) {
-      throw Exception(result.exception.toString());
+    final safeMaxPages = maxPages.clamp(1, 5).toInt();
+
+    for (int page = 1; page <= safeMaxPages; page++) {
+      final variables = <String, dynamic>{
+        'page': page,
+        'perPage': 50,
+        'sort': [safeSort],
+      };
+
+      if (status != null) {
+        variables['status'] = status;
+      }
+
+      if (genre != null) {
+        variables['genre'] = genre;
+      }
+
+      if (format != null) {
+        variables['format'] = format;
+      }
+
+      final result = await _client.query(
+        QueryOptions(
+          document: gql(query),
+          variables: variables,
+          fetchPolicy: FetchPolicy.cacheFirst,
+        ),
+      );
+
+      if (result.hasException) {
+        throw Exception(result.exception.toString());
+      }
+
+      final pageResults = List<dynamic>.from(
+        result.data?['Page']?['media'] ?? [],
+      );
+
+      if (pageResults.isEmpty) {
+        break;
+      }
+
+      allAnime.addAll(pageResults);
     }
 
-    _popularAnimeCache[cacheKey] =
-        List<dynamic>.from(result.data?['Page']?['media'] ?? []);
+    _popularAnimeCache[cacheKey] = allAnime;
 
-    return _popularAnimeCache[cacheKey]!;
+    return allAnime;
   }
 }
