@@ -7,20 +7,32 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-enum GenreSort { popularity, topRated }
+enum GenreSort { popularity, topRated, favorites, alphabetical }
 
 extension GenreSortLabel on GenreSort {
   String get label {
     switch (this) {
-      case GenreSort.popularity: return 'Popularity';
-      case GenreSort.topRated: return 'Top Rated';
+      case GenreSort.popularity:
+        return 'Popularity';
+      case GenreSort.topRated:
+        return 'Top Rated';
+      case GenreSort.favorites:
+        return 'Most Favorites';
+      case GenreSort.alphabetical:
+        return 'Alphabetical';
     }
   }
 
   String get apiValue {
     switch (this) {
-      case GenreSort.popularity: return 'POPULARITY_DESC';
-      case GenreSort.topRated: return 'SCORE_DESC';
+      case GenreSort.popularity:
+        return 'POPULARITY_DESC';
+      case GenreSort.topRated:
+        return 'SCORE_DESC';
+      case GenreSort.favorites:
+        return 'FAVOURITES_DESC';
+      case GenreSort.alphabetical:
+        return 'TITLE_ROMAJI';
     }
   }
 }
@@ -34,31 +46,29 @@ class GenresTab extends StatefulWidget {
 
 class _GenresTabState extends State<GenresTab>
     with AutomaticKeepAliveClientMixin {
-
   @override
   bool get wantKeepAlive => true;
 
   final _anilistService = locator<AniListService>();
 
-  String _selectedGenre = GenreHelper.topGenres.first;
+  String _selectedGenre = GenreHelper.allGenres.first;
   GenreSort _selectedSort = GenreSort.popularity;
-  int? _selectedYear;
   String? _selectedSeason;
+  int? _selectedYear;
   List<dynamic> _animeList = [];
   bool _isLoading = false;
 
-  // temp selections inside the sheet before applying
   late String _tempGenre;
   late GenreSort _tempSort;
-  int? _tempYear;
   String? _tempSeason;
+  int? _tempYear;
 
-  static const List<String> _seasons = ['WINTER', 'SPRING', 'SUMMER', 'FALL'];
+  static const List<String> _seasons = ['SPRING', 'SUMMER', 'FALL', 'WINTER'];
   static const Map<String, IconData> _seasonIcons = {
-    'WINTER': Icons.ac_unit,
     'SPRING': Icons.local_florist,
     'SUMMER': Icons.wb_sunny,
-    'FALL': Icons.cloud,
+    'FALL': Icons.eco,
+    'WINTER': Icons.ac_unit
   };
 
   @override
@@ -83,115 +93,106 @@ class _GenresTabState extends State<GenresTab>
     setState(() => _isLoading = false);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildHeader(),
-        Expanded(
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator(color: kcPrimaryPink))
-              : _buildGrid(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHeader() {
-    // build active filter summary label
-    final parts = <String>[_selectedGenre];
-    if (_selectedSeason != null) {
-      parts.add('${_selectedSeason![0]}${_selectedSeason!.substring(1).toLowerCase()}');
-    }
-    if (_selectedYear != null) parts.add('$_selectedYear');
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // genre title + sort label
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _selectedGenre,
-                style: GoogleFonts.nunito(
-                  color: kcPrimaryPink,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              Text(
-                _buildSubtitle(),
-                style: GoogleFonts.nunito(
-                  color: kcLightGrey,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-          // filter button beside header
-          GestureDetector(
-            onTap: _showFilterSheet,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: kcSurfaceColor,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: kcAccentPink),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.filter_list, color: kcOffWhite, size: 16),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Filter',
-                    style: GoogleFonts.nunito(
-                      color: kcOffWhite,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   String _buildSubtitle() {
     final parts = <String>[_selectedSort.label];
     if (_selectedSeason != null) {
-      parts.add('${_selectedSeason![0]}${_selectedSeason!.substring(1).toLowerCase()}');
+      parts.add(
+          '${_selectedSeason![0]}${_selectedSeason!.substring(1).toLowerCase()}');
     }
     if (_selectedYear != null) parts.add('$_selectedYear');
     return parts.join(' • ');
   }
 
-  Widget _buildGrid() {
-    if (_animeList.isEmpty) {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    if (_isLoading) {
       return const Center(
-        child: Text('No anime found', style: TextStyle(color: kcLightGrey)),
-      );
+          child: CircularProgressIndicator(color: kcPrimaryPink));
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(20),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.55,
-      ),
-      itemCount: _animeList.length,
-      itemBuilder: (context, index) => _buildCard(_animeList[index]),
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _selectedGenre,
+                      style: GoogleFonts.nunito(
+                        color: kcPrimaryPink,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      _buildSubtitle(),
+                      style: GoogleFonts.nunito(
+                        color: kcLightGrey,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: _showFilterSheet,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: kcSurfaceColor,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.filter_list, color: kcLightGrey, size: 18),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Filter',
+                          style: GoogleFonts.nunito(
+                            color: kcLightGrey,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        _animeList.isEmpty
+            ? const SliverFillRemaining(
+                child: Center(
+                  child: Text('No anime found',
+                      style: TextStyle(color: kcLightGrey)),
+                ),
+              )
+            : SliverPadding(
+                padding: const EdgeInsets.all(20),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.55,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _buildCard(_animeList[index]),
+                    childCount: _animeList.length,
+                  ),
+                ),
+              ),
+      ],
     );
   }
 
@@ -214,7 +215,7 @@ class _GenresTabState extends State<GenresTab>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 250,  
+            height: 250,
             width: 180,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
@@ -240,6 +241,7 @@ class _GenresTabState extends State<GenresTab>
           const SizedBox(height: 2),
           Text(
             year.isNotEmpty ? '$format • $year' : format,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.nunito(
               color: kcLightGrey,
@@ -252,11 +254,10 @@ class _GenresTabState extends State<GenresTab>
   }
 
   void _showFilterSheet() {
-    // initialize temp values from current selections
     _tempGenre = _selectedGenre;
     _tempSort = _selectedSort;
-    _tempYear = _selectedYear;
     _tempSeason = _selectedSeason;
+    _tempYear = _selectedYear;
 
     showModalBottomSheet(
       context: context,
@@ -270,18 +271,17 @@ class _GenresTabState extends State<GenresTab>
           return DraggableScrollableSheet(
             initialChildSize: 0.75,
             minChildSize: 0.5,
-            maxChildSize: 0.92,
+            maxChildSize: 0.85,
             expand: false,
             builder: (context, scrollController) {
               return DefaultTabController(
                 length: 2,
                 child: Column(
                   children: [
-                    // drag handle
                     Center(
                       child: Container(
                         margin: const EdgeInsets.symmetric(vertical: 12),
-                        width: 40,
+                        width: 60,
                         height: 4,
                         decoration: BoxDecoration(
                           color: kcLightGrey,
@@ -289,52 +289,7 @@ class _GenresTabState extends State<GenresTab>
                         ),
                       ),
                     ),
-                    // cancel + apply row
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: Text(
-                              'Cancel',
-                              style: GoogleFonts.nunito(
-                                color: kcLightGrey,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                              setState(() {
-                                _selectedGenre = _tempGenre;
-                                _selectedSort = _tempSort;
-                                _selectedYear = _tempYear;
-                                _selectedSeason = _tempSeason;
-                              });
-                              _loadAnime();
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: kcPrimaryPink,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                'Apply',
-                                style: GoogleFonts.nunito(
-                                  color: kcOffWhite,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildActionButtons(context, setSheetState),
                     const SizedBox(height: 12),
                     // tab bar
                     TabBar(
@@ -343,67 +298,83 @@ class _GenresTabState extends State<GenresTab>
                       unselectedLabelColor: kcLightGrey,
                       indicatorColor: kcPrimaryPink,
                       indicatorWeight: 2,
-                      dividerColor: kcLightGrey.withValues(alpha: 0.3),
+                      dividerColor: kcLightGrey.withValues(alpha: 0.5),
                       labelStyle: GoogleFonts.nunito(
-                        fontSize: 15,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
-                      unselectedLabelStyle: GoogleFonts.nunito(fontSize: 15),
+                      unselectedLabelStyle: GoogleFonts.nunito(fontSize: 16),
                       tabs: const [
                         Tab(text: 'Genre'),
                         Tab(text: 'Sort'),
                       ],
                     ),
-                    // tab content
                     Expanded(
                       child: TabBarView(
                         children: [
-                          // genre tab
                           ListView(
                             controller: scrollController,
                             padding: const EdgeInsets.all(20),
-                            children: GenreHelper.topGenres.map((genre) {
-                              final isSelected = genre == _tempGenre;
-                              return GestureDetector(
-                                onTap: () => setSheetState(() => _tempGenre = genre),
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  decoration: BoxDecoration(
-                                    color: isSelected ? kcPrimaryPink : kcBackgroundColor,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    genre,
-                                    style: GoogleFonts.nunito(
-                                      color: isSelected ? kcOffWhite : kcLightGrey,
-                                      fontSize: 15,
-                                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                            children: [
+                              GridView.count(
+                                crossAxisCount: 2,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                crossAxisSpacing: 6,
+                                mainAxisSpacing: 8,
+                                childAspectRatio: 3.2,
+                                children: GenreHelper.allGenres.map((genre) {
+                                  final isSelected = genre == _tempGenre;
+                                  return GestureDetector(
+                                    onTap: () => setSheetState(() => _tempGenre = genre),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? kcPrimaryPink : kcBackgroundColor,
+                                        borderRadius: BorderRadius.circular(50),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        genre,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.nunito(
+                                          color: isSelected ? kcOffWhite : kcLightGrey,
+                                          fontSize: 15,
+                                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
                           ),
                           // sort tab
                           ListView(
                             padding: const EdgeInsets.all(20),
                             children: [
-                              // sort options
-                              Text('Sort by', style: GoogleFonts.nunito(color: kcOffWhite, fontSize: 16, fontWeight: FontWeight.w700)),
+                              Text(
+                                'Sort by',
+                                style: GoogleFonts.nunito(
+                                  color: kcOffWhite,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                               const SizedBox(height: 12),
                               ...GenreSort.values.map((sort) {
                                 final isSelected = sort == _tempSort;
                                 return GestureDetector(
-                                  onTap: () => setSheetState(() => _tempSort = sort),
+                                  onTap: () =>
+                                      setSheetState(() => _tempSort = sort),
                                   child: Container(
                                     width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
                                     margin: const EdgeInsets.only(bottom: 8),
                                     decoration: BoxDecoration(
                                       color: isSelected ? kcPrimaryPink : kcBackgroundColor,
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(50),
                                     ),
                                     child: Text(
                                       sort.label,
@@ -417,11 +388,19 @@ class _GenresTabState extends State<GenresTab>
                                 );
                               }),
                               const SizedBox(height: 20),
-                              // season filter
-                              Text('Season', style: GoogleFonts.nunito(color: kcOffWhite, fontSize: 16, fontWeight: FontWeight.w700)),
+                              // season
+                              Text(
+                                'Season',
+                                style: GoogleFonts.nunito(
+                                  color: kcOffWhite,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                               const SizedBox(height: 12),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: _seasons.map((season) {
                                   final isSelected = _tempSeason == season;
                                   return GestureDetector(
@@ -433,7 +412,7 @@ class _GenresTabState extends State<GenresTab>
                                       height: 64,
                                       decoration: BoxDecoration(
                                         color: isSelected ? kcPrimaryPink : kcBackgroundColor,
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(50),
                                       ),
                                       child: Icon(
                                         _seasonIcons[season],
@@ -445,37 +424,49 @@ class _GenresTabState extends State<GenresTab>
                                 }).toList(),
                               ),
                               const SizedBox(height: 20),
-                              // year filter
-                              Text('Year', style: GoogleFonts.nunito(color: kcOffWhite, fontSize: 16, fontWeight: FontWeight.w700)),
+                              Text(
+                                'Year',
+                                style: GoogleFonts.nunito(
+                                  color: kcOffWhite,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                               const SizedBox(height: 12),
                               SizedBox(
-                                height: 44,
+                                height: 40,
                                 child: ListView.separated(
                                   scrollDirection: Axis.horizontal,
-                                  itemCount: 10,
-                                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                                  itemCount: 50,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(width: 8),
                                   itemBuilder: (context, index) {
-                                    final year = DateTime.now().year + 1 - index;
+                                    final year =
+                                        DateTime.now().year + 1 - index;
                                     final isSelected = _tempYear == year;
                                     return GestureDetector(
                                       onTap: () => setSheetState(() {
                                         _tempYear = isSelected ? null : year;
-                                      }),
+                                       }),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16, vertical: 10),
                                         decoration: BoxDecoration(
-                                          color: isSelected ? kcPrimaryPink : kcBackgroundColor,
-                                          borderRadius: BorderRadius.circular(20),
-                                          border: Border.all(
-                                            color: isSelected ? kcPrimaryPink : kcLightGrey.withValues(alpha: 0.3),
-                                          ),
-                                        ),
+                                            color: isSelected
+                                                ? kcPrimaryPink
+                                                : kcBackgroundColor,
+                                            borderRadius:
+                                                BorderRadius.circular(25)),
                                         child: Text(
                                           '$year',
                                           style: GoogleFonts.nunito(
-                                            color: isSelected ? kcOffWhite : kcLightGrey,
+                                            color: isSelected
+                                                ? kcOffWhite
+                                                : kcLightGrey,
                                             fontSize: 14,
-                                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                            fontWeight: isSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.w400,
                                           ),
                                         ),
                                       ),
@@ -483,6 +474,7 @@ class _GenresTabState extends State<GenresTab>
                                   },
                                 ),
                               ),
+                              const SizedBox(height: 12),
                             ],
                           ),
                         ],
@@ -494,6 +486,94 @@ class _GenresTabState extends State<GenresTab>
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context, StateSetter setSheetState) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: kcBackgroundColor,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.nunito(
+                  color: kcLightGrey,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+              setSheetState(() {
+                _tempGenre = GenreHelper.allGenres.first;
+                _tempSort = GenreSort.popularity;
+                _tempSeason = null;
+                _tempYear = null;
+                _selectedGenre = GenreHelper.allGenres.first;
+                _selectedSort = GenreSort.popularity;
+                _selectedSeason = null;
+                _selectedYear = null;
+              });
+              _loadAnime();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: kcBackgroundColor,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                'Reset',
+                style: GoogleFonts.nunito(
+                  color: kcLightGrey,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+              setState(() {
+                _selectedGenre = _tempGenre;
+                _selectedSort = _tempSort;
+                _selectedYear = _tempYear;
+                _selectedSeason = _tempSeason;
+              });
+              _loadAnime();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: kcPrimaryPink,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                'Apply',
+                style: GoogleFonts.nunito(
+                  color: kcOffWhite,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
