@@ -112,87 +112,94 @@ class _GenresTabState extends State<GenresTab>
           child: CircularProgressIndicator(color: kcPrimaryPink));
     }
 
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _selectedGenre,
-                      style: GoogleFonts.nunito(
-                        color: kcPrimaryPink,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    Text(
-                      _buildSubtitle(),
-                      style: GoogleFonts.nunito(
-                        color: kcLightGrey,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-                GestureDetector(
-                  onTap: _showFilterSheet,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: kcSurfaceColor,
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.filter_list, color: kcLightGrey, size: 18),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Filter',
-                          style: GoogleFonts.nunito(
-                            color: kcLightGrey,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+    return RefreshIndicator(
+      color: kcPrimaryPink,
+      backgroundColor: kcSurfaceColor,
+      onRefresh: _loadAnime,
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _selectedGenre,
+                        style: GoogleFonts.nunito(
+                          color: kcPrimaryPink,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w800,
                         ),
-                      ],
+                      ),
+                      Text(
+                        _buildSubtitle(),
+                        style: GoogleFonts.nunito(
+                          color: kcLightGrey,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: _showFilterSheet,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 18, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: kcSurfaceColor,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.filter_list,
+                              color: kcLightGrey, size: 18),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Filter',
+                            style: GoogleFonts.nunito(
+                              color: kcLightGrey,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        _animeList.isEmpty
-            ? const SliverFillRemaining(
-                child: Center(
-                  child: Text('No anime found',
-                      style: TextStyle(color: kcLightGrey)),
-                ),
-              )
-            : SliverPadding(
-                padding: const EdgeInsets.all(20),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.55,
+          _animeList.isEmpty
+              ? const SliverFillRemaining(
+                  child: Center(
+                    child: Text('No anime found',
+                        style: TextStyle(color: kcLightGrey)),
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => _buildCard(_animeList[index]),
-                    childCount: _animeList.length,
+                )
+              : SliverPadding(
+                  padding: const EdgeInsets.all(20),
+                  sliver: SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.56,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildCard(_animeList[index]),
+                      childCount: _animeList.length,
+                    ),
                   ),
                 ),
-              ),
-      ],
+        ],
+      ),
     );
   }
 

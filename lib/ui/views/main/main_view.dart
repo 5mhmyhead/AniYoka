@@ -25,8 +25,7 @@ class MainView extends StackedView<MainViewModel> {
         int() => throw UnimplementedError(),
       },
       bottomNavigationBar: SizedBox(
-        height:
-            MediaQuery.of(context).size.height * 0.11, // 8% of screen height
+        height: MediaQuery.of(context).size.height * 0.11,
         child: NavigationBar(
           // bottom nav bar styling
           indicatorColor: kcAccentShadePink,

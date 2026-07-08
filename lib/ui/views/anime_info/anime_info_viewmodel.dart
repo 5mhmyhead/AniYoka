@@ -5,9 +5,11 @@ import 'package:palette_generator/palette_generator.dart';
 import 'package:stacked/stacked.dart';
 import 'package:aniyoka/app/app.locator.dart';
 import 'package:aniyoka/services/anilist_service.dart';
+import 'package:aniyoka/services/bookmark_service.dart';
 
 class AnimeInfoViewModel extends BaseViewModel {
   final _anilistService = locator<AniListService>();
+  final _bookmarkService = locator<BookmarkService>();
 
   Map<String, dynamic>? _anime;
   Map<String, dynamic>? get anime => _anime;
@@ -17,6 +19,9 @@ class AnimeInfoViewModel extends BaseViewModel {
 
   bool _showSpoilerTags = false;
   bool get showSpoilerTags => _showSpoilerTags;
+
+  bool _isBookmarked = false;
+  bool get isBookmarked => _isBookmarked;
 
   // color for gradient depending on dominant color of anime cover image
   Color _dominantColor = kcAccentSurfaceColor;
@@ -36,15 +41,41 @@ class AnimeInfoViewModel extends BaseViewModel {
     setBusy(true);
     try {
       _anime = await _anilistService.getAnimeDetails(id);
-      // extract color after data is loaded
       final coverImage = _anime?['coverImage']['extraLarge'] ?? '';
-      if (coverImage.isNotEmpty) {
-        await _extractDominantColor(coverImage);
-      }
+      if (coverImage.isNotEmpty) await _extractDominantColor(coverImage);
+      await _checkBookmarkStatus(); 
     } catch (e) {
       setError(e.toString());
     }
     setBusy(false);
+  }
+
+  // bookmark functionality
+  Future<void> _checkBookmarkStatus() async {
+    _isBookmarked = await _bookmarkService.isBookmarked(_anime!['id']);
+    rebuildUi();
+  }
+
+  Future<void> toggleBookmark() async {
+    if (_anime == null) return;
+    if (_isBookmarked) {
+      await _bookmarkService.removeBookmark(_anime!['id']);
+    } else {
+      // store minimal data needed to display the card
+      await _bookmarkService.addBookmark({
+        'id': _anime!['id'],
+        'title': _anime!['title'],
+        'coverImage': {
+          'large': _anime!['coverImage']['extraLarge'] ??
+                    _anime!['coverImage']['large'] ?? '',
+        },
+        'format': _anime!['format'],
+        'startDate': _anime!['startDate'],
+        'savedAt': DateTime.now().toIso8601String(),
+      });
+    }
+    _isBookmarked = !_isBookmarked;
+    rebuildUi();
   }
 
   // helpers to extract rank and popularity from rankings list
@@ -167,21 +198,8 @@ class AnimeInfoViewModel extends BaseViewModel {
     final day = date['day'];
     if (year == null) return 'Unknown';
 
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-      ''
-    ];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', '' ];
 
     if (month == null) return '$year';
     if (day == null) return '${months[month]} $year';
