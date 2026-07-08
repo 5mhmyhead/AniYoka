@@ -1,5 +1,4 @@
 import 'package:aniyoka/services/anilist_service.dart';
-import 'package:aniyoka/utils/genre_helper.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:aniyoka/app/app.router.dart';
 import 'package:stacked/stacked.dart';

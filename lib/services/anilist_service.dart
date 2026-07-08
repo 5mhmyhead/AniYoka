@@ -1,4 +1,3 @@
-import 'package:aniyoka/utils/genre_helper.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:aniyoka/utils/season_helper.dart';
 
@@ -303,6 +302,9 @@ class AniListService {
             episodes
             status
             format
+            averageScore
+            meanScore
+            startDate { year }
           }
         }
       }

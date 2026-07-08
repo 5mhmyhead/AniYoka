@@ -1,21 +1,83 @@
 import 'dart:async';
-
+import 'package:aniyoka/app/app.router.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:aniyoka/app/app.locator.dart';
 import 'package:aniyoka/services/anilist_service.dart';
+import 'package:stacked_services/stacked_services.dart';
 
 class ExploreViewModel extends BaseViewModel {
+  final _navigationService = locator<NavigationService>();
   final _anilistService = locator<AniListService>();
 
   static const int _minimumSearchLength = 3;
   static const Duration _searchDebounceDuration = Duration(milliseconds: 900);
+
+  bool _isSearching = false;
+  bool get isSearching => _isSearching;
 
   final TextEditingController searchController = TextEditingController();
 
   Timer? _debounce;
   int _searchRequestId = 0;
 
+  final FocusNode searchFocusNode = FocusNode();
+
+  ExploreViewModel() {
+    searchController.addListener(_onSearchChanged);
+  }
+
+  void onAnimeTap(int id) {
+    _navigationService.navigateToAnimeInfoView(
+        animeId: id, transition: TransitionsBuilders.fadeIn);
+  }
+
+  void startSearchMode() {
+    _isSearching = true;
+    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      searchFocusNode.requestFocus();
+    });
+  }
+
+  void exitSearchMode() {
+    _isSearching = false;
+    clearSearch();
+    clearFilters();
+    searchFocusNode.unfocus();
+    notifyListeners();
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    _searchText = '';
+    _searchResults = [];
+    _relatedResults = [];
+    _hasSearched = false;
+    clearErrors();
+    notifyListeners();
+  }
+
+  bool get hasMultipleActiveFilters {
+    int activeCount = 0;
+    if (selectedSortLabel != null) activeCount++;
+    if (selectedStatusLabel != null) activeCount++;
+    if (selectedGenreLabel != null) activeCount++;
+    if (selectedFormatLabel != null) activeCount++;
+    if (onMyListOnly) activeCount++;
+    
+    return activeCount > 1;
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    searchController.dispose();
+    searchFocusNode.dispose(); 
+    super.dispose();
+  }
+  
+  // Options Configurations Maps
   final Map<String, String?> _statusOptions = {
     'Any Status': null,
     'Airing': 'RELEASING',
@@ -112,32 +174,13 @@ class ExploreViewModel extends BaseViewModel {
         _selectedSortLabel != null;
   }
 
-  String? get _apiStatus {
-    if (_selectedStatusLabel == null) return null;
-    return _statusOptions[_selectedStatusLabel];
-  }
-
-  String? get _apiGenre {
-    if (_selectedGenreLabel == null) return null;
-    return _genreOptions[_selectedGenreLabel];
-  }
-
-  String? get _apiFormat {
-    if (_selectedFormatLabel == null) return null;
-    return _formatOptions[_selectedFormatLabel];
-  }
-
-  String get _apiSort {
-    return _sortOptions[_selectedSortLabel ?? 'Default'] ?? 'SEARCH_MATCH';
-  }
-
-  ExploreViewModel() {
-    searchController.addListener(_onSearchChanged);
-  }
+  String? get _apiStatus => _selectedStatusLabel == null ? null : _statusOptions[_selectedStatusLabel];
+  String? get _apiGenre => _selectedGenreLabel == null ? null : _genreOptions[_selectedGenreLabel];
+  String? get _apiFormat => _selectedFormatLabel == null ? null : _formatOptions[_selectedFormatLabel];
+  String get _apiSort => _sortOptions[_selectedSortLabel ?? 'Default'] ?? 'SEARCH_MATCH';
 
   void _onSearchChanged() {
     final input = searchController.text.trim();
-
     _searchText = input;
     _debounce?.cancel();
 
@@ -152,25 +195,8 @@ class ExploreViewModel extends BaseViewModel {
       return;
     }
 
-    if (input.length < _minimumSearchLength) {
-      _searchRequestId++;
-      _searchResults = [];
-      _relatedResults = [];
-      _hasSearched = false;
-      clearErrors();
-      setBusy(false);
-      notifyListeners();
-      return;
-    }
-
     setBusy(true);
-
-    _debounce = Timer(
-      _searchDebounceDuration,
-      () {
-        searchAnime(input);
-      },
-    );
+    _debounce = Timer(_searchDebounceDuration, () => searchAnime(input));
   }
 
   Future<void> loadAnimeByActiveFilters() async {
@@ -188,9 +214,7 @@ class ExploreViewModel extends BaseViewModel {
         perPage: 30,
       );
 
-      if (requestId != _searchRequestId) {
-        return;
-      }
+      if (requestId != _searchRequestId) return;
 
       _searchResults = _removeDuplicateAnime(results);
       _relatedResults = [];
@@ -200,24 +224,12 @@ class ExploreViewModel extends BaseViewModel {
         _searchResults = [];
         _relatedResults = [];
         _hasSearched = true;
-
-        final errorText = e.toString();
-
-        if (errorText.contains('Too Many Requests') ||
-            errorText.contains('429')) {
-          setError('Too many searches. Please wait a moment, then try again.');
-        } else if (errorText.contains('TimeoutException')) {
-          setError(
-              'Search took too long. Please check your internet and try again.');
-        } else {
-          setError('Something went wrong while loading anime.');
-        }
+        _handleError(e);
       }
-    }
-
-    if (requestId == _searchRequestId) {
-      setBusy(false);
-      notifyListeners();
+    } finally {
+      if (requestId == _searchRequestId) {
+        setBusy(false);
+      }
     }
   }
 
@@ -225,9 +237,7 @@ class ExploreViewModel extends BaseViewModel {
     final currentInput = input.trim();
     final int requestId = ++_searchRequestId;
 
-    if (currentInput.isEmpty) {
-      return;
-    }
+    if (currentInput.isEmpty) return;
 
     try {
       clearErrors();
@@ -240,8 +250,7 @@ class ExploreViewModel extends BaseViewModel {
         sort: _apiSort,
       );
 
-      final suggestionResults =
-          await _anilistService.getPopularAnimeForSearchSuggestions(
+      final suggestionResults = await _anilistService.getPopularAnimeForSearchSuggestions(
         status: _apiStatus,
         genre: _apiGenre,
         format: _apiFormat,
@@ -249,26 +258,18 @@ class ExploreViewModel extends BaseViewModel {
         maxPages: 3,
       );
 
-      if (requestId != _searchRequestId || currentInput != _searchText) {
-        return;
-      }
+      if (requestId != _searchRequestId || currentInput != _searchText) return;
 
       final matchingSuggestions = suggestionResults.where((anime) {
         return _anyTitleContainsSearch(anime, currentInput);
       }).toList();
-
-      debugPrint('Suggestion pool: ${suggestionResults.length}');
-      debugPrint('Partial matches: ${matchingSuggestions.length}');
 
       final combinedResults = _removeDuplicateAnime([
         ...directResults,
         ...matchingSuggestions,
       ]);
 
-      final groupedResults = _groupSearchResults(
-        combinedResults,
-        currentInput,
-      );
+      final groupedResults = _groupSearchResults(combinedResults, currentInput);
 
       _searchResults = groupedResults['startsWith']!;
       _relatedResults = groupedResults['contains']!;
@@ -278,19 +279,23 @@ class ExploreViewModel extends BaseViewModel {
         _searchResults = [];
         _relatedResults = [];
         _hasSearched = true;
-        final errorText = e.toString();
-
-        if (errorText.contains('Too Many Requests') ||
-            errorText.contains('429')) {
-          setError('Too many searches. Please wait a moment, then try again.');
-        } else {
-          setError(errorText);
-        }
+        _handleError(e);
+      }
+    } finally {
+      if (requestId == _searchRequestId && currentInput == _searchText) {
+        setBusy(false);
       }
     }
+  }
 
-    if (requestId == _searchRequestId && currentInput == _searchText) {
-      setBusy(false);
+  void _handleError(dynamic error) {
+    final errorText = error.toString();
+    if (errorText.contains('Too Many Requests') || errorText.contains('429')) {
+      setError('Too many searches. Please wait a moment, then try again.');
+    } else if (errorText.contains('TimeoutException')) {
+      setError('Search took too long. Please check your internet and try again.');
+    } else {
+      setError('Something went wrong while loading anime.');
     }
   }
 
@@ -305,9 +310,6 @@ class ExploreViewModel extends BaseViewModel {
 
   void toggleOnMyListFilter() {
     _onMyListOnly = !_onMyListOnly;
-
-    // This is currently visual only. Connect this later to your own
-    // watchlist/bookmark storage or AniList user list.
     notifyListeners();
   }
 
@@ -332,32 +334,16 @@ class ExploreViewModel extends BaseViewModel {
   }
 
   String? get activeFilterResultsTitle {
-    if (_selectedGenreLabel != null) {
-      return '$_selectedGenreLabel Anime';
-    }
-
-    if (_selectedStatusLabel != null) {
-      return '$_selectedStatusLabel Anime';
-    }
-
-    if (_selectedFormatLabel != null) {
-      return '$_selectedFormatLabel Anime';
-    }
-
-    if (_selectedSortLabel != null && _selectedSortLabel != 'Default') {
-      return '$_selectedSortLabel Anime';
-    }
-
-    if (_onMyListOnly) {
-      return 'Anime On My List';
-    }
-
+    if (_selectedGenreLabel != null) return '$_selectedGenreLabel Anime';
+    if (_selectedStatusLabel != null) return '$_selectedStatusLabel Anime';
+    if (_selectedFormatLabel != null) return '$_selectedFormatLabel Anime';
+    if (_selectedSortLabel != null && _selectedSortLabel != 'Default') return '$_selectedSortLabel Anime';
+    if (_onMyListOnly) return 'Anime On My List';
     return null;
   }
 
   void _rerunSearchWithCurrentFilters() {
     _debounce?.cancel();
-
     final input = _searchText.trim();
 
     if (input.isEmpty || input.length < _minimumSearchLength) {
@@ -372,7 +358,6 @@ class ExploreViewModel extends BaseViewModel {
         setBusy(false);
         notifyListeners();
       }
-
       return;
     }
 
@@ -380,10 +365,7 @@ class ExploreViewModel extends BaseViewModel {
     searchAnime(input);
   }
 
-  Map<String, List<dynamic>> _groupSearchResults(
-    List<dynamic> results,
-    String input,
-  ) {
+  Map<String, List<dynamic>> _groupSearchResults(List<dynamic> results, String input) {
     final startsWithResults = <dynamic>[];
     final containsResults = <dynamic>[];
 
@@ -393,81 +375,43 @@ class ExploreViewModel extends BaseViewModel {
       } else if (_anyTitleContainsSearch(anime, input)) {
         containsResults.add(anime);
       } else {
-        // Keep AniList direct search results even if our local title check
-        // does not find the exact text.
         startsWithResults.add(anime);
       }
     }
 
-    startsWithResults.sort((a, b) {
-      final titleA = _cleanText(_getDisplayedTitle(a));
-      final titleB = _cleanText(_getDisplayedTitle(b));
+    startsWithResults.sort((a, b) => _getDisplayedTitle(a).length.compareTo(_getDisplayedTitle(b).length));
+    containsResults.sort((a, b) => _cleanText(_getDisplayedTitle(a)).compareTo(_cleanText(_getDisplayedTitle(b))));
 
-      return titleA.length.compareTo(titleB.length);
-    });
-
-    containsResults.sort((a, b) {
-      final titleA = _cleanText(_getDisplayedTitle(a));
-      final titleB = _cleanText(_getDisplayedTitle(b));
-
-      return titleA.compareTo(titleB);
-    });
-
-    return {
-      'startsWith': startsWithResults,
-      'contains': containsResults,
-    };
+    return {'startsWith': startsWithResults, 'contains': containsResults};
   }
 
   List<String> _getAllTitles(dynamic anime) {
     final title = anime['title'];
-
-    final titles = <String>[
+    return [
       if (title?['english'] != null) title['english'].toString(),
       if (title?['romaji'] != null) title['romaji'].toString(),
       if (title?['native'] != null) title['native'].toString(),
-    ];
-
-    return titles.where((title) => title.trim().isNotEmpty).toSet().toList();
+    ].where((t) => t.trim().isNotEmpty).toSet().toList();
   }
 
   String _getDisplayedTitle(dynamic anime) {
     final titles = _getAllTitles(anime);
-
-    if (titles.isEmpty) {
-      return 'No title';
-    }
-
-    return titles.first;
+    return titles.isEmpty ? 'No title' : titles.first;
   }
 
   bool _anyTitleStartsWithSearch(dynamic anime, String input) {
     final cleanedInput = _cleanText(input);
-
-    if (cleanedInput.isEmpty) {
-      return false;
-    }
-
-    return _getAllTitles(anime).any((title) {
-      return _cleanText(title).startsWith(cleanedInput);
-    });
+    if (cleanedInput.isEmpty) return false;
+    return _getAllTitles(anime).any((title) => _cleanText(title).startsWith(cleanedInput));
   }
 
   bool _anyTitleContainsSearch(dynamic anime, String input) {
     final cleanedInput = _cleanText(input);
-
-    if (cleanedInput.isEmpty) {
-      return false;
-    }
-
-    return _getAllTitles(anime).any((title) {
-      return _cleanText(title).contains(cleanedInput);
-    });
+    if (cleanedInput.isEmpty) return false;
+    return _getAllTitles(anime).any((title) => _cleanText(title).contains(cleanedInput));
   }
 
-  String _cleanText(String value) {
-    return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
-  }
+  String _cleanText(String value) => value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 
   List<dynamic> _removeDuplicateAnime(List<dynamic> animeList) {
     final uniqueAnime = <dynamic>[];
@@ -475,25 +419,10 @@ class ExploreViewModel extends BaseViewModel {
 
     for (final anime in animeList) {
       final id = anime['id']?.toString();
-
-      if (id == null) continue;
-
-      if (seenIds.add(id)) {
+      if (id != null && seenIds.add(id)) {
         uniqueAnime.add(anime);
       }
     }
-
     return uniqueAnime;
-  }
-
-  void clearSearch() {
-    searchController.clear();
-  }
-
-  @override
-  void dispose() {
-    _debounce?.cancel();
-    searchController.dispose();
-    super.dispose();
   }
 }
