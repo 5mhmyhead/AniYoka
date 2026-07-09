@@ -65,7 +65,7 @@ class ExploreViewModel extends BaseViewModel {
     if (selectedGenreLabel != null) activeCount++;
     if (selectedFormatLabel != null) activeCount++;
     if (onMyListOnly) activeCount++;
-    
+
     return activeCount > 1;
   }
 
@@ -73,10 +73,10 @@ class ExploreViewModel extends BaseViewModel {
   void dispose() {
     _debounce?.cancel();
     searchController.dispose();
-    searchFocusNode.dispose(); 
+    searchFocusNode.dispose();
     super.dispose();
   }
-  
+
   // Options Configurations Maps
   final Map<String, String?> _statusOptions = {
     'Any Status': null,
@@ -174,10 +174,16 @@ class ExploreViewModel extends BaseViewModel {
         _selectedSortLabel != null;
   }
 
-  String? get _apiStatus => _selectedStatusLabel == null ? null : _statusOptions[_selectedStatusLabel];
-  String? get _apiGenre => _selectedGenreLabel == null ? null : _genreOptions[_selectedGenreLabel];
-  String? get _apiFormat => _selectedFormatLabel == null ? null : _formatOptions[_selectedFormatLabel];
-  String get _apiSort => _sortOptions[_selectedSortLabel ?? 'Default'] ?? 'SEARCH_MATCH';
+  String? get _apiStatus => _selectedStatusLabel == null
+      ? null
+      : _statusOptions[_selectedStatusLabel];
+  String? get _apiGenre =>
+      _selectedGenreLabel == null ? null : _genreOptions[_selectedGenreLabel];
+  String? get _apiFormat => _selectedFormatLabel == null
+      ? null
+      : _formatOptions[_selectedFormatLabel];
+  String get _apiSort =>
+      _sortOptions[_selectedSortLabel ?? 'Default'] ?? 'SEARCH_MATCH';
 
   void _onSearchChanged() {
     final input = searchController.text.trim();
@@ -250,7 +256,8 @@ class ExploreViewModel extends BaseViewModel {
         sort: _apiSort,
       );
 
-      final suggestionResults = await _anilistService.getPopularAnimeForSearchSuggestions(
+      final suggestionResults =
+          await _anilistService.getPopularAnimeForSearchSuggestions(
         status: _apiStatus,
         genre: _apiGenre,
         format: _apiFormat,
@@ -293,7 +300,8 @@ class ExploreViewModel extends BaseViewModel {
     if (errorText.contains('Too Many Requests') || errorText.contains('429')) {
       setError('Too many searches. Please wait a moment, then try again.');
     } else if (errorText.contains('TimeoutException')) {
-      setError('Search took too long. Please check your internet and try again.');
+      setError(
+          'Search took too long. Please check your internet and try again.');
     } else {
       setError('Something went wrong while loading anime.');
     }
@@ -337,7 +345,8 @@ class ExploreViewModel extends BaseViewModel {
     if (_selectedGenreLabel != null) return '$_selectedGenreLabel Anime';
     if (_selectedStatusLabel != null) return '$_selectedStatusLabel Anime';
     if (_selectedFormatLabel != null) return '$_selectedFormatLabel Anime';
-    if (_selectedSortLabel != null && _selectedSortLabel != 'Default') return '$_selectedSortLabel Anime';
+    if (_selectedSortLabel != null && _selectedSortLabel != 'Default')
+      return '$_selectedSortLabel Anime';
     if (_onMyListOnly) return 'Anime On My List';
     return null;
   }
@@ -365,7 +374,8 @@ class ExploreViewModel extends BaseViewModel {
     searchAnime(input);
   }
 
-  Map<String, List<dynamic>> _groupSearchResults(List<dynamic> results, String input) {
+  Map<String, List<dynamic>> _groupSearchResults(
+      List<dynamic> results, String input) {
     final startsWithResults = <dynamic>[];
     final containsResults = <dynamic>[];
 
@@ -379,8 +389,10 @@ class ExploreViewModel extends BaseViewModel {
       }
     }
 
-    startsWithResults.sort((a, b) => _getDisplayedTitle(a).length.compareTo(_getDisplayedTitle(b).length));
-    containsResults.sort((a, b) => _cleanText(_getDisplayedTitle(a)).compareTo(_cleanText(_getDisplayedTitle(b))));
+    startsWithResults.sort((a, b) =>
+        _getDisplayedTitle(a).length.compareTo(_getDisplayedTitle(b).length));
+    containsResults.sort((a, b) => _cleanText(_getDisplayedTitle(a))
+        .compareTo(_cleanText(_getDisplayedTitle(b))));
 
     return {'startsWith': startsWithResults, 'contains': containsResults};
   }
@@ -402,16 +414,19 @@ class ExploreViewModel extends BaseViewModel {
   bool _anyTitleStartsWithSearch(dynamic anime, String input) {
     final cleanedInput = _cleanText(input);
     if (cleanedInput.isEmpty) return false;
-    return _getAllTitles(anime).any((title) => _cleanText(title).startsWith(cleanedInput));
+    return _getAllTitles(anime)
+        .any((title) => _cleanText(title).startsWith(cleanedInput));
   }
 
   bool _anyTitleContainsSearch(dynamic anime, String input) {
     final cleanedInput = _cleanText(input);
     if (cleanedInput.isEmpty) return false;
-    return _getAllTitles(anime).any((title) => _cleanText(title).contains(cleanedInput));
+    return _getAllTitles(anime)
+        .any((title) => _cleanText(title).contains(cleanedInput));
   }
 
-  String _cleanText(String value) => value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+  String _cleanText(String value) =>
+      value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 
   List<dynamic> _removeDuplicateAnime(List<dynamic> animeList) {
     final uniqueAnime = <dynamic>[];

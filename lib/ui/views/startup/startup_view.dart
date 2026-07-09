@@ -34,7 +34,7 @@ class StartupView extends StackedView<StartupViewModel> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Loading ...', 
+                  'Loading ...',
                   style: GoogleFonts.nunito(
                     color: kcLightGrey,
                     fontSize: 20,

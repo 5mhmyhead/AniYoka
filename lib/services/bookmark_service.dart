@@ -17,14 +17,16 @@ class BookmarkService {
     final exists = bookmarks.any((b) => b['id'] == anime['id']);
     if (exists) return;
     bookmarks.add(anime);
-    await prefs.setStringList(_key, bookmarks.map((b) => jsonEncode(b)).toList());
+    await prefs.setStringList(
+        _key, bookmarks.map((b) => jsonEncode(b)).toList());
   }
 
   Future<void> removeBookmark(int id) async {
     final prefs = await SharedPreferences.getInstance();
     final bookmarks = await getBookmarks();
     bookmarks.removeWhere((b) => b['id'] == id);
-    await prefs.setStringList(_key, bookmarks.map((b) => jsonEncode(b)).toList());
+    await prefs.setStringList(
+        _key, bookmarks.map((b) => jsonEncode(b)).toList());
   }
 
   Future<bool> isBookmarked(int id) async {

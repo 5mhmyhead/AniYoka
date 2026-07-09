@@ -71,26 +71,90 @@ class _GenresTabState extends State<GenresTab>
     'WINTER': Icons.ac_unit
   };
 
+  int _currentPage = 1;
+  bool _hasNextPage = true;
+  bool _isLoadingMore = false;
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 300) {
+        _loadMore();
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadAnime());
   }
 
-  Future<void> _loadAnime() async {
-    setState(() => _isLoading = true);
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadAnime({int retries = 2}) async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _currentPage = 1;       // ← reset page
+      _hasNextPage = true;    // ← reset pagination
+      _animeList = [];        // ← clear old results
+    });
+
+    List<dynamic> result = [];
+
+    for (int attempt = 0; attempt <= retries; attempt++) {
+      try {
+        result = await _anilistService.getAnimeByGenreAndSort(
+          genre: _selectedGenre,
+          sort: _selectedSort.apiValue,
+          year: _selectedYear,
+          season: _selectedSeason,
+          page: 1,
+        );
+        if (result.isNotEmpty) break;
+        if (attempt < retries) await Future.delayed(const Duration(milliseconds: 500));
+      } catch (e) {
+        if (attempt < retries) await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _animeList = result;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _loadMore() async {
+    if (!_hasNextPage || _isLoadingMore || _isLoading) return;
+    if (!mounted) return;
+    setState(() => _isLoadingMore = true);
+
     try {
       final result = await _anilistService.getAnimeByGenreAndSort(
         genre: _selectedGenre,
         sort: _selectedSort.apiValue,
         year: _selectedYear,
         season: _selectedSeason,
+        page: _currentPage + 1,
       );
-      setState(() => _animeList = result);
+      if (!mounted) return;
+      setState(() {
+        if (result.isEmpty) {
+          _hasNextPage = false;
+        } else {
+          _currentPage++;
+          _animeList = [..._animeList, ...result];
+        }
+        _isLoadingMore = false;
+      });
     } catch (e) {
-      setState(() => _animeList = []);
+      if (!mounted) return;
+      setState(() => _isLoadingMore = false);
     }
-    setState(() => _isLoading = false);
   }
 
   String _buildSubtitle() {
@@ -117,6 +181,7 @@ class _GenresTabState extends State<GenresTab>
       backgroundColor: kcSurfaceColor,
       onRefresh: _loadAnime,
       child: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
@@ -177,16 +242,61 @@ class _GenresTabState extends State<GenresTab>
             ),
           ),
           _animeList.isEmpty
-              ? const SliverFillRemaining(
+              ? SliverFillRemaining(
                   child: Center(
-                    child: Text('No anime found',
-                        style: TextStyle(color: kcLightGrey)),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'bruh',
+                          style: GoogleFonts.nunito(
+                            color: kcSecondaryPink,
+                            fontSize: 42,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Text(
+                            'There seems to be an error in finding your anime.',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.nunito(
+                              color: kcLightGrey,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        GestureDetector(
+                          onTap: _loadAnime,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 14),
+                            decoration: BoxDecoration(
+                              color: kcSurfaceColor,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Text(
+                              'Reload the page!',
+                              style: GoogleFonts.nunito(
+                                color: kcLightGrey,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 )
               : SliverPadding(
                   padding: const EdgeInsets.all(20),
                   sliver: SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
@@ -198,6 +308,15 @@ class _GenresTabState extends State<GenresTab>
                     ),
                   ),
                 ),
+          if (_isLoadingMore)
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Center(
+                  child: CircularProgressIndicator(color: kcPrimaryPink),
+                ),
+              ),
+            )
         ],
       ),
     );
@@ -333,10 +452,13 @@ class _GenresTabState extends State<GenresTab>
                                 children: GenreHelper.allGenres.map((genre) {
                                   final isSelected = genre == _tempGenre;
                                   return GestureDetector(
-                                    onTap: () => setSheetState(() => _tempGenre = genre),
+                                    onTap: () =>
+                                        setSheetState(() => _tempGenre = genre),
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: isSelected ? kcPrimaryPink : kcBackgroundColor,
+                                        color: isSelected
+                                            ? kcPrimaryPink
+                                            : kcBackgroundColor,
                                         borderRadius: BorderRadius.circular(50),
                                       ),
                                       alignment: Alignment.center,
@@ -346,9 +468,13 @@ class _GenresTabState extends State<GenresTab>
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: GoogleFonts.nunito(
-                                          color: isSelected ? kcOffWhite : kcLightGrey,
+                                          color: isSelected
+                                              ? kcOffWhite
+                                              : kcLightGrey,
                                           fontSize: 15,
-                                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                          fontWeight: isSelected
+                                              ? FontWeight.w600
+                                              : FontWeight.w400,
                                         ),
                                       ),
                                     ),
@@ -377,18 +503,25 @@ class _GenresTabState extends State<GenresTab>
                                       setSheetState(() => _tempSort = sort),
                                   child: Container(
                                     width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 18, horizontal: 20),
                                     margin: const EdgeInsets.only(bottom: 8),
                                     decoration: BoxDecoration(
-                                      color: isSelected ? kcPrimaryPink : kcBackgroundColor,
+                                      color: isSelected
+                                          ? kcPrimaryPink
+                                          : kcBackgroundColor,
                                       borderRadius: BorderRadius.circular(50),
                                     ),
                                     child: Text(
                                       sort.label,
                                       style: GoogleFonts.nunito(
-                                        color: isSelected ? kcOffWhite : kcLightGrey,
+                                        color: isSelected
+                                            ? kcOffWhite
+                                            : kcLightGrey,
                                         fontSize: 15,
-                                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w600
+                                            : FontWeight.w400,
                                       ),
                                     ),
                                   ),
@@ -418,12 +551,16 @@ class _GenresTabState extends State<GenresTab>
                                       width: 64,
                                       height: 64,
                                       decoration: BoxDecoration(
-                                        color: isSelected ? kcPrimaryPink : kcBackgroundColor,
+                                        color: isSelected
+                                            ? kcPrimaryPink
+                                            : kcBackgroundColor,
                                         borderRadius: BorderRadius.circular(50),
                                       ),
                                       child: Icon(
                                         _seasonIcons[season],
-                                        color: isSelected ? kcOffWhite : kcLightGrey,
+                                        color: isSelected
+                                            ? kcOffWhite
+                                            : kcLightGrey,
                                         size: 28,
                                       ),
                                     ),
@@ -454,7 +591,7 @@ class _GenresTabState extends State<GenresTab>
                                     return GestureDetector(
                                       onTap: () => setSheetState(() {
                                         _tempYear = isSelected ? null : year;
-                                       }),
+                                      }),
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 16, vertical: 10),

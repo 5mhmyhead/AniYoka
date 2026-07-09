@@ -10,9 +10,10 @@ import 'bookmarks_viewmodel.dart';
 class BookmarksView extends StackedView<BookmarksViewModel> {
   const BookmarksView({super.key, this.onNavigateToExplore});
   final VoidCallback? onNavigateToExplore;
-  
+
   @override
-  Widget builder(BuildContext context, BookmarksViewModel viewModel, Widget? child) {
+  Widget builder(
+      BuildContext context, BookmarksViewModel viewModel, Widget? child) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: kcSurfaceColor,
@@ -72,15 +73,20 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
       unselectedLabelStyle: GoogleFonts.nunito(fontSize: 15),
       tabs: const [
         Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Bookmarked'))),
-        Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Recent Saves'))),
-        Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Alphabetical'))),
+        Tab(
+            child:
+                FittedBox(fit: BoxFit.scaleDown, child: Text('Recent Saves'))),
+        Tab(
+            child:
+                FittedBox(fit: BoxFit.scaleDown, child: Text('Alphabetical'))),
       ],
     );
   }
 
   Widget _buildTabContent(BookmarksViewModel viewModel, BuildContext context) {
     if (viewModel.isBusy) {
-      return const Center(child: CircularProgressIndicator(color: kcPrimaryPink));
+      return const Center(
+          child: CircularProgressIndicator(color: kcPrimaryPink));
     }
 
     return TabBarView(
@@ -92,7 +98,8 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
     );
   }
 
-  Widget _buildGrid(List<Map<String, dynamic>> list, BookmarksViewModel viewModel, BuildContext context) {
+  Widget _buildGrid(List<Map<String, dynamic>> list,
+      BookmarksViewModel viewModel, BuildContext context) {
     if (list.isEmpty) {
       return RefreshIndicator(
         color: kcPrimaryPink,
@@ -111,19 +118,19 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
                     Text(
                       'bruh',
                       style: GoogleFonts.nunito(
-                        color: kcSecondaryPink, 
-                        fontSize: 42, 
+                        color: kcSecondaryPink,
+                        fontSize: 42,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32), 
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
                       child: Text(
                         'Hmmm, you don’t seem to have any bookmarks.',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.nunito(
-                          color: kcLightGrey, 
-                          fontSize: 16, 
+                          color: kcLightGrey,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -132,7 +139,8 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
                     GestureDetector(
                       onTap: onNavigateToExplore,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
                         decoration: BoxDecoration(
                           color: kcSurfaceColor,
                           borderRadius: BorderRadius.circular(30),
@@ -176,7 +184,8 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
     );
   }
 
-  Widget _buildCard(Map<String, dynamic> anime, BookmarksViewModel viewModel, BuildContext context) {
+  Widget _buildCard(Map<String, dynamic> anime, BookmarksViewModel viewModel,
+      BuildContext context) {
     final title = anime['title']['english'] ?? anime['title']['romaji'] ?? '';
     final format = anime['format'] ?? '';
     final year = anime['startDate']?['year']?.toString() ?? '';
@@ -238,25 +247,26 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
     );
   }
 
-  void _showRemoveDialog(BuildContext context, Map<String, dynamic> anime, BookmarksViewModel viewModel) {
+  void _showRemoveDialog(BuildContext context, Map<String, dynamic> anime,
+      BookmarksViewModel viewModel) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: Colors.transparent, 
-        insetPadding: const EdgeInsets.symmetric(horizontal: 40), 
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: kcSurfaceColor, 
+            color: kcSurfaceColor,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min, 
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(
                 Icons.bookmark_remove_outlined,
-                color: kcTertiaryPink, 
+                color: kcTertiaryPink,
                 size: 54,
               ),
               const SizedBox(height: 4),
@@ -288,14 +298,14 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: kcTertiaryPink, 
+                          color: kcTertiaryPink,
                           borderRadius: BorderRadius.circular(50),
                         ),
                         child: Text(
                           'No, keep it.',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.nunito(
-                            color: kcSurfaceColor, 
+                            color: kcSurfaceColor,
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
@@ -338,8 +348,10 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
   }
 
   @override
-  void onViewModelReady(BookmarksViewModel viewModel) => viewModel.loadBookmarks();
+  void onViewModelReady(BookmarksViewModel viewModel) =>
+      viewModel.loadBookmarks();
 
   @override
-  BookmarksViewModel viewModelBuilder(BuildContext context) => BookmarksViewModel();
+  BookmarksViewModel viewModelBuilder(BuildContext context) =>
+      BookmarksViewModel();
 }

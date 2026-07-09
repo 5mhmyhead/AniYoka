@@ -21,16 +21,16 @@ class BookmarksViewModel extends BaseViewModel {
   // all bookmarks sorted by most recently saved
   List<Map<String, dynamic>> get recentlySaved {
     final sorted = [..._bookmarks];
-    sorted.sort((a, b) => DateTime.parse(b['savedAt'])
-        .compareTo(DateTime.parse(a['savedAt'])));
+    sorted.sort((a, b) =>
+        DateTime.parse(b['savedAt']).compareTo(DateTime.parse(a['savedAt'])));
     return sorted;
   }
 
   // all bookmarks sorted by oldest saved
   List<Map<String, dynamic>> get oldestSaves {
     final sorted = [..._bookmarks];
-    sorted.sort((a, b) => DateTime.parse(a['savedAt'])
-        .compareTo(DateTime.parse(b['savedAt'])));
+    sorted.sort((a, b) =>
+        DateTime.parse(a['savedAt']).compareTo(DateTime.parse(b['savedAt'])));
     return sorted;
   }
 

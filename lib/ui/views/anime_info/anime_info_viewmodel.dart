@@ -43,7 +43,7 @@ class AnimeInfoViewModel extends BaseViewModel {
       _anime = await _anilistService.getAnimeDetails(id);
       final coverImage = _anime?['coverImage']['extraLarge'] ?? '';
       if (coverImage.isNotEmpty) await _extractDominantColor(coverImage);
-      await _checkBookmarkStatus(); 
+      await _checkBookmarkStatus();
     } catch (e) {
       setError(e.toString());
     }
@@ -67,7 +67,8 @@ class AnimeInfoViewModel extends BaseViewModel {
         'title': _anime!['title'],
         'coverImage': {
           'large': _anime!['coverImage']['extraLarge'] ??
-                    _anime!['coverImage']['large'] ?? '',
+              _anime!['coverImage']['large'] ??
+              '',
         },
         'format': _anime!['format'],
         'startDate': _anime!['startDate'],
@@ -198,8 +199,21 @@ class AnimeInfoViewModel extends BaseViewModel {
     final day = date['day'];
     if (year == null) return 'Unknown';
 
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', '' ];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+      ''
+    ];
 
     if (month == null) return '$year';
     if (day == null) return '${months[month]} $year';

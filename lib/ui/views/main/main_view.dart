@@ -21,8 +21,8 @@ class MainView extends StackedView<MainViewModel> {
         1 => const ExploreView(),
         2 => const WatchlistView(),
         3 => BookmarksView(
-          onNavigateToExplore: () => viewModel.setPage(1),
-        ),
+            onNavigateToExplore: () => viewModel.setPage(1),
+          ),
         4 => const ProfileView(),
         int() => throw UnimplementedError(),
       },

@@ -1,3 +1,6 @@
+import 'package:aniyoka/ui/views/anime_list/anime_list_view.dart';
+import 'package:aniyoka/utils/anime_list_helper.dart';
+import 'package:aniyoka/utils/season_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -70,7 +73,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
       padding: const EdgeInsets.only(bottom: 12),
       decoration: const BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: kcSurfaceColor, width: 1),
+          bottom: BorderSide(color: kcSurfaceColor, width: 2),
         ),
       ),
       child: Column(
@@ -318,15 +321,47 @@ class ExploreView extends StackedView<ExploreViewModel> {
 
   Widget _buildDiscoverGrid(ExploreViewModel viewModel) {
     final categories = [
-      {'label': 'Top 100', 'icon': Icons.star_border},
-      {'label': 'Top Popular', 'icon': Icons.trending_up},
-      {'label': 'Upcoming', 'icon': Icons.access_time},
-      {'label': 'Airing Now', 'icon': Icons.rss_feed},
-      {'label': 'Spring', 'icon': Icons.local_florist},
-      {'label': 'Summer', 'icon': Icons.wb_sunny},
-      {'label': 'Fall', 'icon': Icons.eco},
-      {'label': 'Winter', 'icon': Icons.ac_unit},
-    ];
+    {
+      'label': 'Top 100',
+      'icon': Icons.star_border,
+      'filter': const AnimeListFilter(type: AnimeListType.topRated, title: 'Top 100'),
+    },
+    {
+      'label': 'Trending Now',
+      'icon': Icons.trending_up,
+      'filter': const AnimeListFilter(type: AnimeListType.popular, title: 'Trending Now'),
+    },
+    {
+      'label': 'Upcoming',
+      'icon': Icons.access_time,
+      'filter': const AnimeListFilter(type: AnimeListType.airingSoon, title: 'Upcoming'),
+    },
+    {
+      'label': 'Airing Now',
+      'icon': Icons.rss_feed,
+      'filter': const AnimeListFilter(type: AnimeListType.airing, title: 'Airing Now'),
+    },
+    {
+      'label': 'Spring',
+      'icon': Icons.local_florist,
+      'filter': AnimeListFilter(type: AnimeListType.season, title: 'Spring ${SeasonHelper.currentYear}', season: 'SPRING'),
+    },
+    {
+      'label': 'Summer',
+      'icon': Icons.wb_sunny,
+      'filter': AnimeListFilter(type: AnimeListType.season, title: 'Summer ${SeasonHelper.currentYear}', season: 'SUMMER'),
+    },
+    {
+      'label': 'Fall',
+      'icon': Icons.eco,
+      'filter': AnimeListFilter(type: AnimeListType.season, title: 'Fall ${SeasonHelper.currentYear}', season: 'FALL'),
+    },
+    {
+      'label': 'Winter',
+      'icon': Icons.ac_unit,
+      'filter': AnimeListFilter(type: AnimeListType.season, title: 'Winter ${SeasonHelper.currentYear}', season: 'WINTER'),
+    },
+  ];
 
     return ListView(
       physics: const BouncingScrollPhysics(),
@@ -357,10 +392,16 @@ class ExploreView extends StackedView<ExploreViewModel> {
               decoration: BorderRadius.circular(50)
                   .asBoxDecoration(color: kcSurfaceColor),
               child: InkWell(
-                onTap: () {
-                  viewModel.startSearchMode();
-                  // TODO: WORK ON CATEGORIES SEARCH
-                },
+                onTap: () => Navigator.push(
+                context,
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => AnimeListView(filter: item['filter'] as AnimeListFilter),
+                    transitionDuration: Duration.zero,
+                    reverseTransitionDuration: Duration.zero,
+                    transitionsBuilder: (_, __, ___, child) => child,
+                  ),
+                ),
+                borderRadius: BorderRadius.circular(50),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14.0),
                   child: Row(
@@ -470,7 +511,8 @@ class ExploreView extends StackedView<ExploreViewModel> {
     String? headerTitle;
     if (viewModel.searchText.isNotEmpty || viewModel.hasMultipleActiveFilters) {
       headerTitle = 'Search Results';
-    } else if (viewModel.searchText.isEmpty && viewModel.activeFilterResultsTitle != null) {
+    } else if (viewModel.searchText.isEmpty &&
+        viewModel.activeFilterResultsTitle != null) {
       headerTitle = viewModel.activeFilterResultsTitle;
     }
 
@@ -482,76 +524,69 @@ class ExploreView extends StackedView<ExploreViewModel> {
           Text(
             headerTitle,
             style: GoogleFonts.nunito(
-              color: kcPrimaryPink, 
-              fontSize: 28, 
+              color: kcPrimaryPink,
+              fontSize: 28,
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 12),
         ],
-        ...viewModel.searchResults.map((anime) => _buildAnimeCardListTile(anime, onTap: () {
-          viewModel.onAnimeTap(anime['id']); 
-        })),
+        ...viewModel.searchResults
+            .map((anime) => _buildAnimeCardListTile(anime, onTap: () {
+                  viewModel.onAnimeTap(anime['id']);
+                })),
         if (viewModel.relatedResults.isNotEmpty) ...[
           const SizedBox(height: 20),
           Text(
             'Related Results',
             style: GoogleFonts.nunito(
-              color: kcPrimaryPink, 
-              fontSize: 28, 
+              color: kcPrimaryPink,
+              fontSize: 28,
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 10),
-          ...viewModel.relatedResults.map((anime) => _buildAnimeCardListTile(anime, onTap: () {
-            viewModel.onAnimeTap(anime['id']);
-          })),
+          ...viewModel.relatedResults
+              .map((anime) => _buildAnimeCardListTile(anime, onTap: () {
+                    viewModel.onAnimeTap(anime['id']);
+                  })),
         ],
       ],
     );
   }
 
   Widget _buildAnimeCardListTile(dynamic anime, {required VoidCallback onTap}) {
-    final title = anime['title']?['english'] ??
-        anime['title']?['romaji'] ??
-        anime['title']?['native'] ??
-        'No title';
-
-    final coverImage = anime['coverImage']?['large'];
-    final format = anime['format'] ?? 'TV';
-    final score = anime['averageScore'] != null ? '${anime['averageScore']}%' : 'N/A';
+    final title = anime['title']['english'] ?? anime['title']['romaji'] ?? '';
+    final format = anime['format'] ?? '';
     final year = anime['startDate']?['year']?.toString() ?? '';
+    final score = anime['meanScore'];
 
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: coverImage != null
-                  ? CachedNetworkImage(
-                      imageUrl: coverImage.toString(),
-                      width: 120,
-                      height: 165,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(color: kcSurfaceColor),
-                      errorWidget: (context, url, error) => Container(
-                        width: 120,
-                        height: 165,
-                        color: kcSurfaceColor,
-                        child: const Icon(Icons.broken_image, color: kcLightGrey),
-                      ),
-                    )
-                  : Container(
-                      width: 120,
-                      height: 165,
-                      color: kcSurfaceColor,
-                      child: const Icon(Icons.image_not_supported, color: kcLightGrey),
-                    ),
+              child: CachedNetworkImage(
+                imageUrl: anime['coverImage']['large'] ?? '',
+                width: 120,
+                height: 165,
+                fit: BoxFit.cover,
+                placeholder: (_, __) => Container(
+                  width: 120,
+                  height: 165,
+                  color: kcSurfaceColor,
+                ),
+                errorWidget: (_, __, ___) => Container(
+                  width: 120,
+                  height: 165,
+                  color: kcSurfaceColor,
+                ),
+              ),
             ),
             const SizedBox(width: 20),
             Expanded(
@@ -580,21 +615,22 @@ class ExploreView extends StackedView<ExploreViewModel> {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.star, color: kcLightGrey, size: 20),
-                      const SizedBox(width: 4),
-                      Text(
-                        score,
-                        style: GoogleFonts.nunito(
-                          color: kcLightGrey,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                  if(score != null) 
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.star, color: kcLightGrey, size: 20),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$score%',
+                          style: GoogleFonts.nunito(
+                            color: kcLightGrey,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                 ],
               ),
             ),
