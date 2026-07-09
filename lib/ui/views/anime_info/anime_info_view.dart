@@ -141,9 +141,14 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                     onPressed: () => Navigator.pop(context),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.bookmark_outline,
-                        color: kcPrimaryPink, size: 32),
-                    onPressed: () {}, // TODO: IMPLEMENT BOOKMARK FUNCTIONALITY
+                    icon: Icon(
+                      viewModel.isBookmarked
+                          ? Icons.bookmark
+                          : Icons.bookmark_outline,
+                      color: kcPrimaryPink,
+                      size: 32,
+                    ),
+                    onPressed: viewModel.toggleBookmark,
                   ),
                 ],
               ),

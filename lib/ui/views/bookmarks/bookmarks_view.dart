@@ -1,4 +1,6 @@
 import 'package:aniyoka/ui/common/app_colors.dart';
+import 'package:aniyoka/ui/views/anime_info/anime_info_view.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,7 +8,8 @@ import 'package:stacked/stacked.dart';
 import 'bookmarks_viewmodel.dart';
 
 class BookmarksView extends StackedView<BookmarksViewModel> {
-  const BookmarksView({super.key});
+  const BookmarksView({super.key, this.onNavigateToExplore});
+  final VoidCallback? onNavigateToExplore;
 
   @override
   Widget builder(
@@ -27,9 +30,7 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
                 color: kcSurfaceColor,
                 child: _buildHeader(),
               ),
-              Expanded(
-                child: _buildTabContent(viewModel),
-              ),
+              Expanded(child: _buildTabContent(viewModel, context)),
             ],
           ),
         ),
@@ -68,48 +69,287 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
       indicatorColor: kcPrimaryPink,
       indicatorWeight: 2,
       dividerColor: kcLightGrey,
-      labelStyle: GoogleFonts.nunito(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-      ),
-      unselectedLabelStyle: GoogleFonts.nunito(
-        fontSize: 15,
-      ),
+      labelStyle: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600),
+      unselectedLabelStyle: GoogleFonts.nunito(fontSize: 15),
       tabs: const [
-        Tab(
-            child: FittedBox(
-                fit: BoxFit.scaleDown, child: Text('All Bookmarked'))),
-        Tab(
-            child: FittedBox(
-                fit: BoxFit.scaleDown, child: Text('Recently Saved'))),
+        Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Bookmarked'))),
         Tab(
             child:
-                FittedBox(fit: BoxFit.scaleDown, child: Text('Oldest Saves'))),
+                FittedBox(fit: BoxFit.scaleDown, child: Text('Recent Saves'))),
+        Tab(
+            child:
+                FittedBox(fit: BoxFit.scaleDown, child: Text('Alphabetical'))),
       ],
     );
   }
 
-  Widget _buildTabContent(BookmarksViewModel viewModel) {
+  Widget _buildTabContent(BookmarksViewModel viewModel, BuildContext context) {
     if (viewModel.isBusy) {
       return const Center(
-        child: CircularProgressIndicator(color: kcPrimaryPink),
-      );
+          child: CircularProgressIndicator(color: kcPrimaryPink));
     }
 
     return TabBarView(
       children: [
-        const Center(
-          child: Text('All Bookmarked', style: TextStyle(color: kcOffWhite)),
-        ),
-        const Center(
-          child: Text('Recently Saved', style: TextStyle(color: kcOffWhite)),
-        ),
-        const Center(
-          child: Text('Oldest Saves', style: TextStyle(color: kcOffWhite)),
-        ),
+        _buildGrid(viewModel.oldestSaves, viewModel, context),
+        _buildGrid(viewModel.recentlySaved, viewModel, context),
+        _buildGrid(viewModel.allBookmarks, viewModel, context),
       ],
     );
   }
+
+  Widget _buildGrid(List<Map<String, dynamic>> list,
+      BookmarksViewModel viewModel, BuildContext context) {
+    if (list.isEmpty) {
+      return RefreshIndicator(
+        color: kcPrimaryPink,
+        backgroundColor: kcSurfaceColor,
+        onRefresh: viewModel.loadBookmarks,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'bruh',
+                      style: GoogleFonts.nunito(
+                        color: kcSecondaryPink,
+                        fontSize: 42,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        'Hmmm, you don’t seem to have any bookmarks.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.nunito(
+                          color: kcLightGrey,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    GestureDetector(
+                      onTap: onNavigateToExplore,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: kcSurfaceColor,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Text(
+                          'Search for an anime to save!',
+                          style: GoogleFonts.nunito(
+                            color: kcLightGrey,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      color: kcPrimaryPink,
+      backgroundColor: kcSurfaceColor,
+      onRefresh: viewModel.loadBookmarks,
+      child: GridView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(20),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.56,
+        ),
+        itemCount: list.length,
+        itemBuilder: (context, index) =>
+            _buildCard(list[index], viewModel, context),
+      ),
+    );
+  }
+
+  Widget _buildCard(Map<String, dynamic> anime, BookmarksViewModel viewModel,
+      BuildContext context) {
+    final title = anime['title']['english'] ?? anime['title']['romaji'] ?? '';
+    final format = anime['format'] ?? '';
+    final year = anime['startDate']?['year']?.toString() ?? '';
+
+    return GestureDetector(
+      onTap: () async {
+        await Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => AnimeInfoView(animeId: anime['id']),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+            transitionsBuilder: (_, __, ___, child) => child,
+          ),
+        );
+        // reload bookmarks when user comes back
+        viewModel.loadBookmarks();
+      },
+      onLongPress: () => _showRemoveDialog(context, anime, viewModel),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 250,
+            width: 180,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CachedNetworkImage(
+                imageUrl: anime['coverImage']['large'] ?? '',
+                fit: BoxFit.cover,
+                placeholder: (_, __) => Container(color: kcSurfaceColor),
+                errorWidget: (_, __, ___) => Container(color: kcSurfaceColor),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              color: kcOffWhite,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            year.isNotEmpty ? '$format • $year' : format,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.nunito(
+              color: kcLightGrey,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRemoveDialog(BuildContext context, Map<String, dynamic> anime,
+      BookmarksViewModel viewModel) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: kcSurfaceColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.bookmark_remove_outlined,
+                color: kcTertiaryPink,
+                size: 54,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Remove Bookmark?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: kcTertiaryPink,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Are you sure you want to delete this entry from your bookmarks?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: kcLightGrey,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: kcTertiaryPink,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Text(
+                          'No, keep it.',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.nunito(
+                            color: kcSurfaceColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        viewModel.removeBookmark(anime['id']);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: kcPrimaryPink,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Text(
+                          'Yes, delete!',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.nunito(
+                            color: kcOffWhite,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void onViewModelReady(BookmarksViewModel viewModel) =>
+      viewModel.loadBookmarks();
 
   @override
   BookmarksViewModel viewModelBuilder(BuildContext context) =>

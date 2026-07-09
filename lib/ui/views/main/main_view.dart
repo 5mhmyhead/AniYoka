@@ -20,13 +20,14 @@ class MainView extends StackedView<MainViewModel> {
         0 => const HomeView(),
         1 => const ExploreView(),
         2 => const WatchlistView(),
-        3 => const BookmarksView(),
+        3 => BookmarksView(
+            onNavigateToExplore: () => viewModel.setPage(1),
+          ),
         4 => const ProfileView(),
         int() => throw UnimplementedError(),
       },
       bottomNavigationBar: SizedBox(
-        height:
-            MediaQuery.of(context).size.height * 0.11, // 8% of screen height
+        height: MediaQuery.of(context).size.height * 0.11,
         child: NavigationBar(
           // bottom nav bar styling
           indicatorColor: kcAccentShadePink,

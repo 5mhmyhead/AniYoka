@@ -97,7 +97,7 @@ class HomeView extends StackedView<HomeViewModel> {
     return TabBarView(
       children: [
         DiscoverTab(viewModel: viewModel),
-        const GenresTab(), 
+        const GenresTab(),
         const Center(
           child: Text(
             'Activity',

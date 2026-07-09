@@ -1,6 +1,6 @@
-import 'package:aniyoka/utils/genre_helper.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:aniyoka/utils/season_helper.dart';
+import 'package:aniyoka/utils/anime_list_helper.dart';
 
 class AniListService {
   late final GraphQLClient _client;
@@ -118,10 +118,10 @@ class AniListService {
   }
 
   Future<List<dynamic>> getAiringSoonAnime() async {
-    const query = r'''
+    final query = '''
       query {
         Page(page: 1, perPage: 10) {
-          media(status: NOT_YET_RELEASED, type: ANIME, sort: POPULARITY_DESC, isAdult: false) {
+          media(type: ANIME, isAdult: false, sort: START_DATE, status: NOT_YET_RELEASED) {
             id
             title { english romaji }
             coverImage { large }
@@ -211,28 +211,21 @@ class AniListService {
     return result.data!['Media'];
   }
 
- Future<List<dynamic>> getAnimeByGenreAndSort({
+  Future<List<dynamic>> getAnimeByGenreAndSort({
     required String genre,
     required String sort,
-    bool isThisSeason = false,
     int? year,
     String? season,
+    int page = 1,
   }) async {
     String seasonFilter = '';
-
-    if (isThisSeason) {
-      seasonFilter = '''
-        season: ${SeasonHelper.currentSeason}
-        seasonYear: ${SeasonHelper.currentYear}
-      ''';
-    } else {
-      if (season != null) seasonFilter += 'season: $season\n';
-      if (year != null) seasonFilter += 'seasonYear: $year\n';
-    }
+    if (season != null) seasonFilter += 'season: $season\n';
+    if (year != null) seasonFilter += 'seasonYear: $year\n';
 
     final query = '''
       query {
-        Page(page: 1, perPage: 20) {
+        Page(page: $page, perPage: 20) {
+          pageInfo { hasNextPage }
           media(
             genre: "$genre"
             type: ANIME
@@ -250,14 +243,26 @@ class AniListService {
       }
     ''';
 
-    final result = await _client.query(
-      QueryOptions(
-        document: gql(query),
-        fetchPolicy: FetchPolicy.networkOnly,
-      ),
-    );
-    if (result.hasException) throw Exception(result.exception.toString());
-    return result.data!['Page']['media'];
+    try {
+      final result = await _client.query(
+        QueryOptions(
+          document: gql(query),
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      ).timeout(const Duration(seconds: 15));
+
+      if (result.hasException) return [];
+      
+      final pageData = result.data?['Page'];
+      if (pageData == null) return [];
+      
+      final media = pageData['media']; 
+      if (media == null) return [];
+      
+      return List<dynamic>.from(media);
+    } catch (e) {
+      return [];
+    }
   }
 
   Future<List<dynamic>> searchAnime(
@@ -303,6 +308,9 @@ class AniListService {
             episodes
             status
             format
+            averageScore
+            meanScore
+            startDate { year }
           }
         }
       }
@@ -518,5 +526,65 @@ class AniListService {
     _popularAnimeCache[cacheKey] = allAnime;
 
     return allAnime;
+  }
+
+  Future<List<dynamic>> getAnimeList({
+    required AnimeListType type,
+    required int page,
+    String? genre,
+  }) async {
+    String filters = 'type: ANIME, isAdult: false, sort: POPULARITY_DESC';
+
+    switch (type) {
+      case AnimeListType.popular:
+        filters =
+            'type: ANIME, isAdult: false, sort: POPULARITY_DESC, season: ${SeasonHelper.currentSeason}, seasonYear: ${SeasonHelper.currentYear}';
+        break;
+      case AnimeListType.thisSeason:
+        filters =
+            'type: ANIME, isAdult: false, sort: POPULARITY_DESC, season: ${SeasonHelper.currentSeason}, seasonYear: ${SeasonHelper.currentYear}';
+        break;
+      case AnimeListType.nextSeason:
+        filters =
+            'type: ANIME, isAdult: false, sort: POPULARITY_DESC, season: ${SeasonHelper.nextSeason}, seasonYear: ${SeasonHelper.nextSeasonYear}';
+        break;
+      case AnimeListType.newlyAdded:
+        filters = 'type: ANIME, isAdult: false, sort: ID_DESC';
+        break;
+      case AnimeListType.airingSoon:
+        filters = 'type: ANIME, isAdult: false, sort: START_DATE, status: NOT_YET_RELEASED';
+        break;
+        case AnimeListType.topRated:
+        filters = 'type: ANIME, isAdult: false, sort: SCORE_DESC';
+        break;
+      case AnimeListType.airing:
+        filters = 'type: ANIME, isAdult: false, sort: POPULARITY_DESC, status: RELEASING';
+        break;
+      case AnimeListType.season:
+        filters = 'type: ANIME, isAdult: false, sort: POPULARITY_DESC, season: ${SeasonHelper.currentSeason}, seasonYear: ${SeasonHelper.currentYear}';
+        break;
+    }
+
+    final query = '''
+      query {
+        Page(page: $page, perPage: 20) {
+          pageInfo { hasNextPage }
+          media($filters) {
+            id
+            title { english romaji }
+            coverImage { large }
+            format
+            startDate { year }
+            meanScore
+          }
+        }
+      }
+    ''';
+
+    final result = await _client.query(
+      QueryOptions(document: gql(query), fetchPolicy: FetchPolicy.networkOnly),
+    );
+    if (result.hasException) throw Exception(result.exception.toString());
+    return result.data!['Page']['media'];
   }
 }

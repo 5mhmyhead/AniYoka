@@ -1,6 +1,7 @@
 import 'package:aniyoka/ui/common/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
 import 'package:aniyoka/ui/common/ui_helpers.dart';
 
@@ -15,7 +16,7 @@ class StartupView extends StackedView<StartupViewModel> {
     StartupViewModel viewModel,
     Widget? child,
   ) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: kcBackgroundColor,
       body: Center(
         child: Column(
@@ -23,18 +24,29 @@ class StartupView extends StackedView<StartupViewModel> {
           children: [
             Text(
               'AniYoka',
-              style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900),
+              style: GoogleFonts.nunito(
+                color: kcPrimaryPink,
+                fontSize: 40,
+                fontWeight: FontWeight.w900,
+              ),
             ),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Loading ...', style: TextStyle(fontSize: 16)),
+                Text(
+                  'Loading ...',
+                  style: GoogleFonts.nunito(
+                    color: kcLightGrey,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 horizontalSpaceSmall,
-                SizedBox(
+                const SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(
-                    color: Colors.black,
+                    color: kcPrimaryPink,
                     strokeWidth: 6,
                   ),
                 ),

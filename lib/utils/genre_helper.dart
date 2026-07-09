@@ -1,20 +1,23 @@
 class GenreHelper {
-  static const List<String> topGenres = [
+  static const List<String> allGenres = [
     'Action',
     'Adventure',
     'Comedy',
     'Drama',
+    'Ecchi',
     'Fantasy',
     'Horror',
+    'Mahou Shoujo',
+    'Mecha',
+    'Music',
     'Mystery',
+    'Psychological',
     'Romance',
     'Sci-Fi',
     'Slice of Life',
     'Sports',
     'Supernatural',
     'Thriller',
-    'Psychological',
-    'Mecha',
   ];
 }
 

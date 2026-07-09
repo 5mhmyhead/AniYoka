@@ -1,7 +1,9 @@
 import 'package:aniyoka/ui/common/app_colors.dart';
 import 'package:aniyoka/ui/views/anime_info/anime_info_view.dart';
+import 'package:aniyoka/ui/views/anime_list/anime_list_view.dart';
 import 'package:aniyoka/ui/widgets/anime_card_row.dart';
 import 'package:aniyoka/ui/views/home/home_viewmodel.dart';
+import 'package:aniyoka/utils/anime_list_helper.dart';
 import 'package:aniyoka/utils/season_helper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -32,10 +34,14 @@ class _DiscoverTabState extends State<DiscoverTab>
     }
 
     final sections = [
-      (SeasonHelper.currentSeasonLabel, widget.viewModel.thisSeason),
-      ('Next Season', widget.viewModel.nextSeason),
-      ('Newly Added', widget.viewModel.newlyAdded),
-      ('Airing Soon', widget.viewModel.airingSoon),
+      (SeasonHelper.currentSeasonLabel, widget.viewModel.thisSeason,
+          AnimeListFilter(type: AnimeListType.thisSeason, title: SeasonHelper.currentSeasonLabel)),
+      ('Next Season', widget.viewModel.nextSeason,
+          const AnimeListFilter(type: AnimeListType.nextSeason, title: 'Next Season')),
+      ('Newly Added', widget.viewModel.newlyAdded,
+          const AnimeListFilter(type: AnimeListType.newlyAdded, title: 'Newly Added')),
+      ('Airing Soon', widget.viewModel.airingSoon,
+          const AnimeListFilter(type: AnimeListType.airingSoon, title: 'Airing Soon')),
     ];
 
     return RefreshIndicator(
@@ -46,13 +52,16 @@ class _DiscoverTabState extends State<DiscoverTab>
         padding: EdgeInsets.zero,
         children: [
           const SizedBox(height: 12),
-          _buildSectionHeader('Popular Now'),
+          _buildSectionHeader('Popular Now', const AnimeListFilter(
+            type: AnimeListType.popular,
+            title: 'Popular Now',
+          )),
           const SizedBox(height: 10),
           _buildPopularSection(widget.viewModel.popularAnime),
           const SizedBox(height: 10),
           ...sections
-              .where((section) => section.$2.isNotEmpty)
-              .map((section) => _buildSection(section.$1, section.$2)),
+            .where((section) => section.$2.isNotEmpty)
+            .map((section) => _buildSection(section.$1, section.$2, section.$3)),
           // show bottom spinner while remaining sections are still loading
           if (widget.viewModel.isBusy)
             const Padding(
@@ -67,10 +76,10 @@ class _DiscoverTabState extends State<DiscoverTab>
     );
   }
 
-  Widget _buildSection(String title, List<dynamic> animeList) {
+  Widget _buildSection(String title, List<dynamic> animeList, AnimeListFilter filter) {
     return Column(
       children: [
-        _buildSectionHeader(title),
+        _buildSectionHeader(title, filter),
         const SizedBox(height: 12),
         AnimeCardRow(
           animeList: animeList,
@@ -186,7 +195,7 @@ class _DiscoverTabState extends State<DiscoverTab>
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, AnimeListFilter filter) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Row(
@@ -200,7 +209,18 @@ class _DiscoverTabState extends State<DiscoverTab>
               fontWeight: FontWeight.w700,
             ),
           ),
-          const Icon(Icons.arrow_forward, color: kcTertiaryPink, size: 24),
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => AnimeListView(filter: filter),
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: Duration.zero,
+                transitionsBuilder: (_, __, ___, child) => child,
+              ),
+            ),
+            child: const Icon(Icons.arrow_forward, color: kcTertiaryPink, size: 24),
+          ),
         ],
       ),
     );
