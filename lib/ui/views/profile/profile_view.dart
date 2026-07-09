@@ -98,9 +98,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
         const Center(
           child: Text('Recent Activity', style: TextStyle(color: kcOffWhite)),
         ),
-        const Center(
-          child: Text('Settings', style: TextStyle(color: kcOffWhite)),
-        ),
+        _buildSettingsTab(),
       ],
     );
   }
@@ -115,7 +113,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
           Container(
             width: 200,
             height: 200,
-            padding: const EdgeInsets.all(3),
+            padding: const EdgeInsets.all(6),
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
               color: kcPrimaryPink,
@@ -149,28 +147,48 @@ class ProfileView extends StackedView<ProfileViewModel> {
           ),
           const SizedBox(height: 27),
           // stats grid
-          GridView(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 120,
-              mainAxisSpacing: 15,
-              crossAxisSpacing: 10,
-              childAspectRatio: 1.6,
-            ),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              _buildStatTile(
-                  '${viewModel.episodesWatched ?? 0}', 'episodes watched'),
-              _buildStatTile(
-                  '${viewModel.animeInProgress ?? 0}', 'anime in progress'),
-              _buildStatTile(
-                  '${viewModel.animeCompleted ?? 0}', 'anime completed'),
-              _buildStatTile(
-                  '${viewModel.longestStreak ?? 0}', 'longest streak'),
-              _buildStatTile('${viewModel.averageRating?.toInt() ?? 0}%',
-                  'average rating'),
+              IconButton(
+                icon: Icon(
+                  viewModel.statsHidden
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  color: kcLightGrey,
+                ),
+                onPressed: viewModel.toggleStatsVisibility,
+              ),
             ],
           ),
+
+          // ── Stats grid (only builds if not hidden) ──
+          if (!viewModel.statsHidden)
+            GridView(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 120,
+                mainAxisSpacing: 15,
+                crossAxisSpacing: 10,
+                childAspectRatio: 1.6,
+              ),
+              children: [
+                _buildStatTile(
+                    '${viewModel.episodesWatched ?? 0}', 'episodes watched'),
+                _buildStatTile(
+                    '${viewModel.animeInProgress ?? 0}', 'anime in progress'),
+                _buildStatTile(
+                    '${viewModel.animeCompleted ?? 0}', 'anime completed'),
+                _buildStatTile(
+                    '${viewModel.longestStreak ?? 0}', 'longest streak'),
+                _buildStatTile('${viewModel.averageRating?.toInt() ?? 0}%',
+                    'average rating'),
+                _buildStatTile(
+                    '${viewModel.totalWatchTimeHours ?? 0} hrs', 'watch time'),
+              ],
+            ),
           // favorites section
           const SizedBox(height: 28),
           Align(
@@ -222,9 +240,116 @@ class ProfileView extends StackedView<ProfileViewModel> {
     );
   }
 
+  // SETTINGS TAB
+  Widget _buildSettingsTab() {
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      children: const [
+        _SingleSection(
+          title: "Account",
+          children: [
+            _CustomListTile(
+              title: "Notifications",
+              icon: Icons.notifications_none_rounded,
+            ),
+            _CustomListTile(
+              title: "Security Status",
+              icon: Icons.lock_outline_rounded,
+            ),
+          ],
+        ),
+        Divider(color: kcLightGrey),
+        _SingleSection(
+          title: "Prefrances ",
+          children: [
+            _CustomListTile(
+              title: "Change Profile Picture",
+              icon: Icons.person_outline_rounded,
+            ),
+            _CustomListTile(
+              title: "Change Profile color",
+              icon: Icons.color_lens_outlined,
+            ),
+          ],
+        ),
+        Divider(color: kcLightGrey),
+        _SingleSection(
+          title: "Information",
+          children: [
+            _CustomListTile(
+              title: "Help & Feedback",
+              icon: Icons.help_outline_rounded,
+            ),
+            _CustomListTile(
+              title: "About",
+              icon: Icons.info_outline_rounded,
+            ),
+            _CustomListTile(
+              title: "Sign out",
+              icon: Icons.exit_to_app_rounded,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   void onViewModelReady(ProfileViewModel viewModel) => viewModel.initialise();
 
   @override
   ProfileViewModel viewModelBuilder(BuildContext context) => ProfileViewModel();
+}
+
+class _CustomListTile extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final Widget? trailing;
+  const _CustomListTile({
+    required this.title,
+    required this.icon,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(
+        title,
+        style: GoogleFonts.nunito(color: kcOffWhite, fontSize: 15),
+      ),
+      leading: Icon(icon, color: kcLightGrey),
+      trailing: trailing,
+      onTap: () {},
+    );
+  }
+}
+
+class _SingleSection extends StatelessWidget {
+  final String? title;
+  final List<Widget> children;
+  const _SingleSection({this.title, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (title != null)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              title!,
+              style: GoogleFonts.nunito(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: kcPrimaryPink,
+              ),
+            ),
+          ),
+        Column(children: children),
+      ],
+    );
+  }
 }
