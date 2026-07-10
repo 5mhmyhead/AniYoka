@@ -532,6 +532,7 @@ class AniListService {
     required AnimeListType type,
     required int page,
     String? genre,
+    String? season,
   }) async {
     String filters = 'type: ANIME, isAdult: false, sort: POPULARITY_DESC';
 
@@ -561,7 +562,7 @@ class AniListService {
         filters = 'type: ANIME, isAdult: false, sort: POPULARITY_DESC, status: RELEASING';
         break;
       case AnimeListType.season:
-        filters = 'type: ANIME, isAdult: false, sort: POPULARITY_DESC, season: ${SeasonHelper.currentSeason}, seasonYear: ${SeasonHelper.currentYear}';
+        filters = 'type: ANIME, isAdult: false, sort: POPULARITY_DESC, season: ${season ?? SeasonHelper.currentSeason}, seasonYear: ${SeasonHelper.currentYear}';
         break;
     }
 

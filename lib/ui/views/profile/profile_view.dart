@@ -308,8 +308,7 @@ class _CustomListTile extends StatelessWidget {
   const _CustomListTile({
     required this.title,
     required this.icon,
-    this.trailing,
-  });
+  }) : trailing = null;
 
   @override
   Widget build(BuildContext context) {

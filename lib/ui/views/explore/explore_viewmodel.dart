@@ -345,8 +345,9 @@ class ExploreViewModel extends BaseViewModel {
     if (_selectedGenreLabel != null) return '$_selectedGenreLabel Anime';
     if (_selectedStatusLabel != null) return '$_selectedStatusLabel Anime';
     if (_selectedFormatLabel != null) return '$_selectedFormatLabel Anime';
-    if (_selectedSortLabel != null && _selectedSortLabel != 'Default')
+    if (_selectedSortLabel != null && _selectedSortLabel != 'Default') {
       return '$_selectedSortLabel Anime';
+    }
     if (_onMyListOnly) return 'Anime On My List';
     return null;
   }

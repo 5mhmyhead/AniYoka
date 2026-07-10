@@ -25,6 +25,7 @@ class AnimeListViewModel extends BaseViewModel {
       final result = await _anilistService.getAnimeList(
         type: filter.type,
         page: _currentPage,
+        season: filter.season,
       );
       _animeList = result;
     } catch (e) {
@@ -42,6 +43,7 @@ class AnimeListViewModel extends BaseViewModel {
       final result = await _anilistService.getAnimeList(
         type: filter.type,
         page: _currentPage,
+        season: filter.season,
       );
       _animeList = [..._animeList, ...result];
     } catch (e) {
