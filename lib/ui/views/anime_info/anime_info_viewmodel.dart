@@ -6,10 +6,16 @@ import 'package:stacked/stacked.dart';
 import 'package:aniyoka/app/app.locator.dart';
 import 'package:aniyoka/services/anilist_service.dart';
 import 'package:aniyoka/services/bookmark_service.dart';
+import 'package:aniyoka/services/watchlist_service.dart';
 
 class AnimeInfoViewModel extends BaseViewModel {
   final _anilistService = locator<AniListService>();
   final _bookmarkService = locator<BookmarkService>();
+  final _watchlistService = locator<WatchlistService>();
+
+  WatchlistEntry? _watchlistEntry;
+  WatchlistEntry? get watchlistEntry => _watchlistEntry;
+  bool get isInWatchlist => _watchlistEntry != null;
 
   Map<String, dynamic>? _anime;
   Map<String, dynamic>? get anime => _anime;
@@ -22,6 +28,8 @@ class AnimeInfoViewModel extends BaseViewModel {
 
   bool _isBookmarked = false;
   bool get isBookmarked => _isBookmarked;
+
+  int get totalEpisodes => _anime?['episodes'] ?? 0;
 
   // color for gradient depending on dominant color of anime cover image
   Color _dominantColor = kcAccentSurfaceColor;
@@ -44,11 +52,18 @@ class AnimeInfoViewModel extends BaseViewModel {
       final coverImage = _anime?['coverImage']['extraLarge'] ?? '';
       if (coverImage.isNotEmpty) await _extractDominantColor(coverImage);
       await _checkBookmarkStatus();
+      await _checkWatchlistStatus();
     } catch (e) {
       setError(e.toString());
     }
     setBusy(false);
   }
+
+  Future<void> _checkWatchlistStatus() async {
+    _watchlistEntry = await _watchlistService.getEntry(_anime!['id']);
+    rebuildUi();
+  }
+
 
   // bookmark functionality
   Future<void> _checkBookmarkStatus() async {
@@ -76,6 +91,40 @@ class AnimeInfoViewModel extends BaseViewModel {
       });
     }
     _isBookmarked = !_isBookmarked;
+    rebuildUi();
+  }
+
+  Future<void> saveToWatchlist({
+    required String status,
+    required int episodesWatched,
+  }) async {
+    if (_anime == null) return;
+    final entry = WatchlistEntry(
+      id: _anime!['id'],
+      animeData: {
+        'id': _anime!['id'],
+        'title': _anime!['title'],
+        'coverImage': {
+          'large': _anime!['coverImage']['extraLarge'] ?? '',
+        },
+        'format': _anime!['format'],
+        'startDate': _anime!['startDate'],
+        'status': _anime!['status'],
+      },
+      status: status,
+      episodesWatched: episodesWatched,
+      totalEpisodes: _anime!['episodes'],
+      addedAt: _watchlistEntry?.addedAt ?? DateTime.now(),
+    );
+    await _watchlistService.addOrUpdate(entry);
+    _watchlistEntry = entry;
+    rebuildUi();
+  }
+
+  Future<void> removeFromWatchlist() async {
+    if (_anime == null) return;
+    await _watchlistService.remove(_anime!['id']);
+    _watchlistEntry = null;
     rebuildUi();
   }
 

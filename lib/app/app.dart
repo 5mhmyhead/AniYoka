@@ -9,11 +9,12 @@ import 'package:aniyoka/ui/views/explore/explore_view.dart';
 import 'package:aniyoka/ui/views/watchlist/watchlist_view.dart';
 import 'package:aniyoka/ui/views/bookmarks/bookmarks_view.dart';
 import 'package:aniyoka/ui/views/profile/profile_view.dart';
-import 'package:aniyoka/services/bookmark_service.dart';
-
-import 'package:aniyoka/services/anilist_service.dart';
 import 'package:aniyoka/ui/views/anime_info/anime_info_view.dart';
 import 'package:aniyoka/ui/views/anime_list/anime_list_view.dart';
+
+import 'package:aniyoka/services/bookmark_service.dart';
+import 'package:aniyoka/services/anilist_service.dart';
+import 'package:aniyoka/services/watchlist_service.dart';
 // @stacked-import
 
 @StackedApp(
@@ -35,6 +36,7 @@ import 'package:aniyoka/ui/views/anime_list/anime_list_view.dart';
     LazySingleton(classType: NavigationService),
     LazySingleton(classType: AniListService),
     LazySingleton(classType: BookmarkService),
+    LazySingleton(classType: WatchlistService),
     // @stacked-service
   ],
   bottomsheets: [
