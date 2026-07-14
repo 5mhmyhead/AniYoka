@@ -568,10 +568,10 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
     );
   }
 
-  void _showWatchlistSheet(BuildContext context, AnimeInfoViewModel vm) {
-    String selectedStatus = vm.watchlistEntry?.status ?? 'WATCHING';
-    int episodesWatched = vm.watchlistEntry?.episodesWatched ?? 0;
-    final totalEpisodes = vm.totalEpisodes;
+  void _showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
+    String selectedStatus = viewModel.watchlistEntry?.status ?? 'WATCHING';
+    int episodesWatched = viewModel.watchlistEntry?.episodesWatched ?? 0;
+    final totalEpisodes = viewModel.totalEpisodes;
 
     final statuses = [
       {'value': 'WATCHING', 'icon': Icons.play_circle_outline},
@@ -600,7 +600,7 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                 Center(
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 12),
-                    width: 40,
+                    width: 60,
                     height: 4,
                     decoration: BoxDecoration(
                       color: kcLightGrey,
@@ -610,45 +610,56 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                 ),
                 // cancel and save row
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                           decoration: BoxDecoration(
                             color: kcBackgroundColor,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(30),
                           ),
                           child: Text(
                             'Cancel',
                             style: GoogleFonts.nunito(
-                              color: kcOffWhite,
-                              fontWeight: FontWeight.w600,
+                              color: kcLightGrey,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
                       ),
                       GestureDetector(
                         onTap: () {
+                          // auto-fill episodes to max only when saving as completed
+                          final finalEpisodes =
+                              selectedStatus == 'COMPLETED' && totalEpisodes > 0
+                                  ? totalEpisodes
+                                  : episodesWatched;
+
                           Navigator.pop(context);
-                          vm.saveToWatchlist(
+                          viewModel.saveToWatchlist(
                             status: selectedStatus,
-                            episodesWatched: episodesWatched,
+                            episodesWatched: finalEpisodes,
                           );
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                           decoration: BoxDecoration(
                             color: kcPrimaryPink,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(30),
                           ),
                           child: Text(
                             'Save',
                             style: GoogleFonts.nunito(
                               color: kcOffWhite,
+                              fontSize: 15,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -657,118 +668,144 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 20),
                 // status buttons row
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: statuses.map((s) {
-                      final isSelected = selectedStatus == s['value'];
-                      return GestureDetector(
-                        onTap: () => setSheetState(() => selectedStatus = s['value'] as String),
-                        child: Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: isSelected ? kcPrimaryPink : kcBackgroundColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            s['icon'] as IconData,
-                            color: isSelected ? kcOffWhite : kcLightGrey,
-                            size: 24,
-                          ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: statuses.map((s) {
+                    final isSelected = selectedStatus == s['value'];
+                    return GestureDetector(
+                      onTap: () => setSheetState(
+                          () => selectedStatus = s['value'] as String),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 100),
+                        curve: Curves.easeInOut,
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: isSelected ? kcPrimaryPink : kcBackgroundColor,
+                          borderRadius:
+                              BorderRadius.circular(isSelected ? 16 : 50),
                         ),
-                      );
-                    }).toList(),
-                  ),
+                        child: Icon(
+                          s['icon'] as IconData,
+                          color: isSelected ? kcOffWhite : kcLightGrey,
+                          size: 24,
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
                 const SizedBox(height: 20),
                 // episode counter
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.play_arrow_outlined, color: kcLightGrey, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        '$episodesWatched${totalEpisodes > 0 ? '/$totalEpisodes' : ''} Episodes',
-                        style: GoogleFonts.nunito(
-                          color: kcOffWhite,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                  child: viewModel.isNotYetReleased
+                      ? Row(
+                          children: [
+                            const Icon(Icons.play_circle_outline_rounded,
+                                color: kcLightGrey, size: 24),
+                            const SizedBox(width: 12),
+                            Text(
+                              'No episodes yet',
+                              style: GoogleFonts.inter(
+                                color: kcLightGrey,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            const Icon(Icons.play_circle_outline_rounded,
+                                color: kcLightGrey, size: 24),
+                            const SizedBox(width: 12),
+                            Text(
+                              viewModel.isNotYetReleased
+                                  ? 'No episodes yet'
+                                  : viewModel.isCurrentlyAiring && viewModel.latestEpisode > 0
+                                      ? '$episodesWatched / ${viewModel.latestEpisode} of ${totalEpisodes > 0 ? totalEpisodes : '?'} Episodes'
+                                      : '$episodesWatched / ${totalEpisodes > 0 ? totalEpisodes : '?'} Episodes',
+                              style: GoogleFonts.inter(
+                                color: viewModel.isNotYetReleased ? kcLightGrey : kcOffWhite,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const Spacer(),
+                            // minus button
+                            GestureDetector(
+                              onTap: () => setSheetState(() {
+                                if (episodesWatched > 0) episodesWatched--;
+                              }),
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: const BoxDecoration(
+                                  color: kcBackgroundColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.remove,
+                                    color: kcOffWhite, size: 20),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            // plus button
+                            GestureDetector(
+                              onTap: () => setSheetState(() {
+                                final cap = viewModel.isCurrentlyAiring
+                                    ? viewModel.latestEpisode
+                                    : totalEpisodes;
+                                if (cap == 0 || episodesWatched < cap) {
+                                  episodesWatched++;
+                                }
+                              }),
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: const BoxDecoration(
+                                  color: kcBackgroundColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.add,
+                                    color: kcOffWhite, size: 20),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const Spacer(),
-                      // minus button
-                      GestureDetector(
-                        onTap: () => setSheetState(() {
-                          if (episodesWatched > 0) episodesWatched--;
-                        }),
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: const BoxDecoration(
-                            color: kcBackgroundColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.remove, color: kcOffWhite, size: 18),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // plus button
-                      GestureDetector(
-                        onTap: () => setSheetState(() {
-                          if (totalEpisodes == 0 || episodesWatched < totalEpisodes) {
-                            episodesWatched++;
-                          }
-                        }),
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: const BoxDecoration(
-                            color: kcBackgroundColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.add, color: kcOffWhite, size: 18),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
                 // progress bar
                 if (totalEpisodes > 0)
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: episodesWatched / totalEpisodes,
-                        backgroundColor: kcBackgroundColor,
-                        color: kcPrimaryPink,
-                        minHeight: 6,
-                      ),
+                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
+                    child: LinearProgressIndicator(
+                      value: episodesWatched / totalEpisodes,
+                      backgroundColor: kcBackgroundColor,
+                      color: kcPrimaryPink,
+                      minHeight: 6,
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                // remove from watchlist button (only if already in watchlist)
-                if (vm.isInWatchlist)
+                // remove from watchlist button
+                if (viewModel.isInWatchlist)
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                    padding: const EdgeInsets.all(20),
                     child: GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
-                        vm.removeFromWatchlist();
+                        _showDeleteWatchlistDialog(context, viewModel);
                       },
                       child: Row(
                         children: [
-                          const Icon(Icons.delete_outline, color: kcPrimaryPink, size: 20),
-                          const SizedBox(width: 8),
+                          const Icon(Icons.delete_outline,
+                              color: kcPrimaryPink, size: 24),
+                          const SizedBox(width: 12),
                           Text(
                             'Delete from Watch List',
-                            style: GoogleFonts.nunito(
+                            style: GoogleFonts.inter(
                               color: kcPrimaryPink,
-                              fontSize: 15,
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -785,9 +822,111 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
     );
   }
 
-  @override
-  void onViewModelReady(AnimeInfoViewModel viewModel) => viewModel.loadAnimeDetails(animeId);
+  void _showDeleteWatchlistDialog(
+      BuildContext context, AnimeInfoViewModel viewModel) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: kcSurfaceColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.delete_outline,
+                color: kcTertiaryPink,
+                size: 54,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Remove from Watch List?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: kcTertiaryPink,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Are you sure you want to delete this entry from your watch list?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: kcLightGrey,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: kcTertiaryPink,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Text(
+                          'No, keep it.',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.nunito(
+                            color: kcSurfaceColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        viewModel.removeFromWatchlist();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: kcPrimaryPink,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Text(
+                          'Yes, delete!',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.nunito(
+                            color: kcOffWhite,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
-  AnimeInfoViewModel viewModelBuilder(BuildContext context) => AnimeInfoViewModel();
+  void onViewModelReady(AnimeInfoViewModel viewModel) =>
+      viewModel.loadAnimeDetails(animeId);
+
+  @override
+  AnimeInfoViewModel viewModelBuilder(BuildContext context) =>
+      AnimeInfoViewModel();
 }

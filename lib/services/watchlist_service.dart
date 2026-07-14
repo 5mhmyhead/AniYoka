@@ -8,15 +8,33 @@ class WatchlistEntry {
   int episodesWatched;
   final int? totalEpisodes;
   final DateTime addedAt;
+  final String? animeStatus;        
+  final int? nextAiringEpisode;
 
   WatchlistEntry({
     required this.id,
     required this.animeData,
     required this.status,
     required this.episodesWatched,
-    this.totalEpisodes,
     required this.addedAt,
+    this.totalEpisodes,
+    this.animeStatus,
+    this.nextAiringEpisode,
   });
+
+  int? get latestAiredEpisode {
+    if (animeStatus != 'RELEASING') return null;
+    if (nextAiringEpisode == null) return null;
+    return nextAiringEpisode! - 1;
+  }
+
+  bool get isNotYetReleased => animeStatus == 'NOT_YET_RELEASED';
+  bool get isReleasing => animeStatus == 'RELEASING';
+
+  int? get episodeCap {
+    if (isReleasing) return latestAiredEpisode;
+    return totalEpisodes;
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -25,6 +43,8 @@ class WatchlistEntry {
     'episodesWatched': episodesWatched,
     'totalEpisodes': totalEpisodes,
     'addedAt': addedAt.toIso8601String(),
+    'animeStatus': animeStatus,
+    'nextAiringEpisode': nextAiringEpisode,
   };
 
   factory WatchlistEntry.fromJson(Map<String, dynamic> json) => WatchlistEntry(
@@ -34,6 +54,8 @@ class WatchlistEntry {
     episodesWatched: json['episodesWatched'] ?? 0,
     totalEpisodes: json['totalEpisodes'],
     addedAt: DateTime.parse(json['addedAt']),
+    animeStatus: json['animeStatus'],
+    nextAiringEpisode: json['nextAiringEpisode'],
   );
 }
 

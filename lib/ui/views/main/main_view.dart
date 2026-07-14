@@ -19,10 +19,12 @@ class MainView extends StackedView<MainViewModel> {
       body: switch (viewModel.currentPage) {
         0 => const HomeView(),
         1 => const ExploreView(),
-        2 => const WatchlistView(),
+        2 => WatchlistView(
+          onNavigateToExplore: () => viewModel.setPage(1),
+        ),
         3 => BookmarksView(
-            onNavigateToExplore: () => viewModel.setPage(1),
-          ),
+          onNavigateToExplore: () => viewModel.setPage(1),
+        ),
         4 => const ProfileView(),
         int() => throw UnimplementedError(),
       },

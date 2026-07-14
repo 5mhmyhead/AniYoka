@@ -73,9 +73,9 @@ class WatchlistView extends StackedView<WatchlistViewModel> {
           unselectedLabelStyle: GoogleFonts.nunito(fontSize: 15),
           tabs: const [
             Tab(text: 'All Anime'),
+            Tab(text: 'Watching'),
             Tab(text: 'Completed'),
             Tab(text: 'Rewatching'),
-            Tab(text: 'Favourite'),
           ],
         ),
       ],
@@ -86,9 +86,9 @@ class WatchlistView extends StackedView<WatchlistViewModel> {
     return TabBarView(
       children: [
         _buildList(viewModel.allAnime, viewModel, context),
+        _buildList(viewModel.favourites, viewModel, context),
         _buildList(viewModel.completed, viewModel, context),
         _buildList(viewModel.rewatching, viewModel, context),
-        _buildList(viewModel.favourites, viewModel, context),
       ],
     );
   }
@@ -186,11 +186,11 @@ class WatchlistView extends StackedView<WatchlistViewModel> {
     final title = entry.animeData['title']?['english'] ??
         entry.animeData['title']?['romaji'] ?? '';
     final imageUrl = entry.animeData['coverImage']?['large'] ?? '';
+    final format = entry.animeData['format'] ?? '';
+    final year = entry.animeData['startDate']?['year']?.toString() ?? '';
     final total = entry.totalEpisodes;
-    final progress = total != null && total > 0
-        ? entry.episodesWatched / total
-        : 0.0;
-    final statusLabel = entry.status[0] + entry.status.substring(1).toLowerCase();
+    final progress = total != null && total > 0 ? entry.episodesWatched / total : 0.0;
+    final statusLabel = entry.status[0] + entry.status.substring(1).toLowerCase().replaceAll('_', ' ');
 
     return GestureDetector(
       onTap: () async {
@@ -203,106 +203,269 @@ class WatchlistView extends StackedView<WatchlistViewModel> {
             transitionsBuilder: (_, __, ___, child) => child,
           ),
         );
-        viewModel.loadWatchlist(); // reload after returning
+        viewModel.loadWatchlist();
       },
+      behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // cover image
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
               child: CachedNetworkImage(
                 imageUrl: imageUrl,
-                width: 80,
-                height: 110,
+                width: 120,
+                height: 165,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => Container(width: 80, height: 110, color: kcSurfaceColor),
-                errorWidget: (_, __, ___) => Container(width: 80, height: 110, color: kcSurfaceColor),
+                placeholder: (_, __) => Container(
+                  width: 120,
+                  height: 165,
+                  color: kcSurfaceColor,
+                ),
+                errorWidget: (_, __, ___) => Container(
+                  width: 120,
+                  height: 165,
+                  color: kcSurfaceColor,
+                ),
               ),
             ),
-            const SizedBox(width: 16),
-            // info
+            const SizedBox(width: 20),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      color: kcOffWhite,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Status: $statusLabel',
-                    style: GoogleFonts.nunito(
-                      color: kcLightGrey,
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  // episode counter row
-                  Row(
-                    children: [
-                      // minus
-                      GestureDetector(
-                        onTap: () => viewModel.decrementEpisode(entry.id),
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: kcPrimaryPink,
-                            borderRadius: BorderRadius.circular(18),
+              child: SizedBox(
+                height: 165,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 2),
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            color: kcOffWhite,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            height: 1.25,
                           ),
-                          child: const Icon(Icons.remove, color: kcOffWhite, size: 18),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Ep ${entry.episodesWatched}${total != null ? ' / $total' : ''}',
-                        style: GoogleFonts.nunito(
-                          color: kcOffWhite,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              year.isNotEmpty ? '$format • $year' : format,
+                              style: GoogleFonts.nunito(
+                                color: kcLightGrey,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              statusLabel,
+                              style: GoogleFonts.nunito(
+                                color: kcAccentPink,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      // plus
-                      GestureDetector(
-                        onTap: () => viewModel.incrementEpisode(entry.id),
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // episode counter
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (entry.isNotYetReleased)
+                              Expanded(
+                                child: Center(
+                                  child: Text(
+                                    'No episodes yet',
+                                    style: GoogleFonts.nunito(
+                                      color: kcLightGrey,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else ...[
+                              if (entry.status != 'COMPLETED' && entry.status != 'DROPPED')
+                                IconButton(
+                                  onPressed: () => viewModel.decrementEpisode(entry.id),
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: kcPrimaryPink,
+                                    foregroundColor: kcOffWhite,
+                                    minimumSize: const Size(60, 40),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(40),
+                                    ),
+                                  ),
+                                  icon: const Icon(Icons.remove, size: 24),
+                                ),
+                              Expanded(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                                    child: Text(
+                                      entry.isReleasing && (entry.latestAiredEpisode ?? 0) > 0
+                                          ? 'Ep ${entry.episodesWatched} / ${entry.latestAiredEpisode} of ${entry.totalEpisodes ?? '?'}'
+                                          : 'Ep ${entry.episodesWatched}${entry.totalEpisodes != null ? ' / ${entry.totalEpisodes}' : ''}',
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.nunito(
+                                        color: kcLightGrey,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (entry.status != 'COMPLETED' && entry.status != 'DROPPED')
+                                IconButton(
+                                  onPressed: () async {
+                                    final justCompleted = await viewModel.incrementEpisode(entry.id);
+                                    if (justCompleted && context.mounted) {
+                                      _showCompletionSheet(context, entry, viewModel);
+                                    }
+                                  },
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: kcPrimaryPink,
+                                    foregroundColor: kcOffWhite,
+                                    minimumSize: const Size(60, 40),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(40),
+                                    ),
+                                  ),
+                                  icon: const Icon(Icons.add, size: 24),
+                                ),
+                            ],
+                          ],
+                        ),
+                        // progress bar
+                        ...[
+                          const SizedBox(height: 8),
+                          LinearProgressIndicator(
+                            value: progress,
+                            backgroundColor: kcSurfaceColor,
                             color: kcPrimaryPink,
-                            borderRadius: BorderRadius.circular(18),
+                            minHeight: 6,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(Icons.add, color: kcOffWhite, size: 18),
-                        ),
-                      ),
-                      const Spacer(),
-                    ],
-                  ),
-                  // progress bar
-                  if (total != null && total > 0) ...[
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: kcBackgroundColor,
-                        color: kcPrimaryPink,
-                        minHeight: 4,
-                      ),
+                        ],
+                      ],
                     ),
                   ],
-                ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCompletionSheet(
+    BuildContext context,
+    WatchlistEntry entry,
+    WatchlistViewModel viewModel,
+  ) {
+    final title = entry.animeData['title']?['english'] ??
+        entry.animeData['title']?['romaji'] ?? '';
+    final imageUrl = entry.animeData['coverImage']?['large'] ?? '';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: kcSurfaceColor,
+      isDismissible: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // drag handle
+            Center(
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                width: 60,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: kcLightGrey,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // anime cover
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
+                width: 120,
+                height: 165,
+                fit: BoxFit.cover,
+                placeholder: (_, __) => Container(width: 80, height: 110, color: kcBackgroundColor),
+                errorWidget: (_, __, ___) => Container(width: 80, height: 110, color: kcBackgroundColor),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // congratulations text
+            Text(
+              'Congratulations!',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(
+                color: kcPrimaryPink,
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'You finished $title!',
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.nunito(
+                color: kcOffWhite,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 32),
+            // lets go button
+            SizedBox(
+              width: double.infinity,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: kcPrimaryPink,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Text(
+                    "Let's Go!",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.nunito(
+                      color: kcOffWhite,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

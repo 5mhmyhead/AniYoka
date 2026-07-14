@@ -29,6 +29,12 @@ class AnimeInfoViewModel extends BaseViewModel {
   bool _isBookmarked = false;
   bool get isBookmarked => _isBookmarked;
 
+  bool get isNotYetReleased => _anime?['status'] == 'NOT_YET_RELEASED';
+  int get latestEpisode => _anime?['nextAiringEpisode']?['episode'] != null
+      ? (_anime!['nextAiringEpisode']['episode'] as int) - 1
+      : 0;
+  bool get isCurrentlyAiring => _anime?['status'] == 'RELEASING';
+
   int get totalEpisodes => _anime?['episodes'] ?? 0;
 
   // color for gradient depending on dominant color of anime cover image
@@ -104,9 +110,7 @@ class AnimeInfoViewModel extends BaseViewModel {
       animeData: {
         'id': _anime!['id'],
         'title': _anime!['title'],
-        'coverImage': {
-          'large': _anime!['coverImage']['extraLarge'] ?? '',
-        },
+        'coverImage': {'large': _anime!['coverImage']['extraLarge'] ?? ''},
         'format': _anime!['format'],
         'startDate': _anime!['startDate'],
         'status': _anime!['status'],
@@ -115,9 +119,18 @@ class AnimeInfoViewModel extends BaseViewModel {
       episodesWatched: episodesWatched,
       totalEpisodes: _anime!['episodes'],
       addedAt: _watchlistEntry?.addedAt ?? DateTime.now(),
+      animeStatus: _anime!['status'],                                     
+      nextAiringEpisode: _anime!['nextAiringEpisode']?['episode'],         
     );
     await _watchlistService.addOrUpdate(entry);
     _watchlistEntry = entry;
+
+    // remove bookmark if it exists since user is now tracking it
+    if (_isBookmarked) {
+      await _bookmarkService.removeBookmark(_anime!['id']);
+      _isBookmarked = false;
+    }
+
     rebuildUi();
   }
 

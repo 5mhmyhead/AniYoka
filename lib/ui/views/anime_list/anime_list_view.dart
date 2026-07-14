@@ -73,7 +73,7 @@ class AnimeListView extends StackedView<AnimeListViewModel> {
                           return false;
                         },
                         child: ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           itemCount: viewModel.animeList.length + (viewModel.isLoadingMore ? 1 : 0),
                           separatorBuilder: (_, __) => const Divider(
                             color: kcSurfaceColor,
@@ -119,7 +119,7 @@ class AnimeListView extends StackedView<AnimeListViewModel> {
       ),
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

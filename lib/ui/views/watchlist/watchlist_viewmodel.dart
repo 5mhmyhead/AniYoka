@@ -7,9 +7,9 @@ class WatchlistViewModel extends BaseViewModel {
 
   List<WatchlistEntry> _entries = [];
   List<WatchlistEntry> get allAnime => _entries;
+  List<WatchlistEntry> get favourites => _entries.where((e) => e.status == 'WATCHING').toList();
   List<WatchlistEntry> get completed => _entries.where((e) => e.status == 'COMPLETED').toList();
   List<WatchlistEntry> get rewatching => _entries.where((e) => e.status == 'REWATCHING').toList();
-  List<WatchlistEntry> get favourites => _entries.where((e) => e.status == 'FAVOURITE').toList();
 
   bool _hasLoaded = false;
   bool get hasLoaded => _hasLoaded;
@@ -20,12 +20,22 @@ class WatchlistViewModel extends BaseViewModel {
     rebuildUi();
   }
 
-  Future<void> incrementEpisode(int id) async {
+  Future<bool> incrementEpisode(int id) async {
     final entry = _entries.firstWhere((e) => e.id == id);
-    if (entry.totalEpisodes != null && entry.episodesWatched >= entry.totalEpisodes!) return;
+    final cap = entry.episodeCap;
+    if (cap != null && entry.episodesWatched >= cap) return false;
     entry.episodesWatched++;
+
+    // set to complete if reached the total episodes
+    bool justCompleted = false;
+    if (entry.totalEpisodes != null && entry.episodesWatched >= entry.totalEpisodes!) {
+      entry.status = 'COMPLETED';
+      justCompleted = true;
+    }
+
     await _watchlistService.addOrUpdate(entry);
     rebuildUi();
+    return justCompleted;
   }
 
   Future<void> decrementEpisode(int id) async {
