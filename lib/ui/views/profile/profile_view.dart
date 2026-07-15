@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
 import 'profile_viewmodel.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileView extends StackedView<ProfileViewModel> {
   const ProfileView({super.key});
@@ -244,18 +246,23 @@ class ProfileView extends StackedView<ProfileViewModel> {
   Widget _buildSettingsTab() {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      children: const [
+      children: [
         _SingleSection(
           title: "Account",
           children: [
             _CustomListTile(
+              title: "Manage Account Settings",
+              icon: Icons.account_circle_outlined,
+            ),
+            _CustomListTile(
+              title: "Password & Security",
+              icon: Icons.lock_outline_rounded,
+            ),
+            _CustomListTile(
               title: "Notifications",
               icon: Icons.notifications_none_rounded,
             ),
-            _CustomListTile(
-              title: "Security Status",
-              icon: Icons.lock_outline_rounded,
-            ),
+            _CustomListTile(title: "Log out", icon: Icons.logout)
           ],
         ),
         Divider(color: kcLightGrey),
@@ -270,12 +277,18 @@ class ProfileView extends StackedView<ProfileViewModel> {
               title: "Change Profile color",
               icon: Icons.color_lens_outlined,
             ),
+            _CustomListTile(title: "Score Format", icon: Icons.star_border)
           ],
         ),
         Divider(color: kcLightGrey),
         _SingleSection(
           title: "Information",
           children: [
+            _CustomListTile(
+              title: "Github Repository",
+              icon: FontAwesomeIcons.github,
+              onTap: () => _openUrl('https://github.com/5mhmyhead/AniYoka'),
+            ),
             _CustomListTile(
               title: "Help & Feedback",
               icon: Icons.help_outline_rounded,
@@ -285,13 +298,23 @@ class ProfileView extends StackedView<ProfileViewModel> {
               icon: Icons.info_outline_rounded,
             ),
             _CustomListTile(
-              title: "Sign out",
-              icon: Icons.exit_to_app_rounded,
+                title: "Developed by VIVII", icon: Icons.code_rounded),
+            _CustomListTile(
+              title: "App Version",
+              icon: FontAwesomeIcons.codeBranch,
             ),
           ],
         ),
       ],
     );
+  }
+
+// Opens git repository URL in the browser/app
+  Future<void> _openUrl(String url) async {
+    debugPrint('Attempting to open: $url');
+    final uri = Uri.parse(url);
+    final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    debugPrint('Launch result: $success');
   }
 
   @override
@@ -305,21 +328,25 @@ class _CustomListTile extends StatelessWidget {
   final String title;
   final IconData icon;
   final Widget? trailing;
+  final VoidCallback? onTap;
   const _CustomListTile({
     required this.title,
     required this.icon,
-  }) : trailing = null;
+    this.trailing,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(
         title,
-        style: GoogleFonts.nunito(color: kcOffWhite, fontSize: 15),
+        style: GoogleFonts.inter(
+            color: kcTertiaryPink, fontSize: 16, fontWeight: FontWeight.w500),
       ),
-      leading: Icon(icon, color: kcLightGrey),
+      leading: Icon(icon, color: kcPrimaryPink),
       trailing: trailing,
-      onTap: () {},
+      onTap: onTap,
     );
   }
 }
@@ -343,7 +370,7 @@ class _SingleSection extends StatelessWidget {
               style: GoogleFonts.nunito(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: kcPrimaryPink,
+                color: kcLightGrey,
               ),
             ),
           ),
