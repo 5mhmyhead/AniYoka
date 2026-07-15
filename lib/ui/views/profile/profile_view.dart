@@ -33,7 +33,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
                       child: _buildHeader(),
                     ),
                     Expanded(
-                      child: _buildTabContent(viewModel),
+                      child: _buildTabContent(viewModel, context),
                     ),
                   ],
                 ),
@@ -93,14 +93,14 @@ class ProfileView extends StackedView<ProfileViewModel> {
   }
 
   // TAB CONTENT
-  Widget _buildTabContent(ProfileViewModel viewModel) {
+  Widget _buildTabContent(ProfileViewModel viewModel, BuildContext context) {
     return TabBarView(
       children: [
         _buildMyProfileTab(viewModel),
         const Center(
           child: Text('Recent Activity', style: TextStyle(color: kcOffWhite)),
         ),
-        _buildSettingsTab(),
+        _buildSettingsTab(context, viewModel),
       ],
     );
   }
@@ -243,7 +243,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
   }
 
   // SETTINGS TAB
-  Widget _buildSettingsTab() {
+  Widget _buildSettingsTab(BuildContext context, ProfileViewModel viewModel) {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       children: [
@@ -287,25 +287,321 @@ class ProfileView extends StackedView<ProfileViewModel> {
             _CustomListTile(
               title: "Github Repository",
               icon: FontAwesomeIcons.github,
-              onTap: () => _openUrl('https://github.com/5mhmyhead/AniYoka'),
+              onTap: () => _showGithubDialog(context),
             ),
             _CustomListTile(
               title: "Help & Feedback",
               icon: Icons.help_outline_rounded,
+              onTap: () => _showHelpFeedbackDialog(context),
             ),
             _CustomListTile(
               title: "About",
               icon: Icons.info_outline_rounded,
+              onTap: () => _showAboutDialog(context),
             ),
             _CustomListTile(
                 title: "Developed by VIVII", icon: Icons.code_rounded),
             _CustomListTile(
               title: "App Version",
               icon: FontAwesomeIcons.codeBranch,
+              subtitle: viewModel.appVersion,
             ),
           ],
         ),
       ],
+    );
+  }
+
+// Confirmation dialog before leaving the app for GitHub Repository
+  void _showGithubDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: kcSurfaceColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Icon(
+                FontAwesomeIcons.github,
+                color: kcPrimaryPink,
+                size: 54,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Leave AniYoka?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: kcPrimaryPink,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'This will open your browser to view the GitHub repository.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: kcOffWhite,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: kcTertiaryPink,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.nunito(
+                            color: kcSurfaceColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        _openUrl('https://github.com/5mhmyhead/AniYoka');
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: kcPrimaryPink,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Text(
+                          'Continue',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.nunito(
+                            color: kcOffWhite,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Confirmation dialog before leaving the app for Help & Feedback
+  void _showHelpFeedbackDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: kcSurfaceColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.help_outline_rounded,
+                color: kcPrimaryPink,
+                size: 54,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Leave AniYoka?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: kcPrimaryPink,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'This will open your  email app to report a bug or send feedback.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: kcOffWhite,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: kcTertiaryPink,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.nunito(
+                            color: kcSurfaceColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        _openUrl(
+                            'mailto:sanxwich89@gmail.com?subject=AniYoka Feedback and Bug Reports&body=Describe your issue or feedback here:');
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: kcPrimaryPink,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Text(
+                          'Continue',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.nunito(
+                            color: kcOffWhite,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // About dialog
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: kcSurfaceColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.info_outline_rounded,
+                color: kcPrimaryPink,
+                size: 54,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'AniYoka',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: kcPrimaryPink,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Version 1.0.0',
+                style: GoogleFonts.nunito(
+                  color: kcPrimaryPink,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'AniYoka helps you track, discover, and organize the anime you watch. Keep your watchlist up to date, monitor your progress, and never miss an episode.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: kcOffWhite,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Divider(color: kcLightGrey.withValues(alpha: 0.3)),
+              const SizedBox(height: 12),
+              Text(
+                'Developed by group VIVII',
+                style: GoogleFonts.nunito(
+                  color: kcLightGrey,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: kcPrimaryPink,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Text(
+                      'Close',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.nunito(
+                        color: kcOffWhite,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -327,11 +623,13 @@ class ProfileView extends StackedView<ProfileViewModel> {
 class _CustomListTile extends StatelessWidget {
   final String title;
   final IconData icon;
+  final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
   const _CustomListTile({
     required this.title,
     required this.icon,
+    this.subtitle,
     this.trailing,
     this.onTap,
   });
@@ -344,6 +642,12 @@ class _CustomListTile extends StatelessWidget {
         style: GoogleFonts.inter(
             color: kcTertiaryPink, fontSize: 16, fontWeight: FontWeight.w500),
       ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle!,
+              style: GoogleFonts.inter(color: kcPrimaryPink, fontSize: 13),
+            )
+          : null,
       leading: Icon(icon, color: kcPrimaryPink),
       trailing: trailing,
       onTap: onTap,

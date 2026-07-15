@@ -12,6 +12,7 @@ class ProfileViewModel extends BaseViewModel {
   double? _averageRating;
   int? _totalWatchTimeHours;
   bool _statsHidden = false;
+  final String appVersion = '1.0.0';
   //Public getters for user name
   String? get username => _username;
   String? get email => _email;
