@@ -1,4 +1,5 @@
 import 'package:aniyoka/app/app.locator.dart';
+import 'package:aniyoka/services/recent_activity_service.dart';
 import 'package:aniyoka/services/watchlist_service.dart';
 import 'package:aniyoka/ui/common/app_colors.dart';
 import 'package:aniyoka/ui/views/anime_info/anime_info_view.dart';
@@ -15,6 +16,7 @@ class WatchingTab extends StatefulWidget {
 
 class _WatchingTabState extends State<WatchingTab> {
   final _watchlistService = locator<WatchlistService>();
+  final RecentActivityService _recentActivityService = RecentActivityService();
 
   List<WatchlistEntry> _entries = [];
   bool _hasLoaded = false;
@@ -73,7 +75,8 @@ class _WatchingTabState extends State<WatchingTab> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: _entries.length,
-        separatorBuilder: (_, __) => const Divider(color: kcSurfaceColor, height: 1),
+        separatorBuilder: (_, __) =>
+            const Divider(color: kcSurfaceColor, height: 1),
         itemBuilder: (context, index) {
           final entry = _entries[index];
           return WatchlistEntryTile(
@@ -92,23 +95,44 @@ class _WatchingTabState extends State<WatchingTab> {
             },
             onDecrement: () async {
               if (entry.episodesWatched <= 0) return;
+
               entry.episodesWatched--;
               await _watchlistService.addOrUpdate(entry);
+              await _recordActivity(
+                entry,
+                action: 'WATCHING',
+                description: _capitalizeFirst(_progressText(entry)),
+              );
+
               if (mounted) setState(() {});
             },
             onIncrement: () async {
               final cap = entry.episodeCap;
               if (cap != null && entry.episodesWatched >= cap) return false;
+
               entry.episodesWatched++;
-              bool justCompleted = false;
-              if (entry.totalEpisodes != null && entry.episodesWatched >= entry.totalEpisodes!) {
+              var justCompleted = false;
+
+              if (entry.totalEpisodes != null &&
+                  entry.totalEpisodes! > 0 &&
+                  entry.episodesWatched >= entry.totalEpisodes!) {
+                entry.episodesWatched = entry.totalEpisodes!;
                 entry.status = 'COMPLETED';
                 justCompleted = true;
               }
+
               await _watchlistService.addOrUpdate(entry);
+              await _recordActivity(
+                entry,
+                action: justCompleted ? 'COMPLETED' : 'WATCHING',
+                description: justCompleted
+                    ? 'Completed'
+                    : _capitalizeFirst(_progressText(entry)),
+              );
+
               if (mounted) {
                 setState(() {
-                  // a completed entry drops out of the WATCHING filter
+                  // A completed entry drops out of the WATCHING filter.
                   if (justCompleted) _entries.remove(entry);
                 });
               }
@@ -117,6 +141,61 @@ class _WatchingTabState extends State<WatchingTab> {
           );
         },
       ),
+    );
+  }
+
+  String _titleFor(WatchlistEntry entry) {
+    final title = entry.animeData['title'];
+
+    if (title is Map) {
+      return (title['english'] ??
+              title['romaji'] ??
+              title['native'] ??
+              'Unknown anime')
+          .toString();
+    }
+
+    return 'Unknown anime';
+  }
+
+  String? _coverFor(WatchlistEntry entry) {
+    final coverImage = entry.animeData['coverImage'];
+
+    if (coverImage is Map) {
+      final imageUrl = coverImage['large'] ?? coverImage['medium'];
+      final value = imageUrl?.toString() ?? '';
+      return value.isEmpty ? null : value;
+    }
+
+    return null;
+  }
+
+  String _progressText(WatchlistEntry entry) {
+    final total = entry.totalEpisodes;
+
+    if (total == null || total <= 0) {
+      return 'episode ${entry.episodesWatched}';
+    }
+
+    return 'episode ${entry.episodesWatched} of $total';
+  }
+
+  String _capitalizeFirst(String value) {
+    if (value.isEmpty) return value;
+    return value[0].toUpperCase() + value.substring(1);
+  }
+
+  Future<void> _recordActivity(
+    WatchlistEntry entry, {
+    required String action,
+    required String description,
+  }) {
+    return _recentActivityService.addActivity(
+      animeId: entry.id,
+      title: _titleFor(entry),
+      action: action,
+      description: description,
+      coverImageUrl: _coverFor(entry),
     );
   }
 }

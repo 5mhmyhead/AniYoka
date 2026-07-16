@@ -21,13 +21,17 @@ class WatchlistEntryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = entry.animeData['title']?['english'] ??
-        entry.animeData['title']?['romaji'] ?? '';
+        entry.animeData['title']?['romaji'] ??
+        '';
     final imageUrl = entry.animeData['coverImage']?['large'] ?? '';
     final format = entry.animeData['format'] ?? '';
     final year = entry.animeData['startDate']?['year']?.toString() ?? '';
     final total = entry.totalEpisodes;
-    final progress = total != null && total > 0 ? entry.episodesWatched / total : 0.0;
-    final statusLabel = entry.status[0] + entry.status.substring(1).toLowerCase().replaceAll('_', ' ');
+    final progress = total != null && total > 0
+        ? (entry.episodesWatched / total).clamp(0.0, 1.0).toDouble()
+        : 0.0;
+    final statusLabel = entry.status[0] +
+        entry.status.substring(1).toLowerCase().replaceAll('_', ' ');
 
     return GestureDetector(
       onTap: onTap,
@@ -124,7 +128,8 @@ class WatchlistEntryTile extends StatelessWidget {
                                 ),
                               )
                             else ...[
-                              if (entry.status != 'COMPLETED' && entry.status != 'DROPPED')
+                              if (entry.status != 'COMPLETED' &&
+                                  entry.status != 'DROPPED')
                                 IconButton(
                                   onPressed: onDecrement,
                                   style: IconButton.styleFrom(
@@ -140,9 +145,12 @@ class WatchlistEntryTile extends StatelessWidget {
                               Expanded(
                                 child: Center(
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 5),
                                     child: Text(
-                                      entry.isReleasing && (entry.latestAiredEpisode ?? 0) > 0
+                                      entry.isReleasing &&
+                                              (entry.latestAiredEpisode ?? 0) >
+                                                  0
                                           ? 'Ep ${entry.episodesWatched} / ${entry.latestAiredEpisode} of ${entry.totalEpisodes ?? '?'}'
                                           : 'Ep ${entry.episodesWatched}${entry.totalEpisodes != null ? ' / ${entry.totalEpisodes}' : ''}',
                                       textAlign: TextAlign.center,
@@ -157,12 +165,14 @@ class WatchlistEntryTile extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              if (entry.status != 'COMPLETED' && entry.status != 'DROPPED')
+                              if (entry.status != 'COMPLETED' &&
+                                  entry.status != 'DROPPED')
                                 IconButton(
                                   onPressed: () async {
                                     final justCompleted = await onIncrement();
                                     if (justCompleted && context.mounted) {
-                                      showWatchlistCompletionSheet(context, entry);
+                                      showWatchlistCompletionSheet(
+                                          context, entry);
                                     }
                                   },
                                   style: IconButton.styleFrom(
@@ -204,7 +214,8 @@ class WatchlistEntryTile extends StatelessWidget {
 
 void showWatchlistCompletionSheet(BuildContext context, WatchlistEntry entry) {
   final title = entry.animeData['title']?['english'] ??
-      entry.animeData['title']?['romaji'] ?? '';
+      entry.animeData['title']?['romaji'] ??
+      '';
   final imageUrl = entry.animeData['coverImage']?['large'] ?? '';
 
   showModalBottomSheet(
@@ -240,8 +251,10 @@ void showWatchlistCompletionSheet(BuildContext context, WatchlistEntry entry) {
               width: 120,
               height: 165,
               fit: BoxFit.cover,
-              placeholder: (_, __) => Container(width: 80, height: 110, color: kcBackgroundColor),
-              errorWidget: (_, __, ___) => Container(width: 80, height: 110, color: kcBackgroundColor),
+              placeholder: (_, __) =>
+                  Container(width: 80, height: 110, color: kcBackgroundColor),
+              errorWidget: (_, __, ___) =>
+                  Container(width: 80, height: 110, color: kcBackgroundColor),
             ),
           ),
           const SizedBox(height: 20),

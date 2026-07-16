@@ -1,4 +1,6 @@
+import 'package:aniyoka/services/recent_activity_service.dart';
 import 'package:aniyoka/ui/common/app_colors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,7 +32,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
                   children: [
                     Container(
                       color: kcSurfaceColor,
-                      child: _buildHeader(),
+                      child: _buildHeader(viewModel),
                     ),
                     Expanded(
                       child: _buildTabContent(viewModel, context),
@@ -43,7 +45,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
   }
 
   // HEADER (title + tab bar)
-  Widget _buildHeader() {
+  Widget _buildHeader(ProfileViewModel viewModel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -61,14 +63,19 @@ class ProfileView extends StackedView<ProfileViewModel> {
             ),
           ),
         ),
-        _buildTabBar(),
+        _buildTabBar(viewModel),
       ],
     );
   }
 
   // TAB BAR
-  Widget _buildTabBar() {
+  Widget _buildTabBar(ProfileViewModel viewModel) {
     return TabBar(
+      onTap: (index) {
+        if (index == 1) {
+          viewModel.loadRecentActivities();
+        }
+      },
       isScrollable: false,
       labelColor: kcPrimaryPink,
       unselectedLabelColor: kcLightGrey,
@@ -97,9 +104,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
     return TabBarView(
       children: [
         _buildMyProfileTab(viewModel),
-        const Center(
-          child: Text('Recent Activity', style: TextStyle(color: kcOffWhite)),
-        ),
+        _buildRecentActivityTab(context, viewModel),
         _buildSettingsTab(context, viewModel),
       ],
     );
@@ -242,6 +247,358 @@ class ProfileView extends StackedView<ProfileViewModel> {
     );
   }
 
+  // RECENT ACTIVITY TAB
+  Widget _buildRecentActivityTab(
+    BuildContext context,
+    ProfileViewModel viewModel,
+  ) {
+    if (viewModel.activitiesLoading && viewModel.recentActivities.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(color: kcPrimaryPink),
+      );
+    }
+
+    if (viewModel.recentActivities.isEmpty) {
+      return RefreshIndicator(
+        color: kcPrimaryPink,
+        backgroundColor: kcSurfaceColor,
+        onRefresh: () => viewModel.loadRecentActivities(),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.58,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.history_rounded,
+                      color: kcLightGrey,
+                      size: 54,
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      'No recent activity yet',
+                      style: GoogleFonts.nunito(
+                        color: kcOffWhite,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 36),
+                      child: Text(
+                        'Watch List changes will appear here.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.nunito(
+                          color: kcLightGrey,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(18, 12, 12, 4),
+          child: Row(
+            children: [
+              Text(
+                'Recent Activity',
+                style: GoogleFonts.nunito(
+                  color: kcOffWhite,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: () =>
+                    _confirmClearRecentActivities(context, viewModel),
+                icon: const Icon(
+                  Icons.delete_sweep_outlined,
+                  color: kcPrimaryPink,
+                  size: 20,
+                ),
+                label: Text(
+                  'Clear',
+                  style: GoogleFonts.nunito(
+                    color: kcPrimaryPink,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            color: kcPrimaryPink,
+            backgroundColor: kcSurfaceColor,
+            onRefresh: () => viewModel.loadRecentActivities(),
+            child: ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(14, 4, 14, 24),
+              itemCount: viewModel.recentActivities.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (context, index) {
+                return _buildActivityCard(
+                  viewModel.recentActivities[index],
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActivityCard(RecentActivityEntry activity) {
+    final imageUrl = activity.coverImageUrl ?? '';
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: kcSurfaceColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(9),
+            child: imageUrl.isEmpty
+                ? Container(
+                    width: 58,
+                    height: 82,
+                    color: kcBackgroundColor,
+                    child: const Icon(
+                      Icons.image_not_supported_outlined,
+                      color: kcLightGrey,
+                    ),
+                  )
+                : CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    width: 58,
+                    height: 82,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Container(
+                      width: 58,
+                      height: 82,
+                      color: kcBackgroundColor,
+                    ),
+                    errorWidget: (_, __, ___) => Container(
+                      width: 58,
+                      height: 82,
+                      color: kcBackgroundColor,
+                      child: const Icon(
+                        Icons.broken_image_outlined,
+                        color: kcLightGrey,
+                      ),
+                    ),
+                  ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: kcAccentShadePink,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _activityIcon(activity.action),
+                        color: kcPrimaryPink,
+                        size: 19,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        activity.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          color: kcOffWhite,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 7),
+                Text(
+                  _activitySummary(activity),
+                  style: GoogleFonts.nunito(
+                    color: kcLightGrey,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 7),
+                Text(
+                  _relativeTime(activity.createdAt),
+                  style: GoogleFonts.nunito(
+                    color: kcPrimaryPink,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _activityIcon(String action) {
+    switch (action.toUpperCase()) {
+      case 'WATCHING':
+        return Icons.play_circle_outline_rounded;
+      case 'COMPLETED':
+        return Icons.check_circle_outline_rounded;
+      case 'PAUSED':
+        return Icons.pause_circle_outline_rounded;
+      case 'DROPPED':
+        return Icons.delete_outline_rounded;
+      case 'REWATCHING':
+        return Icons.replay_rounded;
+      case 'REMOVED':
+        return Icons.remove_circle_outline_rounded;
+      case 'PROGRESS':
+        return Icons.play_circle_outline_rounded;
+      default:
+        return Icons.update_rounded;
+    }
+  }
+
+  String _activitySummary(RecentActivityEntry activity) {
+    final action = activity.action.toUpperCase();
+
+    if (action == 'WATCHING' || action == 'PROGRESS') {
+      return _extractEpisodeProgress(activity.description) ?? 'Watching';
+    }
+
+    switch (action) {
+      case 'COMPLETED':
+        return 'Completed';
+      case 'PAUSED':
+        return 'Paused';
+      case 'DROPPED':
+        return 'Dropped';
+      case 'REWATCHING':
+        return 'Rewatching';
+      case 'REMOVED':
+        return 'Removed from Watch List';
+      default:
+        return activity.description;
+    }
+  }
+
+  String? _extractEpisodeProgress(String text) {
+    final matches = RegExp(
+      r'episode\s+(\d+)(?:\s+of\s+(\d+))?',
+      caseSensitive: false,
+    ).allMatches(text).toList();
+
+    if (matches.isEmpty) return null;
+
+    final latest = matches.last;
+    final watched = latest.group(1);
+    final total = latest.group(2);
+
+    if (watched == null) return null;
+    return total == null ? 'Episode $watched' : 'Episode $watched of $total';
+  }
+
+  String _relativeTime(DateTime createdAt) {
+    final difference = DateTime.now().difference(createdAt);
+
+    if (difference.inSeconds < 60) return 'Just now';
+    if (difference.inMinutes < 60) {
+      final value = difference.inMinutes;
+      return '$value minute${value == 1 ? '' : 's'} ago';
+    }
+    if (difference.inHours < 24) {
+      final value = difference.inHours;
+      return '$value hour${value == 1 ? '' : 's'} ago';
+    }
+    if (difference.inDays < 7) {
+      final value = difference.inDays;
+      return '$value day${value == 1 ? '' : 's'} ago';
+    }
+
+    final month = createdAt.month.toString().padLeft(2, '0');
+    final day = createdAt.day.toString().padLeft(2, '0');
+    return '${createdAt.year}-$month-$day';
+  }
+
+  Future<void> _confirmClearRecentActivities(
+    BuildContext context,
+    ProfileViewModel viewModel,
+  ) async {
+    final shouldClear = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: kcSurfaceColor,
+          title: Text(
+            'Clear recent activity?',
+            style: GoogleFonts.nunito(
+              color: kcOffWhite,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: Text(
+            'This will permanently remove the saved activity history.',
+            style: GoogleFonts.nunito(color: kcLightGrey),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: kcLightGrey),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text(
+                'Clear',
+                style: TextStyle(color: kcPrimaryPink),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldClear == true) {
+      await viewModel.clearRecentActivities();
+    }
+  }
+
   // SETTINGS TAB
   Widget _buildSettingsTab(BuildContext context, ProfileViewModel viewModel) {
     return ListView(
@@ -329,7 +686,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-            // const Icon(
+              // const Icon(
               //     FontAwesomeIcons.github,
               //     color: kcPrimaryPink,
               //     size: 54,
