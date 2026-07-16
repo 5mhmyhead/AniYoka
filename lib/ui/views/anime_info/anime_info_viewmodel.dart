@@ -6,14 +6,16 @@ import 'package:stacked/stacked.dart';
 import 'package:aniyoka/app/app.locator.dart';
 import 'package:aniyoka/services/anilist_service.dart';
 import 'package:aniyoka/services/bookmark_service.dart';
-import 'package:aniyoka/services/recent_activity_service.dart';
 import 'package:aniyoka/services/watchlist_service.dart';
+import 'package:aniyoka/services/category_service.dart';
+import 'package:aniyoka/services/recent_activity_service.dart';
 
 class AnimeInfoViewModel extends BaseViewModel {
   final _anilistService = locator<AniListService>();
   final _bookmarkService = locator<BookmarkService>();
   final _watchlistService = locator<WatchlistService>();
-  final RecentActivityService _recentActivityService = RecentActivityService();
+  final _categoryService = locator<CategoryService>();
+  final _recentActivityService = RecentActivityService();
 
   WatchlistEntry? _watchlistEntry;
   WatchlistEntry? get watchlistEntry => _watchlistEntry;
@@ -30,6 +32,12 @@ class AnimeInfoViewModel extends BaseViewModel {
 
   bool _isBookmarked = false;
   bool get isBookmarked => _isBookmarked;
+
+  List<String> _availableCategories = [];
+  List<String> get availableCategories => _availableCategories;
+
+  Set<String> _selectedCategories = {};
+  Set<String> get selectedCategories => _selectedCategories;
 
   bool get isNotYetReleased => _anime?['status'] == 'NOT_YET_RELEASED';
   int get latestEpisode => _anime?['nextAiringEpisode']?['episode'] != null
@@ -61,6 +69,7 @@ class AnimeInfoViewModel extends BaseViewModel {
       if (coverImage.isNotEmpty) await _extractDominantColor(coverImage);
       await _checkBookmarkStatus();
       await _checkWatchlistStatus();
+      await _loadCategories();
     } catch (e) {
       setError(e.toString());
     }
@@ -70,6 +79,36 @@ class AnimeInfoViewModel extends BaseViewModel {
   Future<void> _checkWatchlistStatus() async {
     _watchlistEntry = await _watchlistService.getEntry(_anime!['id']);
     rebuildUi();
+  }
+
+  Future<void> _loadCategories() async {
+    if (_anime == null) return;
+    _availableCategories = await _categoryService.getCategories();
+    _selectedCategories = await _categoryService.getCategoriesForAnime(_anime!['id']);
+    rebuildUi();
+  }
+
+  // Re-reads the global category list — call after the Custom Categories
+  // management sheet is closed so renames/deletes/additions show up here.
+  Future<void> refreshAvailableCategories() async {
+    _availableCategories = await _categoryService.getCategories();
+    // a rename/delete may have changed which of the available categories
+    // this anime is still assigned to
+    if (_anime != null) {
+      _selectedCategories = await _categoryService.getCategoriesForAnime(_anime!['id']);
+    }
+    rebuildUi();
+  }
+
+  Future<void> toggleCategory(String category) async {
+    if (_anime == null) return;
+    if (_selectedCategories.contains(category)) {
+      _selectedCategories.remove(category);
+    } else {
+      _selectedCategories.add(category);
+    }
+    rebuildUi();
+    await _categoryService.setCategoriesForAnime(_anime!['id'], _selectedCategories);
   }
 
   // bookmark functionality
@@ -119,21 +158,17 @@ class AnimeInfoViewModel extends BaseViewModel {
       animeData: {
         'id': _anime!['id'],
         'title': _anime!['title'],
-        'coverImage': {
-          'large': _anime!['coverImage']['extraLarge'] ??
-              _anime!['coverImage']['large'] ??
-              '',
-        },
+        'coverImage': {'large': _anime!['coverImage']['extraLarge'] ?? ''},
         'format': _anime!['format'],
         'startDate': _anime!['startDate'],
         'status': _anime!['status'],
       },
-      status: normalizedStatus,
-      episodesWatched: safeEpisodes,
+      status: status,
+      episodesWatched: episodesWatched,
       totalEpisodes: _anime!['episodes'],
-      addedAt: previousEntry?.addedAt ?? DateTime.now(),
-      animeStatus: _anime!['status'],
-      nextAiringEpisode: _anime!['nextAiringEpisode']?['episode'],
+      addedAt: _watchlistEntry?.addedAt ?? DateTime.now(),
+      animeStatus: _anime!['status'],                                     
+      nextAiringEpisode: _anime!['nextAiringEpisode']?['episode'],         
     );
 
     await _watchlistService.addOrUpdate(entry);
@@ -144,7 +179,7 @@ class AnimeInfoViewModel extends BaseViewModel {
       currentEntry: entry,
     );
 
-    // A tracked anime no longer needs to remain in Bookmarks.
+    // remove bookmark if it exists since user is now tracking it
     if (_isBookmarked) {
       await _bookmarkService.removeBookmark(_anime!['id']);
       _isBookmarked = false;
@@ -372,11 +407,11 @@ class AnimeInfoViewModel extends BaseViewModel {
 
   String cleanDescription(String description) {
     return description
-        .replaceAll(RegExp(r'<[^>]*>'), '')
-        .replaceAll('&nbsp;', ' ')
-        .replaceAll('&amp;', '&')
-        .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>')
+        .replaceAll(RegExp(r'<[^>]*>'), '') 
+        .replaceAll('&nbsp;', ' ') 
+        .replaceAll('&amp;', '&') 
+        .replaceAll('&lt;', '<') 
+        .replaceAll('&gt;', '>') 
         .trim();
   }
 

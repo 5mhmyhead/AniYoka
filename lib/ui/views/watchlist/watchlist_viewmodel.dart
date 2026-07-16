@@ -1,6 +1,7 @@
 import 'package:aniyoka/app/app.locator.dart';
-import 'package:aniyoka/services/recent_activity_service.dart';
+import 'package:aniyoka/services/category_service.dart';
 import 'package:aniyoka/services/watchlist_service.dart';
+import 'package:aniyoka/services/recent_activity_service.dart';
 import 'package:stacked/stacked.dart';
 
 enum WatchlistSort { title, progress, recentlyAdded, oldestAdded }
@@ -8,23 +9,23 @@ enum WatchlistSort { title, progress, recentlyAdded, oldestAdded }
 extension WatchlistSortLabel on WatchlistSort {
   String get label {
     switch (this) {
-      case WatchlistSort.title:
-        return 'Title';
-      case WatchlistSort.progress:
-        return 'Progress';
-      case WatchlistSort.recentlyAdded:
-        return 'Recently Added';
-      case WatchlistSort.oldestAdded:
-        return 'Oldest Added';
+      case WatchlistSort.title: return 'Title';
+      case WatchlistSort.progress: return 'Progress';
+      case WatchlistSort.recentlyAdded: return 'Recently Added';
+      case WatchlistSort.oldestAdded: return 'Oldest Added';
     }
   }
 }
 
 class WatchlistViewModel extends BaseViewModel {
-  final WatchlistService _watchlistService = locator<WatchlistService>();
-  final RecentActivityService _recentActivityService = RecentActivityService();
+  final _watchlistService = locator<WatchlistService>();
+  final _categoryService = locator<CategoryService>();
+  final _recentActivityService = RecentActivityService();
 
-  List<String> get categories => const ['All Anime'];
+  static const String allCategoryLabel = 'All Anime';
+
+  List<String> _customCategories = [];
+  List<String> get categories => [allCategoryLabel, ..._customCategories];
 
   static const List<String> statusOptions = [
     'Watching',
@@ -39,6 +40,8 @@ class WatchlistViewModel extends BaseViewModel {
   List<WatchlistEntry> _entries = [];
   bool _hasLoaded = false;
   bool get hasLoaded => _hasLoaded;
+
+  Map<int, Set<String>> _categoryAssignments = {};
 
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
@@ -75,40 +78,43 @@ class WatchlistViewModel extends BaseViewModel {
   }
 
   List<WatchlistEntry> _applySearchAndSort(List<WatchlistEntry> list) {
-    var result = List<WatchlistEntry>.from(list);
+    var result = list;
 
+    // apply search
     if (_searchQuery.isNotEmpty) {
-      final query = _searchQuery.toLowerCase();
-      result = result.where((entry) {
-        return _titleFor(entry).toLowerCase().contains(query);
+      final q = _searchQuery.toLowerCase();
+      result = result.where((e) {
+        final title = (e.animeData['title']?['english'] ??
+            e.animeData['title']?['romaji'] ?? '').toLowerCase();
+        return title.contains(q);
       }).toList();
     }
 
+    // apply status filter
     if (_selectedStatuses.isNotEmpty) {
-      result = result.where((entry) {
-        return _selectedStatuses.any(
-          (status) => _normalizeStatus(status) == entry.status,
-        );
-      }).toList();
+      result = result
+          .where((e) => _selectedStatuses.any((s) => s.toUpperCase() == e.status))
+          .toList();
     }
 
+    // apply sort
     switch (_sort) {
       case WatchlistSort.title:
-        result.sort(
-          (a, b) => _titleFor(a).toLowerCase().compareTo(
-                _titleFor(b).toLowerCase(),
-              ),
-        );
+        result.sort((a, b) {
+          final ta = a.animeData['title']?['english'] ?? a.animeData['title']?['romaji'] ?? '';
+          final tb = b.animeData['title']?['english'] ?? b.animeData['title']?['romaji'] ?? '';
+          return ta.compareTo(tb);
+        });
         break;
       case WatchlistSort.progress:
         result.sort((a, b) {
-          final progressA = a.totalEpisodes != null && a.totalEpisodes! > 0
+          final pa = a.totalEpisodes != null && a.totalEpisodes! > 0
               ? a.episodesWatched / a.totalEpisodes!
               : 0.0;
-          final progressB = b.totalEpisodes != null && b.totalEpisodes! > 0
+          final pb = b.totalEpisodes != null && b.totalEpisodes! > 0
               ? b.episodesWatched / b.totalEpisodes!
               : 0.0;
-          return progressB.compareTo(progressA);
+          return pb.compareTo(pa);
         });
         break;
       case WatchlistSort.recentlyAdded:
@@ -119,17 +125,27 @@ class WatchlistViewModel extends BaseViewModel {
         break;
     }
 
+    // apply ascending/descending toggle on top of the base ordering above
     if (!_sortAscending) {
       result = result.reversed.toList();
     }
 
     return result;
   }
+  
+  List<WatchlistEntry> entriesForCategory(String category) {
+    if (category == allCategoryLabel) return allAnime;
 
-  List<WatchlistEntry> entriesForCategory(String category) => allAnime;
+    final filtered = _entries
+        .where((e) => (_categoryAssignments[e.id] ?? const {}).contains(category))
+        .toList();
+    return _applySearchAndSort(filtered);
+  }
 
   Future<void> loadWatchlist() async {
     _entries = await _watchlistService.getWatchlist();
+    _customCategories = await _categoryService.getCategories();
+    _categoryAssignments = await _categoryService.getAllAssignments();
     _hasLoaded = true;
     rebuildUi();
   }
@@ -194,7 +210,7 @@ class WatchlistViewModel extends BaseViewModel {
     rebuildUi();
   }
 
-  Future<void> removeEntry(int id) async {
+   Future<void> removeEntry(int id) async {
     final entry = _entryFor(id);
 
     await _watchlistService.remove(id);

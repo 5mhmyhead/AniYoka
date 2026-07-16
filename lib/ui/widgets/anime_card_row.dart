@@ -31,7 +31,7 @@ class AnimeCardRow extends StatelessWidget {
       height: 240,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(left: 20),
+        padding: const EdgeInsets.fromLTRB(20, 0, 8, 0),
         itemCount: animeList.length,
         separatorBuilder: (_, __) => const SizedBox(width: 15),
         itemBuilder: (context, index) {

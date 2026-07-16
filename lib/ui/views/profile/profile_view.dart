@@ -308,59 +308,73 @@ class ProfileView extends StackedView<ProfileViewModel> {
       );
     }
 
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 12, 12, 4),
-          child: Row(
-            children: [
-              Text(
-                'Recent Activity',
-                style: GoogleFonts.nunito(
-                  color: kcOffWhite,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const Spacer(),
-              TextButton.icon(
-                onPressed: () =>
-                    _confirmClearRecentActivities(context, viewModel),
-                icon: const Icon(
-                  Icons.delete_sweep_outlined,
-                  color: kcPrimaryPink,
-                  size: 20,
-                ),
-                label: Text(
-                  'Clear',
-                  style: GoogleFonts.nunito(
-                    color: kcPrimaryPink,
-                    fontWeight: FontWeight.w700,
+    return RefreshIndicator(
+      color: kcPrimaryPink,
+      backgroundColor: kcSurfaceColor,
+      onRefresh: () => viewModel.loadRecentActivities(),
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Text(
+                    'Recent Activity',
+                    style: GoogleFonts.nunito(
+                      color: kcOffWhite,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
+                  const Spacer(),
+                  TextButton.icon(
+                    onPressed: () =>
+                        _confirmClearRecentActivities(context, viewModel),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero, 
+                      minimumSize: Size.zero, 
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    icon: const Icon(
+                      Icons.delete_sweep_outlined,
+                      color: kcPrimaryPink,
+                      size: 20,
+                    ),
+                    label: Text(
+                      'Clear',
+                      style: GoogleFonts.nunito(
+                        color: kcPrimaryPink,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: RefreshIndicator(
-            color: kcPrimaryPink,
-            backgroundColor: kcSurfaceColor,
-            onRefresh: () => viewModel.loadRecentActivities(),
-            child: ListView.separated(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(14, 4, 14, 24),
-              itemCount: viewModel.recentActivities.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                return _buildActivityCard(
-                  viewModel.recentActivities[index],
-                );
-              },
             ),
           ),
-        ),
-      ],
+          
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final activity = viewModel.recentActivities[index];
+                  if (index == viewModel.recentActivities.length - 1) {
+                    return _buildActivityCard(activity);
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _buildActivityCard(activity),
+                  );
+                },
+                childCount: viewModel.recentActivities.length,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -371,17 +385,17 @@ class ProfileView extends StackedView<ProfileViewModel> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: kcSurfaceColor,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: BorderRadius.circular(5),
             child: imageUrl.isEmpty
                 ? Container(
-                    width: 58,
-                    height: 82,
+                    width: 62,
+                    height: 88,
                     color: kcBackgroundColor,
                     child: const Icon(
                       Icons.image_not_supported_outlined,
@@ -390,17 +404,17 @@ class ProfileView extends StackedView<ProfileViewModel> {
                   )
                 : CachedNetworkImage(
                     imageUrl: imageUrl,
-                    width: 58,
-                    height: 82,
+                    width: 62,
+                    height: 88,
                     fit: BoxFit.cover,
                     placeholder: (_, __) => Container(
-                      width: 58,
-                      height: 82,
+                      width: 62,
+                    height: 88,
                       color: kcBackgroundColor,
                     ),
                     errorWidget: (_, __, ___) => Container(
-                      width: 58,
-                      height: 82,
+                      width: 62,
+                      height: 88,
                       color: kcBackgroundColor,
                       child: const Icon(
                         Icons.broken_image_outlined,
@@ -409,13 +423,14 @@ class ProfileView extends StackedView<ProfileViewModel> {
                     ),
                   ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 15),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
                       width: 32,

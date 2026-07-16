@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class _CategoryEdit {
-  // null means this entry was created during this editing session and doesn't exist yet
   final String? original;
   String current;
 
@@ -58,10 +57,10 @@ Future<void> showCustomCategoriesSheet(BuildContext context) async {
 
         return Padding(
           padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
+            left: 20,
+            right: 20,
             top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 40,
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -83,13 +82,13 @@ Future<void> showCustomCategoriesSheet(BuildContext context) async {
                   textAlign: TextAlign.center,
                   style: GoogleFonts.nunito(
                     color: kcPrimaryPink,
-                    fontSize: 22,
+                    fontSize: 32,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 ...workingCategories.map((edit) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 20),
                       child: Row(
                         children: [
                           Expanded(
@@ -105,22 +104,22 @@ Future<void> showCustomCategoriesSheet(BuildContext context) async {
                           GestureDetector(
                             onTap: () => renameCategory(edit),
                             child: Container(
-                              width: 36,
-                              height: 36,
+                              width: 40,
+                              height: 40,
                               margin: const EdgeInsets.only(right: 8),
                               decoration: const BoxDecoration(
                                 color: kcBackgroundColor,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.edit_outlined,
-                                  color: kcLightGrey, size: 16),
+                              child: const Icon(Icons.edit,
+                                  color: kcLightGrey, size: 18),
                             ),
                           ),
                           GestureDetector(
                             onTap: () => deleteCategory(edit),
                             child: Container(
-                              width: 36,
-                              height: 36,
+                              width: 40,
+                              height: 40,
                               decoration: const BoxDecoration(
                                 color: kcBackgroundColor,
                                 shape: BoxShape.circle,
@@ -136,7 +135,7 @@ Future<void> showCustomCategoriesSheet(BuildContext context) async {
                 GestureDetector(
                   onTap: addCategory,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     child: Row(
                       children: [
                         Expanded(
@@ -144,19 +143,19 @@ Future<void> showCustomCategoriesSheet(BuildContext context) async {
                             'Add Category...',
                             style: GoogleFonts.nunito(
                               color: kcLightGrey,
-                              fontSize: 15,
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                         Container(
-                          width: 36,
-                          height: 36,
+                          width: 40,
+                          height: 40,
                           decoration: const BoxDecoration(
                             color: kcBackgroundColor,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.add, color: kcPrimaryPink, size: 20),
+                          child: const Icon(Icons.add, color: kcLightGrey, size: 20),
                         ),
                       ],
                     ),
@@ -171,14 +170,14 @@ Future<void> showCustomCategoriesSheet(BuildContext context) async {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            color: kcTertiaryPink,
+                            color: kcBackgroundColor,
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: Text(
                             'Cancel',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.nunito(
-                              color: kcSurfaceColor,
+                              color: kcLightGrey,
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                             ),
@@ -243,57 +242,91 @@ Future<String?> _showCategoryNameDialog(
     context: context,
     builder: (context) => Dialog(
       backgroundColor: kcSurfaceColor,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 40),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 32), 
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              textAlign: TextAlign.center,
               style: GoogleFonts.nunito(
                 color: kcPrimaryPink,
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
             Text(
-              'category name',
+              'Category Name',
               style: GoogleFonts.nunito(
                 color: kcLightGrey,
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: kcBackgroundColor,
-                borderRadius: BorderRadius.circular(30),
+            const SizedBox(height: 10),
+            Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: const ColorScheme.dark().copyWith(primary: kcPrimaryPink),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-              child: TextField(
+              child: TextFormField(
                 controller: controller,
                 autofocus: true,
                 cursorColor: kcPrimaryPink,
-                style: GoogleFonts.inter(color: kcOffWhite, fontSize: 15),
-                decoration: const InputDecoration(border: InputBorder.none),
+                style: GoogleFonts.inter(
+                  color: kcOffWhite, 
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: kcDarkPink, 
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  hintText: 'Enter name...',
+                  hintStyle: GoogleFonts.inter(color: kcLightGrey.withValues(alpha: 0.5), fontSize: 15),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: kcLightGrey.withValues(alpha: 0.1)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: kcPrimaryPink, width: 1.5),
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerRight,
-              child: GestureDetector(
-                onTap: () => Navigator.pop(context, controller.text.trim()),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: kcPrimaryPink,
-                    borderRadius: BorderRadius.circular(30),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kcBackgroundColor,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.nunito(
+                      color: kcLightGrey,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, controller.text.trim()),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kcPrimaryPink,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
                   ),
                   child: Text(
                     'Save',
@@ -304,7 +337,7 @@ Future<String?> _showCategoryNameDialog(
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
