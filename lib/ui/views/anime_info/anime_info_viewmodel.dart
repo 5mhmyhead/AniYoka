@@ -6,12 +6,14 @@ import 'package:stacked/stacked.dart';
 import 'package:aniyoka/app/app.locator.dart';
 import 'package:aniyoka/services/anilist_service.dart';
 import 'package:aniyoka/services/bookmark_service.dart';
+import 'package:aniyoka/services/recent_activity_service.dart';
 import 'package:aniyoka/services/watchlist_service.dart';
 
 class AnimeInfoViewModel extends BaseViewModel {
   final _anilistService = locator<AniListService>();
   final _bookmarkService = locator<BookmarkService>();
   final _watchlistService = locator<WatchlistService>();
+  final RecentActivityService _recentActivityService = RecentActivityService();
 
   WatchlistEntry? _watchlistEntry;
   WatchlistEntry? get watchlistEntry => _watchlistEntry;
@@ -70,7 +72,6 @@ class AnimeInfoViewModel extends BaseViewModel {
     rebuildUi();
   }
 
-
   // bookmark functionality
   Future<void> _checkBookmarkStatus() async {
     _isBookmarked = await _bookmarkService.isBookmarked(_anime!['id']);
@@ -105,27 +106,45 @@ class AnimeInfoViewModel extends BaseViewModel {
     required int episodesWatched,
   }) async {
     if (_anime == null) return;
+
+    final previousEntry = _watchlistEntry;
+    final normalizedStatus = _normalizeStatus(status);
+    final safeEpisodes = _safeEpisodeCount(
+      episodesWatched,
+      normalizedStatus,
+    );
+
     final entry = WatchlistEntry(
       id: _anime!['id'],
       animeData: {
         'id': _anime!['id'],
         'title': _anime!['title'],
-        'coverImage': {'large': _anime!['coverImage']['extraLarge'] ?? ''},
+        'coverImage': {
+          'large': _anime!['coverImage']['extraLarge'] ??
+              _anime!['coverImage']['large'] ??
+              '',
+        },
         'format': _anime!['format'],
         'startDate': _anime!['startDate'],
         'status': _anime!['status'],
       },
-      status: status,
-      episodesWatched: episodesWatched,
+      status: normalizedStatus,
+      episodesWatched: safeEpisodes,
       totalEpisodes: _anime!['episodes'],
-      addedAt: _watchlistEntry?.addedAt ?? DateTime.now(),
-      animeStatus: _anime!['status'],                                     
-      nextAiringEpisode: _anime!['nextAiringEpisode']?['episode'],         
+      addedAt: previousEntry?.addedAt ?? DateTime.now(),
+      animeStatus: _anime!['status'],
+      nextAiringEpisode: _anime!['nextAiringEpisode']?['episode'],
     );
+
     await _watchlistService.addOrUpdate(entry);
     _watchlistEntry = entry;
 
-    // remove bookmark if it exists since user is now tracking it
+    await _saveWatchlistActivity(
+      previousEntry: previousEntry,
+      currentEntry: entry,
+    );
+
+    // A tracked anime no longer needs to remain in Bookmarks.
     if (_isBookmarked) {
       await _bookmarkService.removeBookmark(_anime!['id']);
       _isBookmarked = false;
@@ -135,10 +154,130 @@ class AnimeInfoViewModel extends BaseViewModel {
   }
 
   Future<void> removeFromWatchlist() async {
-    if (_anime == null) return;
-    await _watchlistService.remove(_anime!['id']);
+    if (_anime == null || _watchlistEntry == null) return;
+
+    final removedEntry = _watchlistEntry!;
+    await _watchlistService.remove(removedEntry.id);
+
+    await _recentActivityService.addActivity(
+      animeId: removedEntry.id,
+      title: _titleForEntry(removedEntry),
+      action: 'REMOVED',
+      description: 'Removed from Watch List',
+      coverImageUrl: _coverForEntry(removedEntry),
+    );
+
     _watchlistEntry = null;
     rebuildUi();
+  }
+
+  Future<void> _saveWatchlistActivity({
+    required WatchlistEntry? previousEntry,
+    required WatchlistEntry currentEntry,
+  }) async {
+    final statusChanged =
+        previousEntry == null || previousEntry.status != currentEntry.status;
+    final progressChanged = previousEntry == null ||
+        previousEntry.episodesWatched != currentEntry.episodesWatched;
+
+    if (!statusChanged && !progressChanged) {
+      return;
+    }
+
+    final normalizedStatus = _normalizeStatus(currentEntry.status);
+
+    // Only Watching activities display episode progress.
+    if (normalizedStatus != 'WATCHING' && !statusChanged) {
+      return;
+    }
+
+    final description = normalizedStatus == 'WATCHING'
+        ? _capitalizeFirst(_progressText(currentEntry))
+        : _displayStatus(currentEntry.status);
+
+    await _recentActivityService.addActivity(
+      animeId: currentEntry.id,
+      title: _titleForEntry(currentEntry),
+      action: normalizedStatus,
+      description: description,
+      coverImageUrl: _coverForEntry(currentEntry),
+    );
+  }
+
+  int _safeEpisodeCount(int requestedEpisodes, String status) {
+    if (status == 'COMPLETED' && totalEpisodes > 0) {
+      return totalEpisodes;
+    }
+
+    final maximumEpisodes = isCurrentlyAiring ? latestEpisode : totalEpisodes;
+
+    if (maximumEpisodes <= 0) {
+      return requestedEpisodes < 0 ? 0 : requestedEpisodes;
+    }
+
+    return requestedEpisodes.clamp(0, maximumEpisodes).toInt();
+  }
+
+  String _normalizeStatus(String status) {
+    return status.trim().replaceAll('_', '').replaceAll(' ', '').toUpperCase();
+  }
+
+  String _displayStatus(String status) {
+    switch (_normalizeStatus(status)) {
+      case 'WATCHING':
+        return 'Watching';
+      case 'COMPLETED':
+        return 'Completed';
+      case 'PAUSED':
+        return 'Paused';
+      case 'DROPPED':
+        return 'Dropped';
+      case 'REWATCHING':
+        return 'Rewatching';
+      default:
+        return status;
+    }
+  }
+
+  String _titleForEntry(WatchlistEntry entry) {
+    final title = entry.animeData['title'];
+
+    if (title is Map) {
+      return (title['english'] ??
+              title['romaji'] ??
+              title['native'] ??
+              'Unknown anime')
+          .toString();
+    }
+
+    return 'Unknown anime';
+  }
+
+  String? _coverForEntry(WatchlistEntry entry) {
+    final coverImage = entry.animeData['coverImage'];
+
+    if (coverImage is Map) {
+      final imageUrl = coverImage['large'] ?? coverImage['medium'];
+      final value = imageUrl?.toString() ?? '';
+      return value.isEmpty ? null : value;
+    }
+
+    return null;
+  }
+
+  String _progressText(WatchlistEntry entry) {
+    final total = entry.totalEpisodes;
+
+    if (total == null || total <= 0) {
+      return 'episode ${entry.episodesWatched}';
+    }
+
+    return 'episode ${entry.episodesWatched} of $total';
+  }
+
+  String _capitalizeFirst(String value) {
+    if (value.isEmpty) return value;
+    return value[0].toUpperCase() + value.substring(1);
   }
 
   // helpers to extract rank and popularity from rankings list
@@ -233,9 +372,9 @@ class AnimeInfoViewModel extends BaseViewModel {
 
   String cleanDescription(String description) {
     return description
-        .replaceAll(RegExp(r'<[^>]*>'), '') 
-        .replaceAll('&nbsp;', ' ') 
-        .replaceAll('&amp;', '&') 
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
         .replaceAll('&lt;', '<')
         .replaceAll('&gt;', '>')
         .trim();
@@ -261,8 +400,21 @@ class AnimeInfoViewModel extends BaseViewModel {
     final day = date['day'];
     if (year == null) return 'Unknown';
 
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', '' ];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+      ''
+    ];
 
     if (month == null) return '$year';
     if (day == null) return '${months[month]} $year';

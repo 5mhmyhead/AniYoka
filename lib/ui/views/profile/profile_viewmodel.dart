@@ -1,7 +1,10 @@
+import 'package:aniyoka/services/recent_activity_service.dart';
 import 'package:stacked/stacked.dart';
 
 class ProfileViewModel extends BaseViewModel {
-  // Private fields
+  final RecentActivityService _recentActivityService = RecentActivityService();
+
+  // Private profile fields.
   String? _username;
   String? _email;
   String? _avatarUrl;
@@ -12,13 +15,16 @@ class ProfileViewModel extends BaseViewModel {
   double? _averageRating;
   int? _totalWatchTimeHours;
   bool _statsHidden = false;
+
+  List<RecentActivityEntry> _recentActivities = [];
+  bool _activitiesLoading = false;
+
   final String appVersion = '1.0.0';
-  //Public getters for user name
+
   String? get username => _username;
   String? get email => _email;
   String? get avatarUrl => _avatarUrl;
 
-  //Public getters fro stats
   int? get episodesWatched => _episodesWatched;
   int? get animeInProgress => _animeInProgress;
   int? get animeCompleted => _animeCompleted;
@@ -27,16 +33,19 @@ class ProfileViewModel extends BaseViewModel {
   int? get totalWatchTimeHours => _totalWatchTimeHours;
   bool get statsHidden => _statsHidden;
 
+  List<RecentActivityEntry> get recentActivities =>
+      List<RecentActivityEntry>.unmodifiable(_recentActivities);
+  bool get activitiesLoading => _activitiesLoading;
+
   void toggleStatsVisibility() {
     _statsHidden = !_statsHidden;
-    notifyListeners(); // rebuilds the View so the grid shows/hides immediately
+    rebuildUi();
   }
 
-  // Called once when the ProfileView is first shown
   Future<void> initialise() async {
     setBusy(true);
 
-    //TODO: replace with real user service call later
+    // TODO: Replace these temporary values with a user service later.
     await Future.delayed(const Duration(milliseconds: 500));
     _username = 'sanxwich';
     _email = 'sanxwich@gmail.com';
@@ -49,7 +58,27 @@ class ProfileViewModel extends BaseViewModel {
     _averageRating = 0;
     _totalWatchTimeHours = 0;
 
+    await loadRecentActivities(notify: false);
+
     setBusy(false);
-    notifyListeners();
+    rebuildUi();
+  }
+
+  Future<void> loadRecentActivities({bool notify = true}) async {
+    _activitiesLoading = true;
+    if (notify) rebuildUi();
+
+    try {
+      _recentActivities = await _recentActivityService.getActivities();
+    } finally {
+      _activitiesLoading = false;
+      if (notify) rebuildUi();
+    }
+  }
+
+  Future<void> clearRecentActivities() async {
+    await _recentActivityService.clearActivities();
+    _recentActivities = [];
+    rebuildUi();
   }
 }

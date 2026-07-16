@@ -719,7 +719,8 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
             width: 28,
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Icon(Icons.bookmarks_outlined, color: kcLightGrey, size: 22),
+              child:
+                  Icon(Icons.bookmarks_outlined, color: kcLightGrey, size: 22),
             ),
           ),
           const SizedBox(width: 12),
@@ -785,297 +786,305 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 12),
-                    width: 60,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: kcLightGrey,
-                      borderRadius: BorderRadius.circular(2),
+                  Center(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 12),
+                      width: 60,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: kcLightGrey,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                ),
-                // cancel and save row
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: kcBackgroundColor,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Text(
-                            'Cancel',
-                            style: GoogleFonts.nunito(
-                              color: kcLightGrey,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
+                  // cancel and save row
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: kcBackgroundColor,
+                              borderRadius: BorderRadius.circular(30),
                             ),
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // auto-fill episodes to max only when saving as completed
-                          final finalEpisodes =
-                              selectedStatus == 'COMPLETED' && totalEpisodes > 0
-                                  ? totalEpisodes
-                                  : episodesWatched;
-
-                          Navigator.pop(context);
-                          viewModel.saveToWatchlist(
-                            status: selectedStatus,
-                            episodesWatched: finalEpisodes,
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: kcPrimaryPink,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Text(
-                            'Save',
-                            style: GoogleFonts.nunito(
-                              color: kcOffWhite,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // status buttons row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: statuses.map((s) {
-                    final isSelected = selectedStatus == s['value'];
-                    return GestureDetector(
-                      onTap: () => setSheetState(
-                          () => selectedStatus = s['value'] as String),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 100),
-                        curve: Curves.easeInOut,
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: isSelected ? kcPrimaryPink : kcBackgroundColor,
-                          borderRadius:
-                              BorderRadius.circular(isSelected ? 16 : 50),
-                        ),
-                        child: Icon(
-                          s['icon'] as IconData,
-                          color: isSelected ? kcOffWhite : kcLightGrey,
-                          size: 24,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
-                // episode counter
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: viewModel.isNotYetReleased
-                      ? Row(
-                          children: [
-                            const SizedBox(
-                              width: 28,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Icon(Icons.play_circle_outline_rounded, color: kcLightGrey, size: 22),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              'No episodes yet',
-                              style: GoogleFonts.inter(
+                            child: Text(
+                              'Cancel',
+                              style: GoogleFonts.nunito(
                                 color: kcLightGrey,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                          ],
-                        )
-                      : Row(
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            // Auto-fill episodes to the maximum when completed.
+                            final finalEpisodes =
+                                selectedStatus == 'COMPLETED' &&
+                                        totalEpisodes > 0
+                                    ? totalEpisodes
+                                    : episodesWatched;
+
+                            final navigator = Navigator.of(context);
+                            await viewModel.saveToWatchlist(
+                              status: selectedStatus,
+                              episodesWatched: finalEpisodes,
+                            );
+                            navigator.pop();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: kcPrimaryPink,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Text(
+                              'Save',
+                              style: GoogleFonts.nunito(
+                                color: kcOffWhite,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // status buttons row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: statuses.map((s) {
+                      final isSelected = selectedStatus == s['value'];
+                      return GestureDetector(
+                        onTap: () => setSheetState(
+                            () => selectedStatus = s['value'] as String),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 100),
+                          curve: Curves.easeInOut,
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected ? kcPrimaryPink : kcBackgroundColor,
+                            borderRadius:
+                                BorderRadius.circular(isSelected ? 16 : 50),
+                          ),
+                          child: Icon(
+                            s['icon'] as IconData,
+                            color: isSelected ? kcOffWhite : kcLightGrey,
+                            size: 24,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+                  // episode counter
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: viewModel.isNotYetReleased
+                        ? Row(
+                            children: [
+                              const SizedBox(
+                                width: 28,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Icon(Icons.play_circle_outline_rounded,
+                                      color: kcLightGrey, size: 22),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'No episodes yet',
+                                style: GoogleFonts.inter(
+                                  color: kcLightGrey,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              const SizedBox(
+                                width: 28,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Icon(Icons.play_circle_outline_rounded,
+                                      color: kcLightGrey, size: 22),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                viewModel.isNotYetReleased
+                                    ? 'No episodes yet'
+                                    : viewModel.isCurrentlyAiring &&
+                                            viewModel.latestEpisode > 0
+                                        ? '$episodesWatched / ${viewModel.latestEpisode} of ${totalEpisodes > 0 ? totalEpisodes : '?'} Episodes'
+                                        : '$episodesWatched / ${totalEpisodes > 0 ? totalEpisodes : '?'} Episodes',
+                                style: GoogleFonts.inter(
+                                  color: viewModel.isNotYetReleased
+                                      ? kcLightGrey
+                                      : kcOffWhite,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const Spacer(),
+                              // minus button
+                              GestureDetector(
+                                onTap: () => setSheetState(() {
+                                  if (episodesWatched > 0) episodesWatched--;
+                                }),
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: const BoxDecoration(
+                                    color: kcBackgroundColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.remove,
+                                      color: kcOffWhite, size: 20),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              // plus button
+                              GestureDetector(
+                                onTap: () => setSheetState(() {
+                                  final cap = viewModel.isCurrentlyAiring
+                                      ? viewModel.latestEpisode
+                                      : totalEpisodes;
+                                  if (cap == 0 || episodesWatched < cap) {
+                                    episodesWatched++;
+                                  }
+                                }),
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: const BoxDecoration(
+                                    color: kcBackgroundColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.add,
+                                      color: kcOffWhite, size: 20),
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                  if (totalEpisodes > 0)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
+                      child: LinearProgressIndicator(
+                        value: episodesWatched / totalEpisodes,
+                        backgroundColor: kcBackgroundColor,
+                        color: kcPrimaryPink,
+                        minHeight: 6,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+                  // score
+                  _buildCounterRow(
+                    icon: Icons.star,
+                    label: 'Score',
+                    value: score,
+                    onDecrement: () => setSheetState(() {
+                      if (score > 0) score--;
+                    }),
+                    onIncrement: () => setSheetState(() {
+                      if (score < 10) score++;
+                    }),
+                  ),
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Divider(color: kcLightGrey, height: 1),
+                  ),
+                  const SizedBox(height: 24),
+                  // start date
+                  _buildDateRow(
+                    icon: Icons.event_outlined,
+                    label: 'Start Date',
+                    value: 'Not set',
+                    onEditTap: () {
+                      // TODO: open a date picker once start date is tracked
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // end date
+                  _buildDateRow(
+                    icon: Icons.event_available_outlined,
+                    label: 'End Date',
+                    value: 'Not set',
+                    onEditTap: () {
+                      // TODO: open a date picker once end date is tracked
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // rewatch count
+                  _buildCounterRow(
+                    icon: Icons.history_toggle_off_rounded,
+                    label: 'Rewatch Count',
+                    value: rewatchCount,
+                    onDecrement: () => setSheetState(() {
+                      if (rewatchCount > 0) rewatchCount--;
+                    }),
+                    onIncrement: () => setSheetState(() {
+                      rewatchCount++;
+                    }),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // custom categories
+                  _buildCustomCategoriesRow(() {
+                    // TODO: open category picker once per-anime categories exist
+                  }),
+
+                  // remove from watchlist button
+                  if (viewModel.isInWatchlist)
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showDeleteWatchlistDialog(context, viewModel);
+                        },
+                        child: Row(
                           children: [
                             const SizedBox(
                               width: 28,
                               child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Icon(Icons.play_circle_outline_rounded, color: kcLightGrey, size: 22),
-                              ),
+                                  alignment: Alignment.centerLeft,
+                                  child: Icon(Icons.delete_outline_outlined,
+                                      color: kcPrimaryPink, size: 22)),
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              viewModel.isNotYetReleased
-                                  ? 'No episodes yet'
-                                  : viewModel.isCurrentlyAiring && viewModel.latestEpisode > 0
-                                      ? '$episodesWatched / ${viewModel.latestEpisode} of ${totalEpisodes > 0 ? totalEpisodes : '?'} Episodes'
-                                      : '$episodesWatched / ${totalEpisodes > 0 ? totalEpisodes : '?'} Episodes',
+                              'Delete from Watch List',
                               style: GoogleFonts.inter(
-                                color: viewModel.isNotYetReleased ? kcLightGrey : kcOffWhite,
+                                color: kcPrimaryPink,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const Spacer(),
-                            // minus button
-                            GestureDetector(
-                              onTap: () => setSheetState(() {
-                                if (episodesWatched > 0) episodesWatched--;
-                              }),
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: const BoxDecoration(
-                                  color: kcBackgroundColor,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.remove,
-                                    color: kcOffWhite, size: 20),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // plus button
-                            GestureDetector(
-                              onTap: () => setSheetState(() {
-                                final cap = viewModel.isCurrentlyAiring
-                                    ? viewModel.latestEpisode
-                                    : totalEpisodes;
-                                if (cap == 0 || episodesWatched < cap) {
-                                  episodesWatched++;
-                                }
-                              }),
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: const BoxDecoration(
-                                  color: kcBackgroundColor,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.add,
-                                    color: kcOffWhite, size: 20),
-                              ),
-                            ),
                           ],
                         ),
-                ),
-                if (totalEpisodes > 0)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
-                    child: LinearProgressIndicator(
-                      value: episodesWatched / totalEpisodes,
-                      backgroundColor: kcBackgroundColor,
-                      color: kcPrimaryPink,
-                      minHeight: 6,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                const SizedBox(height: 20),
-                // score
-                _buildCounterRow(
-                  icon: Icons.star,
-                  label: 'Score',
-                  value: score,
-                  onDecrement: () => setSheetState(() {
-                    if (score > 0) score--;
-                  }),
-                  onIncrement: () => setSheetState(() {
-                    if (score < 10) score++;
-                  }),
-                ),
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Divider(color: kcLightGrey, height: 1),
-                ),
-                const SizedBox(height: 24),
-                // start date
-                _buildDateRow(
-                  icon: Icons.event_outlined,
-                  label: 'Start Date',
-                  value: 'Not set',
-                  onEditTap: () {
-                    // TODO: open a date picker once start date is tracked
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // end date
-                _buildDateRow(
-                  icon: Icons.event_available_outlined,
-                  label: 'End Date',
-                  value: 'Not set',
-                  onEditTap: () {
-                    // TODO: open a date picker once end date is tracked
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // rewatch count
-                _buildCounterRow(
-                  icon: Icons.history_toggle_off_rounded,
-                  label: 'Rewatch Count',
-                  value: rewatchCount,
-                  onDecrement: () => setSheetState(() {
-                    if (rewatchCount > 0) rewatchCount--;
-                  }),
-                  onIncrement: () => setSheetState(() {
-                    rewatchCount++;
-                  }),
-                ),
-                const SizedBox(height: 20),
-
-                // custom categories
-                _buildCustomCategoriesRow(() {
-                  // TODO: open category picker once per-anime categories exist
-                }),
-
-                // remove from watchlist button
-                if (viewModel.isInWatchlist)
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        _showDeleteWatchlistDialog(context, viewModel);
-                      },
-                      child: Row(
-                        children: [
-                          const SizedBox(
-                              width: 28,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Icon(Icons.delete_outline_outlined, color: kcPrimaryPink, size: 22)
-                              ),
-                            ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Delete from Watch List',
-                            style: GoogleFonts.inter(
-                              color: kcPrimaryPink,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
                       ),
                     ),
-                  ),
-                const SizedBox(height: 32),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
@@ -1154,9 +1163,10 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        viewModel.removeFromWatchlist();
+                      onTap: () async {
+                        final navigator = Navigator.of(context);
+                        await viewModel.removeFromWatchlist();
+                        navigator.pop();
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
