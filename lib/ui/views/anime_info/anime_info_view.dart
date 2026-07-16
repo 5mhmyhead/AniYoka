@@ -116,7 +116,7 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
         icon: Icon(
           viewModel.isInWatchlist ? Icons.edit : Icons.add,
           color: kcOffWhite,
-          size: 32,
+          size: 28,
         ),
         label: Text(
           viewModel.isInWatchlist ? 'Edit' : 'Add',
@@ -568,10 +568,180 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
     );
   }
 
+  // Generic +/- counter row used by both Score and Rewatch Count below.
+  // UI-only for now — the value lives in the sheet's local state and is
+  // not part of `saveToWatchlist` yet.
+  Widget _buildCounterRow({
+    required IconData icon,
+    required String label,
+    required int value,
+    required VoidCallback onDecrement,
+    required VoidCallback onIncrement,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 28,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Icon(icon, color: kcLightGrey, size: 22),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: kcOffWhite,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            '$value',
+            style: GoogleFonts.inter(
+              color: kcOffWhite,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: onDecrement,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: kcBackgroundColor,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.remove, color: kcOffWhite, size: 20),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onIncrement,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: kcBackgroundColor,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.add, color: kcOffWhite, size: 20),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // WatchlistEntry. TODO: hook up a date picker  persist once supported.
+  Widget _buildDateRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required VoidCallback onEditTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 28,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Icon(icon, color: kcLightGrey, size: 22),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: kcOffWhite,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: GoogleFonts.inter(
+              color: kcLightGrey,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onEditTap,
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: kcBackgroundColor,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.edit, color: kcLightGrey, size: 18),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Custom Categories row
+  // TODO: open a category picker
+  Widget _buildCustomCategoriesRow(VoidCallback onEditTap) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          const SizedBox(
+            width: 28,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Icon(Icons.bookmarks_outlined, color: kcLightGrey, size: 22),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Custom Categories',
+            style: GoogleFonts.inter(
+              color: kcOffWhite,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: onEditTap,
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: kcBackgroundColor,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.edit, color: kcLightGrey, size: 18),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
     String selectedStatus = viewModel.watchlistEntry?.status ?? 'WATCHING';
     int episodesWatched = viewModel.watchlistEntry?.episodesWatched ?? 0;
     final totalEpisodes = viewModel.totalEpisodes;
+
+    // UI-only state for now — not part of WatchlistEntry yet, so nothing
+    // here is passed to saveToWatchlist(). See _buildCounterRow /
+    // _buildDateRow / _buildCustomCategoriesRow TODOs.
+    int score = 0;
+    int rewatchCount = 0;
 
     final statuses = [
       {'value': 'WATCHING', 'icon': Icons.play_circle_outline},
@@ -594,9 +764,10 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                 Center(
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 12),
@@ -703,8 +874,13 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                   child: viewModel.isNotYetReleased
                       ? Row(
                           children: [
-                            const Icon(Icons.play_circle_outline_rounded,
-                                color: kcLightGrey, size: 24),
+                            const SizedBox(
+                              width: 28,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Icon(Icons.play_circle_outline_rounded, color: kcLightGrey, size: 22),
+                              ),
+                            ),
                             const SizedBox(width: 12),
                             Text(
                               'No episodes yet',
@@ -718,8 +894,13 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                         )
                       : Row(
                           children: [
-                            const Icon(Icons.play_circle_outline_rounded,
-                                color: kcLightGrey, size: 24),
+                            const SizedBox(
+                              width: 28,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Icon(Icons.play_circle_outline_rounded, color: kcLightGrey, size: 22),
+                              ),
+                            ),
                             const SizedBox(width: 12),
                             Text(
                               viewModel.isNotYetReleased
@@ -775,7 +956,6 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                           ],
                         ),
                 ),
-                // progress bar
                 if (totalEpisodes > 0)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
@@ -787,6 +967,66 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+                const SizedBox(height: 20),
+                // score
+                _buildCounterRow(
+                  icon: Icons.star,
+                  label: 'Score',
+                  value: score,
+                  onDecrement: () => setSheetState(() {
+                    if (score > 0) score--;
+                  }),
+                  onIncrement: () => setSheetState(() {
+                    if (score < 10) score++;
+                  }),
+                ),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Divider(color: kcLightGrey, height: 1),
+                ),
+                const SizedBox(height: 24),
+                // start date
+                _buildDateRow(
+                  icon: Icons.event_outlined,
+                  label: 'Start Date',
+                  value: 'Not set',
+                  onEditTap: () {
+                    // TODO: open a date picker once start date is tracked
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // end date
+                _buildDateRow(
+                  icon: Icons.event_available_outlined,
+                  label: 'End Date',
+                  value: 'Not set',
+                  onEditTap: () {
+                    // TODO: open a date picker once end date is tracked
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                // rewatch count
+                _buildCounterRow(
+                  icon: Icons.history_toggle_off_rounded,
+                  label: 'Rewatch Count',
+                  value: rewatchCount,
+                  onDecrement: () => setSheetState(() {
+                    if (rewatchCount > 0) rewatchCount--;
+                  }),
+                  onIncrement: () => setSheetState(() {
+                    rewatchCount++;
+                  }),
+                ),
+                const SizedBox(height: 20),
+
+                // custom categories
+                _buildCustomCategoriesRow(() {
+                  // TODO: open category picker once per-anime categories exist
+                }),
+
                 // remove from watchlist button
                 if (viewModel.isInWatchlist)
                   Padding(
@@ -798,8 +1038,13 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                       },
                       child: Row(
                         children: [
-                          const Icon(Icons.delete_outline,
-                              color: kcPrimaryPink, size: 24),
+                          const SizedBox(
+                              width: 28,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Icon(Icons.delete_outline_outlined, color: kcPrimaryPink, size: 22)
+                              ),
+                            ),
                           const SizedBox(width: 12),
                           Text(
                             'Delete from Watch List',
@@ -814,7 +1059,8 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                     ),
                   ),
                 const SizedBox(height: 32),
-              ],
+                ],
+              ),
             ),
           );
         },

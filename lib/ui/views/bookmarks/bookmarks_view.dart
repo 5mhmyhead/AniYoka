@@ -1,5 +1,6 @@
 import 'package:aniyoka/ui/common/app_colors.dart';
 import 'package:aniyoka/ui/views/anime_info/anime_info_view.dart';
+import 'package:aniyoka/ui/widgets/search_filter_header.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
@@ -14,23 +15,34 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
   @override
   Widget builder(
       BuildContext context, BookmarksViewModel viewModel, Widget? child) {
+    final categories = viewModel.categories;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: kcSurfaceColor,
         statusBarIconBrightness: Brightness.light,
       ),
       child: DefaultTabController(
-        length: 3,
+        length: categories.length,
         child: Scaffold(
           backgroundColor: kcBackgroundColor,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                color: kcSurfaceColor,
-                child: _buildHeader(),
+              SearchFilterHeader(
+                title: 'Bookmarks',
+                sortOptions: BookmarkSort.values.map((s) => s.label).toList(),
+                selectedSort: viewModel.sort.label,
+                selectedSortAscending: viewModel.sortAscending,
+                onSortSelected: (label, ascending) {
+                  final sort = BookmarkSort.values.firstWhere((s) => s.label == label);
+                  viewModel.setSort(sort, ascending: ascending);
+                },
+                onSearchChanged: viewModel.setSearch,
+                onSearchCleared: viewModel.clearSearch,
               ),
-              Expanded(child: _buildTabContent(viewModel, context)),
+              _buildTabBar(categories),
+              Expanded(child: _buildTabContent(categories, viewModel, context)),
             ],
           ),
         ),
@@ -38,68 +50,43 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
     );
   }
 
-  Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-            child: Text(
-              'Bookmarks',
-              style: GoogleFonts.nunito(
-                color: kcPrimaryPink,
-                fontSize: 42,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
-        _buildTabBar(),
-      ],
+  Widget _buildTabBar(List<String> categories) {
+    return Container(
+      color: kcSurfaceColor,
+      child: TabBar(
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        labelColor: kcPrimaryPink,
+        unselectedLabelColor: kcLightGrey,
+        indicatorColor: kcPrimaryPink,
+        indicatorWeight: 2,
+        dividerColor: kcLightGrey,
+        labelStyle: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: GoogleFonts.nunito(fontSize: 15),
+        tabs: categories.map((c) => Tab(
+          child: FittedBox(fit: BoxFit.scaleDown, child: Text(c)),
+        )).toList(),
+      ),
     );
   }
 
-  Widget _buildTabBar() {
-    return TabBar(
-      isScrollable: false,
-      labelColor: kcPrimaryPink,
-      unselectedLabelColor: kcLightGrey,
-      indicatorColor: kcPrimaryPink,
-      indicatorWeight: 2,
-      dividerColor: kcLightGrey,
-      labelStyle: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600),
-      unselectedLabelStyle: GoogleFonts.nunito(fontSize: 15),
-      tabs: const [
-        Tab(child: FittedBox(fit: BoxFit.scaleDown, child: Text('Bookmarked'))),
-        Tab(
-            child:
-                FittedBox(fit: BoxFit.scaleDown, child: Text('Recent Saves'))),
-        Tab(
-            child:
-                FittedBox(fit: BoxFit.scaleDown, child: Text('Alphabetical'))),
-      ],
-    );
-  }
-
-  Widget _buildTabContent(BookmarksViewModel viewModel, BuildContext context) {
-    if (viewModel.isBusy) {
-      return const Center(
-          child: CircularProgressIndicator(color: kcPrimaryPink));
-    }
-
+  Widget _buildTabContent(List<String> categories, BookmarksViewModel viewModel,
+      BuildContext context) {
     return TabBarView(
-      children: [
-        _buildGrid(viewModel.oldestSaves, viewModel, context),
-        _buildGrid(viewModel.recentlySaved, viewModel, context),
-        _buildGrid(viewModel.allBookmarks, viewModel, context),
-      ],
+      children: categories
+          .map((c) => _buildGrid(
+              viewModel.bookmarksForCategory(c), viewModel, context))
+          .toList(),
     );
   }
 
-  Widget _buildGrid(List<Map<String, dynamic>> list,
-      BookmarksViewModel viewModel, BuildContext context) {
+  Widget _buildGrid(List<Map<String, dynamic>> list, BookmarksViewModel viewModel, BuildContext context) {
+    if (!viewModel.hasLoaded) {
+      return const Center(
+        child: CircularProgressIndicator(color: kcPrimaryPink),
+      );
+    }
+      
     if (list.isEmpty) {
       return RefreshIndicator(
         color: kcPrimaryPink,
@@ -170,7 +157,7 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
       onRefresh: viewModel.loadBookmarks,
       child: GridView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 12,

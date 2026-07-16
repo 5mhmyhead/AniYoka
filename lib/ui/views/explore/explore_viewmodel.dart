@@ -77,7 +77,7 @@ class ExploreViewModel extends BaseViewModel {
     super.dispose();
   }
 
-  // Options Configurations Maps
+  // options
   final Map<String, String?> _statusOptions = {
     'Any Status': null,
     'Airing': 'RELEASING',

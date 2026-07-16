@@ -81,7 +81,7 @@ class MainView extends StackedView<MainViewModel> {
 class NarrowPillIndicator extends ShapeBorder {
   final double customWidth;
   const NarrowPillIndicator(
-      {this.customWidth = 46.0}); // Enforce a 46px narrow width
+      {this.customWidth = 46.0});
 
   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.zero;

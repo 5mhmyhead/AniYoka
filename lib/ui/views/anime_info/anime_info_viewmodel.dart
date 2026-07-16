@@ -233,11 +233,11 @@ class AnimeInfoViewModel extends BaseViewModel {
 
   String cleanDescription(String description) {
     return description
-        .replaceAll(RegExp(r'<[^>]*>'), '') // removes all html tags
-        .replaceAll('&nbsp;', ' ') // replaces html spaces
-        .replaceAll('&amp;', '&') // replaces &amp; with &
-        .replaceAll('&lt;', '<') // replaces &lt; with
-        .replaceAll('&gt;', '>') // replaces &gt; with >
+        .replaceAll(RegExp(r'<[^>]*>'), '') 
+        .replaceAll('&nbsp;', ' ') 
+        .replaceAll('&amp;', '&') 
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
         .trim();
   }
 
@@ -261,21 +261,8 @@ class AnimeInfoViewModel extends BaseViewModel {
     final day = date['day'];
     if (year == null) return 'Unknown';
 
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-      ''
-    ];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', '' ];
 
     if (month == null) return '$year';
     if (day == null) return '${months[month]} $year';

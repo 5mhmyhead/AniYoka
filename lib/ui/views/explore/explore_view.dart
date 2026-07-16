@@ -39,48 +39,50 @@ class ExploreView extends StackedView<ExploreViewModel> {
   Widget _buildStaticSearchHeader(ExploreViewModel viewModel) {
     return Padding(
       padding: const EdgeInsets.all(20),
-      child: InkWell(
-        onTap: viewModel.startSearchMode,
-        borderRadius: BorderRadius.circular(50),
-        child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: kcSurfaceColor,
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.search, color: kcPrimaryPink, size: 24),
-              const SizedBox(width: 12),
-              Text(
-                'Search for an anime...',
-                style: GoogleFonts.inter(
-                  color: kcLightGrey.withValues(alpha: 0.75),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+      child: SizedBox(
+        height: 64,
+        child: InkWell(
+          onTap: viewModel.startSearchMode,
+          borderRadius: BorderRadius.circular(50),
+          child: Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: kcSurfaceColor,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.search, color: kcPrimaryPink, size: 24),
+                const SizedBox(width: 12),
+                Text(
+                  'Search for an anime...',
+                  style: GoogleFonts.inter(
+                    color: kcLightGrey.withValues(alpha: 0.75),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildActiveSearchHeader(
-      BuildContext context, ExploreViewModel viewModel) {
+  Widget _buildActiveSearchHeader(BuildContext context, ExploreViewModel viewModel) {
     return Container(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 15),
       decoration: const BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: kcSurfaceColor, width: 2),
+          bottom: BorderSide(color: kcSurfaceColor, width: 1),
         ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
             child: Row(
               children: [
                 IconButton(
@@ -93,10 +95,11 @@ class ExploreView extends StackedView<ExploreViewModel> {
                     focusNode: viewModel.searchFocusNode,
                     cursorColor: kcPrimaryPink,
                     style: GoogleFonts.inter(color: kcOffWhite, fontSize: 16),
+                    autocorrect: false,
+                    enableSuggestions: false,
                     decoration: InputDecoration(
                       hintText: 'Search for an anime...',
-                      hintStyle: GoogleFonts.inter(
-                          color: kcLightGrey.withValues(alpha: 0.75)),
+                      hintStyle: GoogleFonts.inter(color: kcLightGrey.withValues(alpha: 0.75)),
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -105,7 +108,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
                 ),
                 if (viewModel.searchText.isNotEmpty)
                   IconButton(
-                    icon: const Icon(Icons.close, color: kcLightGrey),
+                    icon: const Icon(Icons.close, color: kcLightGrey, size: 20),
                     onPressed: viewModel.clearSearch,
                   ),
               ],
@@ -117,7 +120,6 @@ class ExploreView extends StackedView<ExploreViewModel> {
     );
   }
 
-  // Horizontal Scrolling dynamic filter chips bar (Image 1 & 3)
   Widget _buildFilterBar(BuildContext context, ExploreViewModel viewModel) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -130,13 +132,6 @@ class ExploreView extends StackedView<ExploreViewModel> {
             icon: Icons.check,
             selected: !viewModel.hasActiveFilters,
             onTap: viewModel.clearFilters,
-          ),
-          const SizedBox(width: 8),
-          _buildFilterChip(
-            label: 'On My List',
-            icon: Icons.bookmark,
-            selected: viewModel.onMyListOnly,
-            onTap: viewModel.toggleOnMyListFilter,
           ),
           const SizedBox(width: 8),
           _buildPopupFilterButton(
@@ -157,6 +152,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
             options: viewModel.statusOptionLabels,
             selectedValue: viewModel.selectedStatusLabel ?? 'Any Status',
             onSelected: viewModel.setStatusFilterByLabel,
+            icon: Icons.hourglass_empty,
             selected: viewModel.selectedStatusLabel != null,
           ),
           const SizedBox(width: 8),
@@ -167,6 +163,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
             options: viewModel.genreOptionLabels,
             selectedValue: viewModel.selectedGenreLabel ?? 'Any Genre',
             onSelected: viewModel.setGenreFilterByLabel,
+            icon: Icons.style,
             selected: viewModel.selectedGenreLabel != null,
           ),
           const SizedBox(width: 8),
@@ -177,6 +174,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
             options: viewModel.formatOptionLabels,
             selectedValue: viewModel.selectedFormatLabel ?? 'Any Format',
             onSelected: viewModel.setFormatFilterByLabel,
+            icon: Icons.video_library,
             selected: viewModel.selectedFormatLabel != null,
           ),
         ],

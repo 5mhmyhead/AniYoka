@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
 import 'profile_viewmodel.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+//import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProfileView extends StackedView<ProfileViewModel> {
@@ -267,7 +267,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
         ),
         Divider(color: kcLightGrey),
         _SingleSection(
-          title: "Prefrances ",
+          title: "Preferences",
           children: [
             _CustomListTile(
               title: "Change Profile Picture",
@@ -284,11 +284,11 @@ class ProfileView extends StackedView<ProfileViewModel> {
         _SingleSection(
           title: "Information",
           children: [
-            _CustomListTile(
-              title: "Github Repository",
-              icon: FontAwesomeIcons.github,
-              onTap: () => _showGithubDialog(context),
-            ),
+            // _CustomListTile(
+            //   title: "Github Repository",
+            //   icon: FontAwesomeIcons.github,
+            //   onTap: () => _showGithubDialog(context),
+            // ),
             _CustomListTile(
               title: "Help & Feedback",
               icon: Icons.help_outline_rounded,
@@ -301,11 +301,11 @@ class ProfileView extends StackedView<ProfileViewModel> {
             ),
             _CustomListTile(
                 title: "Developed by VIVII", icon: Icons.code_rounded),
-            _CustomListTile(
-              title: "App Version",
-              icon: FontAwesomeIcons.codeBranch,
-              subtitle: viewModel.appVersion,
-            ),
+            // _CustomListTile(
+            //   title: "App Version",
+            //   icon: FontAwesomeIcons.codeBranch,
+            //   subtitle: viewModel.appVersion,
+            // ),
           ],
         ),
       ],
@@ -329,11 +329,11 @@ class ProfileView extends StackedView<ProfileViewModel> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Icon(
-                FontAwesomeIcons.github,
-                color: kcPrimaryPink,
-                size: 54,
-              ),
+            // const Icon(
+              //     FontAwesomeIcons.github,
+              //     color: kcPrimaryPink,
+              //     size: 54,
+              //   ),
               const SizedBox(height: 4),
               Text(
                 'Leave AniYoka?',
@@ -630,9 +630,8 @@ class _CustomListTile extends StatelessWidget {
     required this.title,
     required this.icon,
     this.subtitle,
-    this.trailing,
     this.onTap,
-  });
+  }) : trailing = null;
 
   @override
   Widget build(BuildContext context) {

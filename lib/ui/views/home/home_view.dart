@@ -1,6 +1,7 @@
 import 'package:aniyoka/ui/common/app_colors.dart';
 import 'package:aniyoka/ui/widgets/discover_tab.dart';
 import 'package:aniyoka/ui/widgets/genres_tab.dart';
+import 'package:aniyoka/ui/widgets/watching_tab.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -64,10 +65,8 @@ class HomeView extends StackedView<HomeViewModel> {
   Widget _buildTabBar() {
     return TabBar(
       isScrollable: false,
-      // label styling
       labelColor: kcPrimaryPink,
       unselectedLabelColor: kcLightGrey,
-      // indicator styling
       indicatorColor: kcPrimaryPink,
       indicatorWeight: 2,
       dividerColor: kcLightGrey,
@@ -81,7 +80,7 @@ class HomeView extends StackedView<HomeViewModel> {
       tabs: const [
         Tab(text: 'Discover'),
         Tab(text: 'Genres'),
-        Tab(text: 'Activity'),
+        Tab(text: 'Watching'),
       ],
     );
   }
@@ -98,12 +97,7 @@ class HomeView extends StackedView<HomeViewModel> {
       children: [
         DiscoverTab(viewModel: viewModel),
         const GenresTab(),
-        const Center(
-          child: Text(
-            'Activity',
-            style: TextStyle(color: kcOffWhite),
-          ),
-        ),
+        const WatchingTab(),
       ],
     );
   }
