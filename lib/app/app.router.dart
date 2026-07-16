@@ -135,7 +135,8 @@ class StackedRouter extends _i1.RouterBase {
         orElse: () => const WatchlistViewArguments(),
       );
       return _i11.MaterialPageRoute<dynamic>(
-        builder: (context) => _i6.WatchlistView(key: args.key),
+        builder: (context) => _i6.WatchlistView(
+            key: args.key, onNavigateToExplore: args.onNavigateToExplore),
         settings: data,
       );
     },
@@ -276,24 +277,29 @@ class ExploreViewArguments {
 }
 
 class WatchlistViewArguments {
-  const WatchlistViewArguments({this.key});
+  const WatchlistViewArguments({
+    this.key,
+    this.onNavigateToExplore,
+  });
 
   final _i11.Key? key;
 
+  final void Function()? onNavigateToExplore;
+
   @override
   String toString() {
-    return '{"key": "$key"}';
+    return '{"key": "$key", "onNavigateToExplore": "$onNavigateToExplore"}';
   }
 
   @override
   bool operator ==(covariant WatchlistViewArguments other) {
     if (identical(this, other)) return true;
-    return other.key == key;
+    return other.key == key && other.onNavigateToExplore == onNavigateToExplore;
   }
 
   @override
   int get hashCode {
-    return key.hashCode;
+    return key.hashCode ^ onNavigateToExplore.hashCode;
   }
 }
 
@@ -467,6 +473,7 @@ extension NavigatorStateExtension on _i13.NavigationService {
 
   Future<dynamic> navigateToWatchlistView({
     _i11.Key? key,
+    void Function()? onNavigateToExplore,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -474,7 +481,8 @@ extension NavigatorStateExtension on _i13.NavigationService {
         transition,
   }) async {
     return navigateTo<dynamic>(Routes.watchlistView,
-        arguments: WatchlistViewArguments(key: key),
+        arguments: WatchlistViewArguments(
+            key: key, onNavigateToExplore: onNavigateToExplore),
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,
@@ -615,6 +623,7 @@ extension NavigatorStateExtension on _i13.NavigationService {
 
   Future<dynamic> replaceWithWatchlistView({
     _i11.Key? key,
+    void Function()? onNavigateToExplore,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -622,7 +631,8 @@ extension NavigatorStateExtension on _i13.NavigationService {
         transition,
   }) async {
     return replaceWith<dynamic>(Routes.watchlistView,
-        arguments: WatchlistViewArguments(key: key),
+        arguments: WatchlistViewArguments(
+            key: key, onNavigateToExplore: onNavigateToExplore),
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,

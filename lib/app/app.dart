@@ -1,6 +1,7 @@
 import 'package:aniyoka/ui/bottom_sheets/notice/notice_sheet.dart';
 import 'package:aniyoka/ui/dialogs/info_alert/info_alert_dialog.dart';
 import 'package:aniyoka/ui/views/home/home_view.dart';
+import 'package:aniyoka/ui/views/main/main_viewmodel.dart';
 import 'package:aniyoka/ui/views/startup/startup_view.dart';
 import 'package:stacked/stacked_annotations.dart';
 import 'package:stacked_services/stacked_services.dart';
