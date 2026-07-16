@@ -268,33 +268,28 @@ Future<String?> _showCategoryNameDialog(
               ),
             ),
             const SizedBox(height: 10),
-            Theme(
-              data: Theme.of(context).copyWith(
-                colorScheme: const ColorScheme.dark().copyWith(primary: kcPrimaryPink),
+            TextFormField(
+              controller: controller,
+              autofocus: false,
+              cursorColor: kcPrimaryPink,
+              style: GoogleFonts.inter(
+                color: kcOffWhite, 
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
               ),
-              child: TextFormField(
-                controller: controller,
-                autofocus: true,
-                cursorColor: kcPrimaryPink,
-                style: GoogleFonts.inter(
-                  color: kcOffWhite, 
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: kcDarkPink, 
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                hintText: 'Enter name...',
+                hintStyle: GoogleFonts.inter(color: kcLightGrey, fontSize: 15),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: kcLightGrey),
                 ),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: kcDarkPink, 
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  hintText: 'Enter name...',
-                  hintStyle: GoogleFonts.inter(color: kcLightGrey.withValues(alpha: 0.5), fontSize: 15),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: kcLightGrey.withValues(alpha: 0.1)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: kcPrimaryPink, width: 1.5),
-                  ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: kcPrimaryPink, width: 1.5),
                 ),
               ),
             ),

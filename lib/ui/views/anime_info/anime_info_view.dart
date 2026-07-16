@@ -726,7 +726,7 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
               ),
               const SizedBox(width: 12),
               Text(
-                'Custom Categories',
+                'Custom Lists',
                 style: GoogleFonts.inter(
                   color: kcOffWhite,
                   fontSize: 16,
