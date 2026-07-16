@@ -31,8 +31,25 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
         : '';
 
     final status = viewModel.formatEnum(anime['status']);
+    final hasSeason = season.isNotEmpty;
+    final hasYear = seasonYear.toString().isNotEmpty;
 
-    final subtitle = '$format • $season $seasonYear • $status';
+    String? seasonString;
+    if (hasSeason && hasYear) {
+      seasonString = '$season $seasonYear';
+    } else if (hasSeason) {
+      seasonString = season;
+    } else if (hasYear) {
+      seasonString = seasonYear.toString();
+    }
+
+    final parts = [
+      if (format.isNotEmpty) format,
+      if (seasonString != null && seasonString.isNotEmpty) seasonString,
+      if (status.isNotEmpty) status,
+    ];
+
+    final subtitle = parts.join(' • ');
 
     final meanScore = anime['meanScore'];
     final episodes = anime['episodes'];
