@@ -84,7 +84,8 @@ class AnimeInfoViewModel extends BaseViewModel {
   Future<void> _loadCategories() async {
     if (_anime == null) return;
     _availableCategories = await _categoryService.getCategories();
-    _selectedCategories = await _categoryService.getCategoriesForAnime(_anime!['id']);
+    _selectedCategories =
+        await _categoryService.getCategoriesForAnime(_anime!['id']);
     rebuildUi();
   }
 
@@ -95,7 +96,8 @@ class AnimeInfoViewModel extends BaseViewModel {
     // a rename/delete may have changed which of the available categories
     // this anime is still assigned to
     if (_anime != null) {
-      _selectedCategories = await _categoryService.getCategoriesForAnime(_anime!['id']);
+      _selectedCategories =
+          await _categoryService.getCategoriesForAnime(_anime!['id']);
     }
     rebuildUi();
   }
@@ -108,7 +110,8 @@ class AnimeInfoViewModel extends BaseViewModel {
       _selectedCategories.add(category);
     }
     rebuildUi();
-    await _categoryService.setCategoriesForAnime(_anime!['id'], _selectedCategories);
+    await _categoryService.setCategoriesForAnime(
+        _anime!['id'], _selectedCategories);
   }
 
   // bookmark functionality
@@ -167,8 +170,8 @@ class AnimeInfoViewModel extends BaseViewModel {
       episodesWatched: episodesWatched,
       totalEpisodes: _anime!['episodes'],
       addedAt: _watchlistEntry?.addedAt ?? DateTime.now(),
-      animeStatus: _anime!['status'],                                     
-      nextAiringEpisode: _anime!['nextAiringEpisode']?['episode'],         
+      animeStatus: _anime!['status'],
+      nextAiringEpisode: _anime!['nextAiringEpisode']?['episode'],
     );
 
     await _watchlistService.addOrUpdate(entry);
@@ -407,11 +410,11 @@ class AnimeInfoViewModel extends BaseViewModel {
 
   String cleanDescription(String description) {
     return description
-        .replaceAll(RegExp(r'<[^>]*>'), '') 
-        .replaceAll('&nbsp;', ' ') 
-        .replaceAll('&amp;', '&') 
-        .replaceAll('&lt;', '<') 
-        .replaceAll('&gt;', '>') 
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
         .trim();
   }
 
@@ -462,5 +465,14 @@ class AnimeInfoViewModel extends BaseViewModel {
           RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
           (match) => '${match[1]},',
         );
+  }
+
+  // Auto-selects newly created categories for the current anime
+  Future<void> autoSelectNewCategories(List<String> newCategories) async {
+    if (_anime == null || newCategories.isEmpty) return;
+    _selectedCategories.addAll(newCategories);
+    rebuildUi();
+    await _categoryService.setCategoriesForAnime(
+        _anime!['id'], _selectedCategories);
   }
 }

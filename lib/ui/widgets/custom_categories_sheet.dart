@@ -11,15 +11,16 @@ class _CategoryEdit {
   _CategoryEdit({this.original, required this.current});
 }
 
-Future<void> showCustomCategoriesSheet(BuildContext context) async {
+Future<List<String>> showCustomCategoriesSheet(BuildContext context) async {
   final categoryService = locator<CategoryService>();
   final existing = await categoryService.getCategories();
 
-  if (!context.mounted) return;
+  if (!context.mounted) return [];
 
   final workingCategories =
       existing.map((c) => _CategoryEdit(original: c, current: c)).toList();
   final toDelete = <String>[];
+  final newlyAdded = <String>[];
 
   await showModalBottomSheet(
     context: context,
@@ -31,7 +32,8 @@ Future<void> showCustomCategoriesSheet(BuildContext context) async {
     builder: (context) => StatefulBuilder(
       builder: (context, setSheetState) {
         Future<void> addCategory() async {
-          final name = await _showCategoryNameDialog(context, title: 'Add Category');
+          final name =
+              await _showCategoryNameDialog(context, title: 'Add Category');
           if (name == null || name.trim().isEmpty) return;
           setSheetState(() {
             workingCategories.add(_CategoryEdit(current: name.trim()));
@@ -88,7 +90,8 @@ Future<void> showCustomCategoriesSheet(BuildContext context) async {
                 ),
                 const SizedBox(height: 10),
                 ...workingCategories.map((edit) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 20),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 6, horizontal: 20),
                       child: Row(
                         children: [
                           Expanded(
@@ -135,7 +138,8 @@ Future<void> showCustomCategoriesSheet(BuildContext context) async {
                 GestureDetector(
                   onTap: addCategory,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 20),
                     child: Row(
                       children: [
                         Expanded(
@@ -155,7 +159,8 @@ Future<void> showCustomCategoriesSheet(BuildContext context) async {
                             color: kcBackgroundColor,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.add, color: kcLightGrey, size: 20),
+                          child: const Icon(Icons.add,
+                              color: kcLightGrey, size: 20),
                         ),
                       ],
                     ),
@@ -195,6 +200,7 @@ Future<void> showCustomCategoriesSheet(BuildContext context) async {
                           for (final edit in workingCategories) {
                             if (edit.original == null) {
                               await categoryService.addCategory(edit.current);
+                              newlyAdded.add(edit.current);
                             } else if (edit.original != edit.current) {
                               await categoryService.renameCategory(
                                   edit.original!, edit.current);
@@ -229,6 +235,7 @@ Future<void> showCustomCategoriesSheet(BuildContext context) async {
       },
     ),
   );
+  return newlyAdded;
 }
 
 Future<String?> _showCategoryNameDialog(
@@ -242,7 +249,7 @@ Future<String?> _showCategoryNameDialog(
     context: context,
     builder: (context) => Dialog(
       backgroundColor: kcSurfaceColor,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 32), 
+      insetPadding: const EdgeInsets.symmetric(horizontal: 32),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -273,14 +280,15 @@ Future<String?> _showCategoryNameDialog(
               autofocus: false,
               cursorColor: kcPrimaryPink,
               style: GoogleFonts.inter(
-                color: kcOffWhite, 
+                color: kcOffWhite,
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: kcDarkPink, 
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                fillColor: kcDarkPink,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 hintText: 'Enter name...',
                 hintStyle: GoogleFonts.inter(color: kcLightGrey, fontSize: 15),
                 enabledBorder: OutlineInputBorder(
@@ -289,7 +297,8 @@ Future<String?> _showCategoryNameDialog(
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: kcPrimaryPink, width: 1.5),
+                  borderSide:
+                      const BorderSide(color: kcPrimaryPink, width: 1.5),
                 ),
               ),
             ),
@@ -302,8 +311,10 @@ Future<String?> _showCategoryNameDialog(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: kcBackgroundColor,
                     elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 28, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50)),
                   ),
                   child: Text(
                     'Cancel',
@@ -316,12 +327,15 @@ Future<String?> _showCategoryNameDialog(
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed: () => Navigator.pop(context, controller.text.trim()),
+                  onPressed: () =>
+                      Navigator.pop(context, controller.text.trim()),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: kcPrimaryPink,
                     elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 28, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50)),
                   ),
                   child: Text(
                     'Save',
