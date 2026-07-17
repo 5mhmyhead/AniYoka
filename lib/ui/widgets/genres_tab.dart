@@ -99,9 +99,9 @@ class _GenresTabState extends State<GenresTab>
     if (!mounted) return;
     setState(() {
       _isLoading = true;
-      _currentPage = 1;       // ← reset page
-      _hasNextPage = true;    // ← reset pagination
-      _animeList = [];        // ← clear old results
+      _currentPage = 1; // ← reset page
+      _hasNextPage = true; // ← reset pagination
+      _animeList = []; // ← clear old results
     });
 
     List<dynamic> result = [];
@@ -116,9 +116,11 @@ class _GenresTabState extends State<GenresTab>
           page: 1,
         );
         if (result.isNotEmpty) break;
-        if (attempt < retries) await Future.delayed(const Duration(milliseconds: 500));
+        if (attempt < retries)
+          await Future.delayed(const Duration(milliseconds: 500));
       } catch (e) {
-        if (attempt < retries) await Future.delayed(const Duration(milliseconds: 500));
+        if (attempt < retries)
+          await Future.delayed(const Duration(milliseconds: 500));
       }
     }
 
@@ -301,7 +303,7 @@ class _GenresTabState extends State<GenresTab>
                       crossAxisCount: 2,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
-                      childAspectRatio: 0.56,
+                      childAspectRatio: 0.50,
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => _buildCard(_animeList[index]),

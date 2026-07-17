@@ -36,7 +36,8 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
                 selectedSort: viewModel.sort.label,
                 selectedSortAscending: viewModel.sortAscending,
                 onSortSelected: (label, ascending) {
-                  final sort = BookmarkSort.values.firstWhere((s) => s.label == label);
+                  final sort =
+                      BookmarkSort.values.firstWhere((s) => s.label == label);
                   viewModel.setSort(sort, ascending: ascending);
                 },
                 onSearchChanged: viewModel.setSearch,
@@ -62,11 +63,14 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
         indicatorColor: kcPrimaryPink,
         indicatorWeight: 2,
         dividerColor: kcLightGrey,
-        labelStyle: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600),
+        labelStyle:
+            GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600),
         unselectedLabelStyle: GoogleFonts.nunito(fontSize: 15),
-        tabs: categories.map((c) => Tab(
-          child: FittedBox(fit: BoxFit.scaleDown, child: Text(c)),
-        )).toList(),
+        tabs: categories
+            .map((c) => Tab(
+                  child: FittedBox(fit: BoxFit.scaleDown, child: Text(c)),
+                ))
+            .toList(),
       ),
     );
   }
@@ -75,19 +79,20 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
       BuildContext context) {
     return TabBarView(
       children: categories
-          .map((c) => _buildGrid(
-              viewModel.bookmarksForCategory(c), viewModel, context))
+          .map((c) =>
+              _buildGrid(viewModel.bookmarksForCategory(c), viewModel, context))
           .toList(),
     );
   }
 
-  Widget _buildGrid(List<Map<String, dynamic>> list, BookmarksViewModel viewModel, BuildContext context) {
+  Widget _buildGrid(List<Map<String, dynamic>> list,
+      BookmarksViewModel viewModel, BuildContext context) {
     if (!viewModel.hasLoaded) {
       return const Center(
         child: CircularProgressIndicator(color: kcPrimaryPink),
       );
     }
-      
+
     if (list.isEmpty) {
       return RefreshIndicator(
         color: kcPrimaryPink,
@@ -163,7 +168,7 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 0.56,
+          childAspectRatio: 0.50,
         ),
         itemCount: list.length,
         itemBuilder: (context, index) =>
