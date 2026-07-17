@@ -1,4 +1,5 @@
 import 'package:aniyoka/ui/views/anime_list/anime_list_view.dart';
+import 'package:aniyoka/ui/widgets/watchlist_sheet.dart';
 import 'package:aniyoka/utils/anime_list_helper.dart';
 import 'package:aniyoka/utils/season_helper.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: viewModel.isSearching
-                    ? _buildSearchBody(viewModel)
+                    ? _buildSearchBody(context, viewModel)
                     : _buildDiscoverGrid(viewModel),
               ),
             ),
@@ -428,7 +429,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
     );
   }
 
-  Widget _buildSearchBody(ExploreViewModel viewModel) {
+  Widget _buildSearchBody(BuildContext context, ExploreViewModel viewModel) {
     if (viewModel.searchText.isEmpty &&
         !viewModel.hasActiveFilters &&
         !viewModel.hasSearched) {
@@ -530,7 +531,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
           const SizedBox(height: 12),
         ],
         ...viewModel.searchResults
-            .map((anime) => _buildAnimeCardListTile(anime, onTap: () {
+            .map((anime) => _buildAnimeCardListTile(context, anime, onTap: () {
                   viewModel.onAnimeTap(anime['id']);
                 })),
         if (viewModel.relatedResults.isNotEmpty) ...[
@@ -545,7 +546,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
           ),
           const SizedBox(height: 10),
           ...viewModel.relatedResults
-              .map((anime) => _buildAnimeCardListTile(anime, onTap: () {
+              .map((anime) => _buildAnimeCardListTile(context, anime, onTap: () {
                     viewModel.onAnimeTap(anime['id']);
                   })),
         ],
@@ -553,7 +554,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
     );
   }
 
-  Widget _buildAnimeCardListTile(dynamic anime, {required VoidCallback onTap}) {
+  Widget _buildAnimeCardListTile(BuildContext context, dynamic anime, {required VoidCallback onTap}) {
     final title = anime['title']['english'] ?? anime['title']['romaji'] ?? '';
     final format = anime['format'] ?? '';
     final year = anime['startDate']?['year']?.toString() ?? '';
@@ -561,6 +562,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
 
     return GestureDetector(
       onTap: onTap,
+      onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime['id']),
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),

@@ -1,6 +1,7 @@
 import 'package:aniyoka/ui/common/app_colors.dart';
 import 'package:aniyoka/ui/views/anime_info/anime_info_view.dart';
 import 'package:aniyoka/ui/widgets/search_filter_header.dart';
+import 'package:aniyoka/ui/widgets/watchlist_sheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
@@ -196,7 +197,7 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
         // reload bookmarks when user comes back
         viewModel.loadBookmarks();
       },
-      onLongPress: () => _showRemoveDialog(context, anime, viewModel),
+      onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime['id']),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -235,106 +236,6 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showRemoveDialog(BuildContext context, Map<String, dynamic> anime,
-      BookmarksViewModel viewModel) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: kcSurfaceColor,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.bookmark_remove_outlined,
-                color: kcTertiaryPink,
-                size: 54,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Remove Bookmark?',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.nunito(
-                  color: kcTertiaryPink,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Are you sure you want to delete this entry from your bookmarks?',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.nunito(
-                  color: kcLightGrey,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: kcTertiaryPink,
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: Text(
-                          'No, keep it.',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.nunito(
-                            color: kcSurfaceColor,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        viewModel.removeBookmark(anime['id']);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: kcPrimaryPink,
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: Text(
-                          'Yes, delete!',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.nunito(
-                            color: kcOffWhite,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

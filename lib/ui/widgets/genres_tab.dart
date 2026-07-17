@@ -2,6 +2,7 @@ import 'package:aniyoka/app/app.locator.dart';
 import 'package:aniyoka/services/anilist_service.dart';
 import 'package:aniyoka/ui/common/app_colors.dart';
 import 'package:aniyoka/ui/views/anime_info/anime_info_view.dart';
+import 'package:aniyoka/ui/widgets/watchlist_sheet.dart';
 import 'package:aniyoka/utils/genre_helper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -339,6 +340,7 @@ class _GenresTabState extends State<GenresTab>
           transitionsBuilder: (_, __, ___, child) => child,
         ),
       ),
+      onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime['id']),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

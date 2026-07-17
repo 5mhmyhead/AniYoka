@@ -3,6 +3,7 @@ import 'package:aniyoka/ui/views/anime_info/anime_info_view.dart';
 import 'package:aniyoka/ui/views/anime_list/anime_list_view.dart';
 import 'package:aniyoka/ui/widgets/anime_card_row.dart';
 import 'package:aniyoka/ui/views/home/home_viewmodel.dart';
+import 'package:aniyoka/ui/widgets/watchlist_sheet.dart';
 import 'package:aniyoka/utils/anime_list_helper.dart';
 import 'package:aniyoka/utils/season_helper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -132,6 +133,7 @@ class _DiscoverTabState extends State<DiscoverTab>
                 transitionsBuilder: (_, __, ___, child) => child,
               ),
             ),
+            onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime['id']),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ClipRRect(

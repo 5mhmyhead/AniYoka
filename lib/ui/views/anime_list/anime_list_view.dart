@@ -1,5 +1,6 @@
 import 'package:aniyoka/ui/common/app_colors.dart';
 import 'package:aniyoka/ui/views/anime_info/anime_info_view.dart';
+import 'package:aniyoka/ui/widgets/watchlist_sheet.dart';
 import 'package:aniyoka/utils/anime_list_helper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -117,6 +118,7 @@ class AnimeListView extends StackedView<AnimeListViewModel> {
           transitionsBuilder: (_, __, ___, child) => child,
         ),
       ),
+      onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime['id']),
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
