@@ -99,7 +99,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
     );
   }
 
-  // TAB CONTENT
+  // TAB CONTENT (MAKE SURE TO REMOVE THIS IF WERE IMPLEMENTING THE PROFILE)
   Widget _buildTabContent(ProfileViewModel viewModel, BuildContext context) {
     return TabBarView(
       children: [
@@ -110,8 +110,45 @@ class ProfileView extends StackedView<ProfileViewModel> {
     );
   }
 
-  // PROFILE TAB with avatar, name, and email
   Widget _buildMyProfileTab(ProfileViewModel viewModel) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.sentiment_dissatisfied_rounded,
+              color: kcPrimaryPink,
+              size: 64,
+            ),
+            Text(
+              'Sorry, user-kun',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(
+                color: kcPrimaryPink,
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "We're still working on this one. Thanks for your patience.",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(
+                color: kcOffWhite,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // PROFILE TAB with avatar, name, and email (FOR FUTURE ENHANCEMENTS)
+  /*Widget _buildMyProfileTab(ProfileViewModel viewModel) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 35, horizontal: 15),
       child: Column(
@@ -213,9 +250,9 @@ class ProfileView extends StackedView<ProfileViewModel> {
       ),
     );
   }
-
-  // Single stat tile (the pink rounded boxes in the grid)
-  Widget _buildStatTile(String value, String label) {
+*/
+  // Single stat tile (the pink rounded boxes in the grid) (FOR FUTURE ENHANCEMENTS)
+  /*Widget _buildStatTile(String value, String label) {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -246,7 +283,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
       ),
     );
   }
-
+*/
   // RECENT ACTIVITY TAB
   Widget _buildRecentActivityTab(
     BuildContext context,
@@ -333,8 +370,8 @@ class ProfileView extends StackedView<ProfileViewModel> {
                     onPressed: () =>
                         _confirmClearRecentActivities(context, viewModel),
                     style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero, 
-                      minimumSize: Size.zero, 
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     icon: const Icon(
@@ -354,7 +391,6 @@ class ProfileView extends StackedView<ProfileViewModel> {
               ),
             ),
           ),
-          
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
             sliver: SliverList(
@@ -409,7 +445,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
                     fit: BoxFit.cover,
                     placeholder: (_, __) => Container(
                       width: 62,
-                    height: 88,
+                      height: 88,
                       color: kcBackgroundColor,
                     ),
                     errorWidget: (_, __, ___) => Container(
@@ -619,7 +655,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       children: [
-        _SingleSection(
+        /*_SingleSection(
           title: "Account",
           children: [
             _CustomListTile(
@@ -651,8 +687,8 @@ class ProfileView extends StackedView<ProfileViewModel> {
             ),
             _CustomListTile(title: "Score Format", icon: Icons.star_border)
           ],
-        ),
-        Divider(color: kcLightGrey),
+        ), */
+        //Divider(color: kcLightGrey),
         _SingleSection(
           title: "Information",
           children: [
@@ -673,11 +709,6 @@ class ProfileView extends StackedView<ProfileViewModel> {
             ),
             _CustomListTile(
                 title: "Developed by VIVII", icon: Icons.code_rounded),
-            _CustomListTile(
-              title: "App Version",
-              icon: FontAwesomeIcons.codeBranch,
-              subtitle: viewModel.appVersion,
-            ),
           ],
         ),
       ],
@@ -1018,8 +1049,8 @@ class _CustomListTile extends StatelessWidget {
       title: Text(
         title,
         style: GoogleFonts.inter(
-          color: kcTertiaryPink, 
-          fontSize: 16, 
+          color: kcTertiaryPink,
+          fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
       ),
