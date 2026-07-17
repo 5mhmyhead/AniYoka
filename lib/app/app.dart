@@ -2,7 +2,6 @@ import 'package:aniyoka/services/category_service.dart';
 import 'package:aniyoka/ui/bottom_sheets/notice/notice_sheet.dart';
 import 'package:aniyoka/ui/dialogs/info_alert/info_alert_dialog.dart';
 import 'package:aniyoka/ui/views/home/home_view.dart';
-import 'package:aniyoka/ui/views/startup/startup_view.dart';
 import 'package:stacked/stacked_annotations.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:aniyoka/ui/views/main/main_view.dart';
@@ -20,8 +19,7 @@ import 'package:aniyoka/services/watchlist_service.dart';
 
 @StackedApp(
   routes: [
-    MaterialRoute(page: StartupView, initial: true),
-    MaterialRoute(page: MainView),
+    MaterialRoute(page: MainView, initial: true),
     MaterialRoute(page: HomeView),
     MaterialRoute(page: ExploreView),
     MaterialRoute(page: WatchlistView),
