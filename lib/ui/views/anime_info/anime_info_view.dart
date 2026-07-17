@@ -170,8 +170,7 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back,
-                        color: kcOffWhite, size: 32),
+                    icon: Icon(Icons.arrow_back, color: kcOffWhite, size: 32),
                     onPressed: () => Navigator.pop(context),
                   ),
                   IconButton(
@@ -336,7 +335,7 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
                     onTap: viewModel.copyDescription,
-                    child: const Icon(
+                    child: Icon(
                       Icons.copy,
                       color: kcTertiaryPink,
                       size: 24,
@@ -409,7 +408,7 @@ class AnimeInfoView extends StackedView<AnimeInfoViewModel> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (isSpoiler) ...[
-                      const Icon(Icons.warning_amber_rounded,
+                      Icon(Icons.warning_amber_rounded,
                           color: kcPrimaryPink, size: 12),
                       const SizedBox(width: 4),
                     ],

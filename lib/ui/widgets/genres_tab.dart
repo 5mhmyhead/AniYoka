@@ -175,8 +175,7 @@ class _GenresTabState extends State<GenresTab>
     super.build(context);
 
     if (_isLoading) {
-      return const Center(
-          child: CircularProgressIndicator(color: kcPrimaryPink));
+      return Center(child: CircularProgressIndicator(color: kcPrimaryPink));
     }
 
     return RefreshIndicator(
@@ -312,7 +311,7 @@ class _GenresTabState extends State<GenresTab>
                   ),
                 ),
           if (_isLoadingMore)
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.all(20),
                 child: Center(
@@ -340,7 +339,8 @@ class _GenresTabState extends State<GenresTab>
           transitionsBuilder: (_, __, ___, child) => child,
         ),
       ),
-      onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime['id']),
+      onLongPress: () =>
+          showWatchlistSheetForAnime(context, animeId: anime['id']),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

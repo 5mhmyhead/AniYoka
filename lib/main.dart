@@ -12,6 +12,7 @@ Future<void> main() async {
   await setupLocator();
   setupDialogUi();
   setupBottomSheetUi();
+  await ThemeService.instance.init();
   runApp(const MainApp());
 }
 
@@ -20,40 +21,45 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: Routes.mainView,
-      onGenerateRoute: StackedRouter().onGenerateRoute,
-      navigatorKey: StackedService.navigatorKey,
-      navigatorObservers: [StackedService.routeObserver],
-      theme: ThemeData(
-        useMaterial3: true,
-        textTheme: GoogleFonts.interTextTheme(),
-        scaffoldBackgroundColor: kcBackgroundColor,
-        canvasColor: kcBackgroundColor,
-        // theme data to change navigation bar styling
-        navigationBarTheme: NavigationBarThemeData(
-          iconTheme: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return const IconThemeData(color: kcPrimaryPink);
-            }
-            return const IconThemeData(color: kcLightGrey);
-          }),
-          labelTextStyle: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return GoogleFonts.nunito(
-                color: kcPrimaryPink,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              );
-            }
-            return GoogleFonts.nunito(
-              color: kcLightGrey,
-              fontSize: 12,
-            );
-          }),
-        ),
-      ),
+    return AnimatedBuilder(
+      animation: ThemeService.instance,
+      builder: (context, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          initialRoute: Routes.mainView,
+          onGenerateRoute: StackedRouter().onGenerateRoute,
+          navigatorKey: StackedService.navigatorKey,
+          navigatorObservers: [StackedService.routeObserver],
+          theme: ThemeData(
+            useMaterial3: true,
+            textTheme: GoogleFonts.interTextTheme(),
+            scaffoldBackgroundColor: kcBackgroundColor,
+            canvasColor: kcBackgroundColor,
+            // theme data to change navigation bar styling
+            navigationBarTheme: NavigationBarThemeData(
+              iconTheme: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return IconThemeData(color: kcPrimaryPink);
+                }
+                return const IconThemeData(color: kcLightGrey);
+              }),
+              labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return GoogleFonts.nunito(
+                    color: kcPrimaryPink,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  );
+                }
+                return GoogleFonts.nunito(
+                  color: kcLightGrey,
+                  fontSize: 12,
+                );
+              }),
+            ),
+          ),
+        );
+      },
     );
   }
 }

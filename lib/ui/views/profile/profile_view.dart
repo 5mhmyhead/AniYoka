@@ -25,8 +25,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
         child: Scaffold(
           backgroundColor: kcBackgroundColor,
           body: viewModel.isBusy
-              ? const Center(
-                  child: CircularProgressIndicator(color: kcPrimaryPink))
+              ? Center(child: CircularProgressIndicator(color: kcPrimaryPink))
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -290,7 +289,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
     ProfileViewModel viewModel,
   ) {
     if (viewModel.activitiesLoading && viewModel.recentActivities.isEmpty) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(color: kcPrimaryPink),
       );
     }
@@ -374,7 +373,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.delete_sweep_outlined,
                       color: kcPrimaryPink,
                       size: 20,
@@ -471,7 +470,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
                     Container(
                       width: 32,
                       height: 32,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         color: kcAccentShadePink,
                         shape: BoxShape.circle,
                       ),
@@ -635,7 +634,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text(
+              child: Text(
                 'Clear',
                 style: TextStyle(color: kcPrimaryPink),
               ),
@@ -672,23 +671,24 @@ class ProfileView extends StackedView<ProfileViewModel> {
             ),
             _CustomListTile(title: "Log out", icon: Icons.logout)
           ],
-        ),
-        Divider(color: kcLightGrey),
+        ), */
+        //Divider(color: kcLightGrey),
         _SingleSection(
           title: "Preferences",
           children: [
+            // _CustomListTile(
+            // title: "Change Profile Picture",
+            // icon: Icons.person_outline_rounded,
+            //),
             _CustomListTile(
-              title: "Change Profile Picture",
-              icon: Icons.person_outline_rounded,
-            ),
-            _CustomListTile(
-              title: "Change Profile color",
+              title: "Change App Color",
               icon: Icons.color_lens_outlined,
+              onTap: () => _showChangeAppColorDialog(context),
             ),
-            _CustomListTile(title: "Score Format", icon: Icons.star_border)
+            // _CustomListTile(title: "Score Format", icon: Icons.star_border)
           ],
-        ), */
-        //Divider(color: kcLightGrey),
+        ),
+        Divider(color: kcLightGrey),
         _SingleSection(
           title: "Information",
           children: [
@@ -732,7 +732,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const FaIcon(
+              FaIcon(
                 FontAwesomeIcons.github,
                 color: kcPrimaryPink,
                 size: 54,
@@ -815,6 +815,193 @@ class ProfileView extends StackedView<ProfileViewModel> {
     );
   }
 
+// Hex color input dialog for app-wide accent color
+  void _showChangeAppColorDialog(BuildContext context) {
+    final controller = TextEditingController(
+      text: _colorToHex(ThemeService.instance.accentColor),
+    );
+    String? errorText;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: kcSurfaceColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Change App Color',
+                    style: GoogleFonts.nunito(
+                      color: kcPrimaryPink,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Enter a hex color code (e.g. FF5733)',
+                    style: GoogleFonts.nunito(
+                      color: kcLightGrey,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      // live preview swatch
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _tryParseHex(controller.text) ?? kcLightGrey,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: kcLightGrey, width: 1),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: controller,
+                          maxLength: 6,
+                          cursorColor: kcPrimaryPink,
+                          textCapitalization: TextCapitalization.characters,
+                          style: GoogleFonts.inter(
+                            color: kcOffWhite,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          decoration: InputDecoration(
+                            counterText: '',
+                            prefixText: '#',
+                            prefixStyle: GoogleFonts.inter(color: kcLightGrey),
+                            filled: true,
+                            fillColor: kcDarkPink,
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 14),
+                            errorText: errorText,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          onChanged: (_) =>
+                              setDialogState(() {}), // live preview update
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: kcTertiaryPink,
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: Text(
+                              'Cancel',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.nunito(
+                                color: kcSurfaceColor,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            final parsed = _tryParseHex(controller.text);
+                            if (parsed == null) {
+                              setDialogState(() {
+                                errorText = 'Enter a valid 6-digit hex code';
+                              });
+                              return;
+                            }
+                            ThemeService.instance.setAccentColor(parsed);
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: kcPrimaryPink,
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: Text(
+                              'Apply',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.nunito(
+                                color: kcOffWhite,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        ThemeService.instance.resetToDefault();
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        'Reset to default',
+                        style: GoogleFonts.nunito(
+                          color: kcLightGrey,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+// Parses a hex string like "FF5733" or "#FF5733" into a Color, or null if invalid
+  Color? _tryParseHex(String input) {
+    var hex = input.trim().replaceAll('#', '');
+    if (hex.length != 6) return null;
+    final value = int.tryParse(hex, radix: 16);
+    if (value == null) return null;
+    return Color(0xFF000000 | value); // force full opacity
+  }
+
+// Converts a Color to a 6-digit hex string (no alpha, no #)
+  String _colorToHex(Color color) {
+    final r = (color.r * 255).round().toRadixString(16).padLeft(2, '0');
+    final g = (color.g * 255).round().toRadixString(16).padLeft(2, '0');
+    final b = (color.b * 255).round().toRadixString(16).padLeft(2, '0');
+    return '$r$g$b'.toUpperCase();
+  }
+
   // Confirmation dialog before leaving the app for Help & Feedback
   void _showHelpFeedbackDialog(BuildContext context) {
     showDialog(
@@ -832,7 +1019,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.help_outline_rounded,
                 color: kcPrimaryPink,
                 size: 54,
@@ -933,7 +1120,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.info_outline_rounded,
                 color: kcPrimaryPink,
                 size: 54,

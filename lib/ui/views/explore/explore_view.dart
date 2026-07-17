@@ -53,7 +53,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.search, color: kcPrimaryPink, size: 24),
+                Icon(Icons.search, color: kcPrimaryPink, size: 24),
                 const SizedBox(width: 12),
                 Text(
                   'Search for an anime...',
@@ -71,7 +71,8 @@ class ExploreView extends StackedView<ExploreViewModel> {
     );
   }
 
-  Widget _buildActiveSearchHeader(BuildContext context, ExploreViewModel viewModel) {
+  Widget _buildActiveSearchHeader(
+      BuildContext context, ExploreViewModel viewModel) {
     return Container(
       padding: const EdgeInsets.only(bottom: 15),
       decoration: const BoxDecoration(
@@ -100,7 +101,8 @@ class ExploreView extends StackedView<ExploreViewModel> {
                     enableSuggestions: false,
                     decoration: InputDecoration(
                       hintText: 'Search for an anime...',
-                      hintStyle: GoogleFonts.inter(color: kcLightGrey.withValues(alpha: 0.75)),
+                      hintStyle: GoogleFonts.inter(
+                          color: kcLightGrey.withValues(alpha: 0.75)),
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -301,7 +303,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
                             ),
                           ),
                           trailing: isChosen
-                              ? const Icon(Icons.check_circle,
+                              ? Icon(Icons.check_circle,
                                   color: kcPrimaryPink, size: 20)
                               : null,
                           onTap: () => Navigator.of(dialogContext).pop(option),
@@ -320,47 +322,63 @@ class ExploreView extends StackedView<ExploreViewModel> {
 
   Widget _buildDiscoverGrid(ExploreViewModel viewModel) {
     final categories = [
-    {
-      'label': 'Top 100',
-      'icon': Icons.star_border,
-      'filter': const AnimeListFilter(type: AnimeListType.topRated, title: 'Top 100'),
-    },
-    {
-      'label': 'Trending Now',
-      'icon': Icons.trending_up,
-      'filter': const AnimeListFilter(type: AnimeListType.popular, title: 'Trending Now'),
-    },
-    {
-      'label': 'Upcoming',
-      'icon': Icons.access_time,
-      'filter': const AnimeListFilter(type: AnimeListType.airingSoon, title: 'Upcoming'),
-    },
-    {
-      'label': 'Airing Now',
-      'icon': Icons.rss_feed,
-      'filter': const AnimeListFilter(type: AnimeListType.airing, title: 'Airing Now'),
-    },
-    {
-      'label': 'Spring',
-      'icon': Icons.local_florist,
-      'filter': AnimeListFilter(type: AnimeListType.season, title: 'Spring ${SeasonHelper.currentYear}', season: 'SPRING'),
-    },
-    {
-      'label': 'Summer',
-      'icon': Icons.wb_sunny,
-      'filter': AnimeListFilter(type: AnimeListType.season, title: 'Summer ${SeasonHelper.currentYear}', season: 'SUMMER'),
-    },
-    {
-      'label': 'Fall',
-      'icon': Icons.eco,
-      'filter': AnimeListFilter(type: AnimeListType.season, title: 'Fall ${SeasonHelper.currentYear}', season: 'FALL'),
-    },
-    {
-      'label': 'Winter',
-      'icon': Icons.ac_unit,
-      'filter': AnimeListFilter(type: AnimeListType.season, title: 'Winter ${SeasonHelper.currentYear}', season: 'WINTER'),
-    },
-  ];
+      {
+        'label': 'Top 100',
+        'icon': Icons.star_border,
+        'filter': const AnimeListFilter(
+            type: AnimeListType.topRated, title: 'Top 100'),
+      },
+      {
+        'label': 'Trending Now',
+        'icon': Icons.trending_up,
+        'filter': const AnimeListFilter(
+            type: AnimeListType.popular, title: 'Trending Now'),
+      },
+      {
+        'label': 'Upcoming',
+        'icon': Icons.access_time,
+        'filter': const AnimeListFilter(
+            type: AnimeListType.airingSoon, title: 'Upcoming'),
+      },
+      {
+        'label': 'Airing Now',
+        'icon': Icons.rss_feed,
+        'filter': const AnimeListFilter(
+            type: AnimeListType.airing, title: 'Airing Now'),
+      },
+      {
+        'label': 'Spring',
+        'icon': Icons.local_florist,
+        'filter': AnimeListFilter(
+            type: AnimeListType.season,
+            title: 'Spring ${SeasonHelper.currentYear}',
+            season: 'SPRING'),
+      },
+      {
+        'label': 'Summer',
+        'icon': Icons.wb_sunny,
+        'filter': AnimeListFilter(
+            type: AnimeListType.season,
+            title: 'Summer ${SeasonHelper.currentYear}',
+            season: 'SUMMER'),
+      },
+      {
+        'label': 'Fall',
+        'icon': Icons.eco,
+        'filter': AnimeListFilter(
+            type: AnimeListType.season,
+            title: 'Fall ${SeasonHelper.currentYear}',
+            season: 'FALL'),
+      },
+      {
+        'label': 'Winter',
+        'icon': Icons.ac_unit,
+        'filter': AnimeListFilter(
+            type: AnimeListType.season,
+            title: 'Winter ${SeasonHelper.currentYear}',
+            season: 'WINTER'),
+      },
+    ];
 
     return ListView(
       physics: const BouncingScrollPhysics(),
@@ -392,9 +410,10 @@ class ExploreView extends StackedView<ExploreViewModel> {
                   .asBoxDecoration(color: kcSurfaceColor),
               child: InkWell(
                 onTap: () => Navigator.push(
-                context,
+                  context,
                   PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => AnimeListView(filter: item['filter'] as AnimeListFilter),
+                    pageBuilder: (_, __, ___) => AnimeListView(
+                        filter: item['filter'] as AnimeListFilter),
                     transitionDuration: Duration.zero,
                     reverseTransitionDuration: Duration.zero,
                     transitionsBuilder: (_, __, ___, child) => child,
@@ -456,8 +475,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
     }
 
     if (viewModel.isBusy) {
-      return const Center(
-          child: CircularProgressIndicator(color: kcPrimaryPink));
+      return Center(child: CircularProgressIndicator(color: kcPrimaryPink));
     }
 
     if (viewModel.hasError) {
@@ -545,8 +563,8 @@ class ExploreView extends StackedView<ExploreViewModel> {
             ),
           ),
           const SizedBox(height: 10),
-          ...viewModel.relatedResults
-              .map((anime) => _buildAnimeCardListTile(context, anime, onTap: () {
+          ...viewModel.relatedResults.map(
+              (anime) => _buildAnimeCardListTile(context, anime, onTap: () {
                     viewModel.onAnimeTap(anime['id']);
                   })),
         ],
@@ -554,7 +572,8 @@ class ExploreView extends StackedView<ExploreViewModel> {
     );
   }
 
-  Widget _buildAnimeCardListTile(BuildContext context, dynamic anime, {required VoidCallback onTap}) {
+  Widget _buildAnimeCardListTile(BuildContext context, dynamic anime,
+      {required VoidCallback onTap}) {
     final title = anime['title']['english'] ?? anime['title']['romaji'] ?? '';
     final format = anime['format'] ?? '';
     final year = anime['startDate']?['year']?.toString() ?? '';
@@ -562,7 +581,8 @@ class ExploreView extends StackedView<ExploreViewModel> {
 
     return GestureDetector(
       onTap: onTap,
-      onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime['id']),
+      onLongPress: () =>
+          showWatchlistSheetForAnime(context, animeId: anime['id']),
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
@@ -615,7 +635,7 @@ class ExploreView extends StackedView<ExploreViewModel> {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  if(score != null) 
+                  if (score != null)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

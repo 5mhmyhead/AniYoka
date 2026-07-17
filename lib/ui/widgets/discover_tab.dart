@@ -29,20 +29,37 @@ class _DiscoverTabState extends State<DiscoverTab>
 
     // only show spinner if nothing has loaded yet
     if (widget.viewModel.popularAnime.isEmpty) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(color: kcPrimaryPink),
       );
     }
 
     final sections = [
-      (SeasonHelper.currentSeasonLabel, widget.viewModel.thisSeason,
-          AnimeListFilter(type: AnimeListType.thisSeason, title: SeasonHelper.currentSeasonLabel)),
-      ('Next Season', widget.viewModel.nextSeason,
-          const AnimeListFilter(type: AnimeListType.nextSeason, title: 'Next Season')),
-      ('Newly Added', widget.viewModel.newlyAdded,
-          const AnimeListFilter(type: AnimeListType.newlyAdded, title: 'Newly Added')),
-      ('Airing Soon', widget.viewModel.airingSoon,
-          const AnimeListFilter(type: AnimeListType.airingSoon, title: 'Airing Soon')),
+      (
+        SeasonHelper.currentSeasonLabel,
+        widget.viewModel.thisSeason,
+        AnimeListFilter(
+            type: AnimeListType.thisSeason,
+            title: SeasonHelper.currentSeasonLabel)
+      ),
+      (
+        'Next Season',
+        widget.viewModel.nextSeason,
+        const AnimeListFilter(
+            type: AnimeListType.nextSeason, title: 'Next Season')
+      ),
+      (
+        'Newly Added',
+        widget.viewModel.newlyAdded,
+        const AnimeListFilter(
+            type: AnimeListType.newlyAdded, title: 'Newly Added')
+      ),
+      (
+        'Airing Soon',
+        widget.viewModel.airingSoon,
+        const AnimeListFilter(
+            type: AnimeListType.airingSoon, title: 'Airing Soon')
+      ),
     ];
 
     return RefreshIndicator(
@@ -53,19 +70,20 @@ class _DiscoverTabState extends State<DiscoverTab>
         padding: EdgeInsets.zero,
         children: [
           const SizedBox(height: 12),
-          _buildSectionHeader('Popular Now', const AnimeListFilter(
-            type: AnimeListType.popular,
-            title: 'Popular Now',
-          )),
+          _buildSectionHeader(
+              'Popular Now',
+              const AnimeListFilter(
+                type: AnimeListType.popular,
+                title: 'Popular Now',
+              )),
           const SizedBox(height: 10),
           _buildPopularSection(widget.viewModel.popularAnime),
           const SizedBox(height: 10),
-          ...sections
-            .where((section) => section.$2.isNotEmpty)
-            .map((section) => _buildSection(section.$1, section.$2, section.$3)),
+          ...sections.where((section) => section.$2.isNotEmpty).map(
+              (section) => _buildSection(section.$1, section.$2, section.$3)),
           // show bottom spinner while remaining sections are still loading
           if (widget.viewModel.isBusy)
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(20),
               child: Center(
                 child: CircularProgressIndicator(color: kcPrimaryPink),
@@ -77,7 +95,8 @@ class _DiscoverTabState extends State<DiscoverTab>
     );
   }
 
-  Widget _buildSection(String title, List<dynamic> animeList, AnimeListFilter filter) {
+  Widget _buildSection(
+      String title, List<dynamic> animeList, AnimeListFilter filter) {
     return Column(
       children: [
         _buildSectionHeader(title, filter),
@@ -133,7 +152,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                 transitionsBuilder: (_, __, ___, child) => child,
               ),
             ),
-            onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime['id']),
+            onLongPress: () =>
+                showWatchlistSheetForAnime(context, animeId: anime['id']),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ClipRRect(
@@ -221,7 +241,7 @@ class _DiscoverTabState extends State<DiscoverTab>
                 transitionsBuilder: (_, __, ___, child) => child,
               ),
             ),
-            child: const Icon(Icons.arrow_forward, color: kcTertiaryPink, size: 24),
+            child: Icon(Icons.arrow_forward, color: kcTertiaryPink, size: 24),
           ),
         ],
       ),

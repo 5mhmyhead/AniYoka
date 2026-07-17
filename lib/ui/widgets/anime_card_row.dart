@@ -44,7 +44,8 @@ class AnimeCardRow extends StatelessWidget {
 
           return GestureDetector(
             onTap: onAnimeTap != null ? () => onAnimeTap!(anime['id']) : null,
-            onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime['id']),
+            onLongPress: () =>
+                showWatchlistSheetForAnime(context, animeId: anime['id']),
             child: SizedBox(
               width: 135,
               child: Column(

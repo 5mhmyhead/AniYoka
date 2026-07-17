@@ -14,10 +14,12 @@ class WatchlistView extends StackedView<WatchlistViewModel> {
   final VoidCallback? onNavigateToExplore;
 
   @override
-  void onViewModelReady(WatchlistViewModel viewModel) => viewModel.loadWatchlist();
+  void onViewModelReady(WatchlistViewModel viewModel) =>
+      viewModel.loadWatchlist();
 
   @override
-  Widget builder(BuildContext context, WatchlistViewModel viewModel, Widget? child) {
+  Widget builder(
+      BuildContext context, WatchlistViewModel viewModel, Widget? child) {
     final categories = viewModel.categories;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -38,7 +40,8 @@ class WatchlistView extends StackedView<WatchlistViewModel> {
                 selectedSort: viewModel.sort.label,
                 selectedSortAscending: viewModel.sortAscending,
                 onSortSelected: (label, ascending) {
-                  final sort = WatchlistSort.values.firstWhere((s) => s.label == label);
+                  final sort =
+                      WatchlistSort.values.firstWhere((s) => s.label == label);
                   viewModel.setSort(sort, ascending: ascending);
                 },
                 onSearchChanged: viewModel.setSearch,
@@ -67,17 +70,20 @@ class WatchlistView extends StackedView<WatchlistViewModel> {
         indicatorColor: kcPrimaryPink,
         indicatorWeight: 2,
         dividerColor: kcLightGrey,
-        labelStyle: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600),
+        labelStyle:
+            GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600),
         unselectedLabelStyle: GoogleFonts.nunito(fontSize: 15),
         tabs: categories.map((c) => Tab(text: c)).toList(),
       ),
     );
   }
 
-  Widget _buildTabContent(List<String> categories, WatchlistViewModel viewModel, BuildContext context) {
+  Widget _buildTabContent(List<String> categories, WatchlistViewModel viewModel,
+      BuildContext context) {
     return TabBarView(
       children: categories
-          .map((c) => _buildList(viewModel.entriesForCategory(c), viewModel, context))
+          .map((c) =>
+              _buildList(viewModel.entriesForCategory(c), viewModel, context))
           .toList(),
     );
   }
@@ -88,7 +94,7 @@ class WatchlistView extends StackedView<WatchlistViewModel> {
     BuildContext context,
   ) {
     if (!viewModel.hasLoaded) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(color: kcPrimaryPink),
       );
     }
@@ -165,7 +171,8 @@ class WatchlistView extends StackedView<WatchlistViewModel> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: entries.length,
-        separatorBuilder: (_, __) => const Divider(color: kcSurfaceColor, height: 1),
+        separatorBuilder: (_, __) =>
+            const Divider(color: kcSurfaceColor, height: 1),
         itemBuilder: (context, index) {
           final entry = entries[index];
           return WatchlistEntryTile(
@@ -191,5 +198,6 @@ class WatchlistView extends StackedView<WatchlistViewModel> {
   }
 
   @override
-  WatchlistViewModel viewModelBuilder(BuildContext context) => WatchlistViewModel();
+  WatchlistViewModel viewModelBuilder(BuildContext context) =>
+      WatchlistViewModel();
 }

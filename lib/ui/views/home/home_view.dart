@@ -88,7 +88,7 @@ class HomeView extends StackedView<HomeViewModel> {
   // tab content switcher
   Widget _buildTabContent(HomeViewModel viewModel, BuildContext context) {
     if (viewModel.isBusy) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(color: kcPrimaryPink),
       );
     }

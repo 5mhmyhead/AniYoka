@@ -18,10 +18,12 @@ class AnimeListView extends StackedView<AnimeListViewModel> {
       AnimeListViewModel(filter: filter);
 
   @override
-  void onViewModelReady(AnimeListViewModel viewModel) => viewModel.loadAnimeList();
+  void onViewModelReady(AnimeListViewModel viewModel) =>
+      viewModel.loadAnimeList();
 
   @override
-  Widget builder(BuildContext context, AnimeListViewModel viewModel, Widget? child) {
+  Widget builder(
+      BuildContext context, AnimeListViewModel viewModel, Widget? child) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: kcBackgroundColor,
@@ -41,7 +43,8 @@ class AnimeListView extends StackedView<AnimeListViewModel> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                   child: Row(
                     children: [
                       IconButton(
@@ -63,7 +66,7 @@ class AnimeListView extends StackedView<AnimeListViewModel> {
               // content
               Expanded(
                 child: viewModel.isBusy
-                    ? const Center(
+                    ? Center(
                         child: CircularProgressIndicator(color: kcPrimaryPink))
                     : NotificationListener<ScrollNotification>(
                         onNotification: (notification) {
@@ -75,14 +78,15 @@ class AnimeListView extends StackedView<AnimeListViewModel> {
                         },
                         child: ListView.separated(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          itemCount: viewModel.animeList.length + (viewModel.isLoadingMore ? 1 : 0),
+                          itemCount: viewModel.animeList.length +
+                              (viewModel.isLoadingMore ? 1 : 0),
                           separatorBuilder: (_, __) => const Divider(
                             color: kcSurfaceColor,
                             height: 1,
                           ),
                           itemBuilder: (context, index) {
                             if (index == viewModel.animeList.length) {
-                              return const Padding(
+                              return Padding(
                                 padding: EdgeInsets.all(20),
                                 child: Center(
                                   child: CircularProgressIndicator(
@@ -90,7 +94,8 @@ class AnimeListView extends StackedView<AnimeListViewModel> {
                                 ),
                               );
                             }
-                            return _buildListItem(context, viewModel.animeList[index]);
+                            return _buildListItem(
+                                context, viewModel.animeList[index]);
                           },
                         ),
                       ),
@@ -118,7 +123,8 @@ class AnimeListView extends StackedView<AnimeListViewModel> {
           transitionsBuilder: (_, __, ___, child) => child,
         ),
       ),
-      onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime['id']),
+      onLongPress: () =>
+          showWatchlistSheetForAnime(context, animeId: anime['id']),
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -171,7 +177,7 @@ class AnimeListView extends StackedView<AnimeListViewModel> {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  if(score != null) 
+                  if (score != null)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

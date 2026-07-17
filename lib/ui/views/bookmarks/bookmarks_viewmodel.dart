@@ -7,9 +7,12 @@ enum BookmarkSort { title, recentlySaved, oldestSaved }
 extension BookmarkSortLabel on BookmarkSort {
   String get label {
     switch (this) {
-      case BookmarkSort.title: return 'Title';
-      case BookmarkSort.recentlySaved: return 'Recently Saved';
-      case BookmarkSort.oldestSaved: return 'Oldest Saved';
+      case BookmarkSort.title:
+        return 'Title';
+      case BookmarkSort.recentlySaved:
+        return 'Recently Saved';
+      case BookmarkSort.oldestSaved:
+        return 'Oldest Saved';
     }
   }
 }
@@ -48,13 +51,15 @@ class BookmarksViewModel extends BaseViewModel {
     rebuildUi();
   }
 
-  List<Map<String, dynamic>> _applySearchAndSort(List<Map<String, dynamic>> list) {
+  List<Map<String, dynamic>> _applySearchAndSort(
+      List<Map<String, dynamic>> list) {
     var result = list;
 
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
       result = result.where((b) {
-        final title = (b['title']?['english'] ?? b['title']?['romaji'] ?? '').toLowerCase();
+        final title = (b['title']?['english'] ?? b['title']?['romaji'] ?? '')
+            .toLowerCase();
         return title.contains(q);
       }).toList();
     }
@@ -68,12 +73,12 @@ class BookmarksViewModel extends BaseViewModel {
         });
         break;
       case BookmarkSort.recentlySaved:
-        result.sort((a, b) =>
-            DateTime.parse(b['savedAt']).compareTo(DateTime.parse(a['savedAt'])));
+        result.sort((a, b) => DateTime.parse(b['savedAt'])
+            .compareTo(DateTime.parse(a['savedAt'])));
         break;
       case BookmarkSort.oldestSaved:
-        result.sort((a, b) =>
-            DateTime.parse(a['savedAt']).compareTo(DateTime.parse(b['savedAt'])));
+        result.sort((a, b) => DateTime.parse(a['savedAt'])
+            .compareTo(DateTime.parse(b['savedAt'])));
         break;
     }
 
@@ -85,7 +90,8 @@ class BookmarksViewModel extends BaseViewModel {
     return result;
   }
 
-  List<Map<String, dynamic>> get allBookmarks => _applySearchAndSort(_bookmarks);
+  List<Map<String, dynamic>> get allBookmarks =>
+      _applySearchAndSort(_bookmarks);
 
   List<Map<String, dynamic>> bookmarksForCategory(String category) {
     return allBookmarks;

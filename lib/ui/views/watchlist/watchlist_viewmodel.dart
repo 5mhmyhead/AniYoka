@@ -9,10 +9,14 @@ enum WatchlistSort { title, progress, recentlyAdded, oldestAdded }
 extension WatchlistSortLabel on WatchlistSort {
   String get label {
     switch (this) {
-      case WatchlistSort.title: return 'Title';
-      case WatchlistSort.progress: return 'Progress';
-      case WatchlistSort.recentlyAdded: return 'Recently Added';
-      case WatchlistSort.oldestAdded: return 'Oldest Added';
+      case WatchlistSort.title:
+        return 'Title';
+      case WatchlistSort.progress:
+        return 'Progress';
+      case WatchlistSort.recentlyAdded:
+        return 'Recently Added';
+      case WatchlistSort.oldestAdded:
+        return 'Oldest Added';
     }
   }
 }
@@ -85,7 +89,9 @@ class WatchlistViewModel extends BaseViewModel {
       final q = _searchQuery.toLowerCase();
       result = result.where((e) {
         final title = (e.animeData['title']?['english'] ??
-            e.animeData['title']?['romaji'] ?? '').toLowerCase();
+                e.animeData['title']?['romaji'] ??
+                '')
+            .toLowerCase();
         return title.contains(q);
       }).toList();
     }
@@ -93,7 +99,8 @@ class WatchlistViewModel extends BaseViewModel {
     // apply status filter
     if (_selectedStatuses.isNotEmpty) {
       result = result
-          .where((e) => _selectedStatuses.any((s) => s.toUpperCase() == e.status))
+          .where(
+              (e) => _selectedStatuses.any((s) => s.toUpperCase() == e.status))
           .toList();
     }
 
@@ -101,8 +108,12 @@ class WatchlistViewModel extends BaseViewModel {
     switch (_sort) {
       case WatchlistSort.title:
         result.sort((a, b) {
-          final ta = a.animeData['title']?['english'] ?? a.animeData['title']?['romaji'] ?? '';
-          final tb = b.animeData['title']?['english'] ?? b.animeData['title']?['romaji'] ?? '';
+          final ta = a.animeData['title']?['english'] ??
+              a.animeData['title']?['romaji'] ??
+              '';
+          final tb = b.animeData['title']?['english'] ??
+              b.animeData['title']?['romaji'] ??
+              '';
           return ta.compareTo(tb);
         });
         break;
@@ -132,12 +143,13 @@ class WatchlistViewModel extends BaseViewModel {
 
     return result;
   }
-  
+
   List<WatchlistEntry> entriesForCategory(String category) {
     if (category == allCategoryLabel) return allAnime;
 
     final filtered = _entries
-        .where((e) => (_categoryAssignments[e.id] ?? const {}).contains(category))
+        .where(
+            (e) => (_categoryAssignments[e.id] ?? const {}).contains(category))
         .toList();
     return _applySearchAndSort(filtered);
   }
@@ -210,7 +222,7 @@ class WatchlistViewModel extends BaseViewModel {
     rebuildUi();
   }
 
-   Future<void> removeEntry(int id) async {
+  Future<void> removeEntry(int id) async {
     final entry = _entryFor(id);
 
     await _watchlistService.remove(id);

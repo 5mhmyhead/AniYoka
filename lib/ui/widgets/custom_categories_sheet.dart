@@ -127,7 +127,7 @@ Future<List<String>> showCustomCategoriesSheet(BuildContext context) async {
                                 color: kcBackgroundColor,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.delete_outline,
+                              child: Icon(Icons.delete_outline,
                                   color: kcPrimaryPink, size: 18),
                             ),
                           ),
@@ -297,8 +297,7 @@ Future<String?> _showCategoryNameDialog(
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide:
-                      const BorderSide(color: kcPrimaryPink, width: 1.5),
+                  borderSide: BorderSide(color: kcPrimaryPink, width: 1.5),
                 ),
               ),
             ),

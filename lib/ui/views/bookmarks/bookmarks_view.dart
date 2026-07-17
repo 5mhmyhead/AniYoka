@@ -88,7 +88,7 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
   Widget _buildGrid(List<Map<String, dynamic>> list,
       BookmarksViewModel viewModel, BuildContext context) {
     if (!viewModel.hasLoaded) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(color: kcPrimaryPink),
       );
     }
@@ -197,7 +197,8 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
         // reload bookmarks when user comes back
         viewModel.loadBookmarks();
       },
-      onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime['id']),
+      onLongPress: () =>
+          showWatchlistSheetForAnime(context, animeId: anime['id']),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

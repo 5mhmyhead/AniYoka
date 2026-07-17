@@ -47,7 +47,7 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
   }
 
   @override
-    Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       color: kcSurfaceColor,
       child: SafeArea(
@@ -55,9 +55,9 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
           child: SizedBox(
-            height: 60,
-            child: _isSearching ? _buildSearchBar() : _buildTitleRow(context)
-          ),
+              height: 60,
+              child:
+                  _isSearching ? _buildSearchBar() : _buildTitleRow(context)),
         ),
       ),
     );
@@ -127,7 +127,8 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
             enableSuggestions: false,
             decoration: InputDecoration(
               hintText: 'Search for an anime...',
-              hintStyle: GoogleFonts.inter(color: kcLightGrey.withValues(alpha: 0.75)),
+              hintStyle:
+                  GoogleFonts.inter(color: kcLightGrey.withValues(alpha: 0.75)),
               border: InputBorder.none,
               focusedBorder: InputBorder.none,
               enabledBorder: InputBorder.none,
@@ -162,7 +163,8 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
       }
     }
 
-    void resetAndClose(BuildContext sheetContext, void Function(void Function()) setSheetState) {
+    void resetAndClose(BuildContext sheetContext,
+        void Function(void Function()) setSheetState) {
       Navigator.pop(sheetContext);
       tempSort = widget.sortOptions.first;
       tempAscending = true;
@@ -187,7 +189,8 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
       );
     }
 
-    Widget buildActionButtons(BuildContext sheetContext, void Function(void Function()) setSheetState) {
+    Widget buildActionButtons(BuildContext sheetContext,
+        void Function(void Function()) setSheetState) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
         child: Row(
@@ -195,7 +198,8 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
             GestureDetector(
               onTap: () => Navigator.pop(sheetContext),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 decoration: BoxDecoration(
                   color: kcBackgroundColor,
                   borderRadius: BorderRadius.circular(30),
@@ -214,7 +218,8 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
             GestureDetector(
               onTap: () => resetAndClose(sheetContext, setSheetState),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 decoration: BoxDecoration(
                   color: kcBackgroundColor,
                   borderRadius: BorderRadius.circular(30),
@@ -233,7 +238,8 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
             GestureDetector(
               onTap: () => applyAndClose(sheetContext),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 decoration: BoxDecoration(
                   color: kcPrimaryPink,
                   borderRadius: BorderRadius.circular(30),
@@ -278,7 +284,8 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
               }),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
                   color: isSelected ? kcPrimaryPink : kcBackgroundColor,
@@ -292,7 +299,8 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
                       style: GoogleFonts.nunito(
                         color: isSelected ? kcOffWhite : kcLightGrey,
                         fontSize: 15,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.w400,
                       ),
                     ),
                     if (isSelected)
@@ -307,7 +315,8 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
       );
     }
 
-    Widget buildSortList(ScrollController? scrollController, void Function(void Function()) setSheetState) {
+    Widget buildSortList(ScrollController? scrollController,
+        void Function(void Function()) setSheetState) {
       return ListView(
         controller: scrollController,
         padding: const EdgeInsets.all(20),
@@ -334,7 +343,8 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
               }),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
                   color: isSelected ? kcPrimaryPink : kcBackgroundColor,
@@ -348,12 +358,15 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
                       style: GoogleFonts.nunito(
                         color: isSelected ? kcOffWhite : kcLightGrey,
                         fontSize: 15,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.w400,
                       ),
                     ),
                     if (isSelected)
                       Icon(
-                        tempAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                        tempAscending
+                            ? Icons.arrow_upward
+                            : Icons.arrow_downward,
                         color: kcOffWhite,
                         size: 20,
                       ),
@@ -388,7 +401,8 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
                     buildDragHandle(),
                     buildActionButtons(sheetContext, setSheetState),
                     const SizedBox(height: 12),
-                    Expanded(child: buildSortList(scrollController, setSheetState)),
+                    Expanded(
+                        child: buildSortList(scrollController, setSheetState)),
                   ],
                 );
               }
@@ -407,7 +421,8 @@ class _SearchFilterHeaderState extends State<SearchFilterHeader> {
                       indicatorColor: kcPrimaryPink,
                       indicatorWeight: 2,
                       dividerColor: kcLightGrey.withValues(alpha: 0.5),
-                      labelStyle: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w600),
+                      labelStyle: GoogleFonts.nunito(
+                          fontSize: 16, fontWeight: FontWeight.w600),
                       unselectedLabelStyle: GoogleFonts.nunito(fontSize: 16),
                       tabs: const [
                         Tab(text: 'Status'),

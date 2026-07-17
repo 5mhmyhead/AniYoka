@@ -83,8 +83,7 @@ void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
                       GestureDetector(
                         onTap: () {
                           final finalEpisodes =
-                              selectedStatus == 'COMPLETED' &&
-                                      totalEpisodes > 0
+                              selectedStatus == 'COMPLETED' && totalEpisodes > 0
                                   ? totalEpisodes
                                   : episodesWatched;
 
@@ -129,8 +128,7 @@ void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
                         width: 52,
                         height: 52,
                         decoration: BoxDecoration(
-                          color:
-                              isSelected ? kcPrimaryPink : kcBackgroundColor,
+                          color: isSelected ? kcPrimaryPink : kcBackgroundColor,
                           borderRadius:
                               BorderRadius.circular(isSelected ? 16 : 50),
                         ),
@@ -290,7 +288,7 @@ void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
                 _buildCustomCategoriesSection(
                     viewModel, context, setSheetState),
 
-                if (viewModel.isInWatchlist) 
+                if (viewModel.isInWatchlist)
                   Padding(
                     padding: const EdgeInsets.all(20),
                     child: GestureDetector(
@@ -300,7 +298,7 @@ void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
                       },
                       child: Row(
                         children: [
-                          const SizedBox(
+                          SizedBox(
                               width: 28,
                               child: Align(
                                   alignment: Alignment.centerLeft,
@@ -344,7 +342,7 @@ Future<void> showWatchlistSheetForAnime(
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (_) => const Center(
+    builder: (_) => Center(
       child: CircularProgressIndicator(color: kcPrimaryPink),
     ),
   );
@@ -541,8 +539,7 @@ Widget _buildCustomCategoriesSection(
         ] else ...[
           const SizedBox(height: 10),
           ...viewModel.availableCategories.map((category) {
-            final isSelected =
-                viewModel.selectedCategories.contains(category);
+            final isSelected = viewModel.selectedCategories.contains(category);
             return GestureDetector(
               onTap: () => setSheetState(() {
                 viewModel.toggleCategory(category);
@@ -603,7 +600,7 @@ void _showDeleteWatchlistDialog(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.delete_outline,
               color: kcTertiaryPink,
               size: 54,
@@ -685,7 +682,6 @@ void _showDeleteWatchlistDialog(
     ),
   );
 
-  
   void _showRemoveDialog(BuildContext context, Map<String, dynamic> anime,
       BookmarksViewModel viewModel) {
     showDialog(
@@ -703,7 +699,7 @@ void _showDeleteWatchlistDialog(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.bookmark_remove_outlined,
                 color: kcTertiaryPink,
                 size: 54,

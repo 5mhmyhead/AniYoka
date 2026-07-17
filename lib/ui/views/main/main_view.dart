@@ -20,11 +20,11 @@ class MainView extends StackedView<MainViewModel> {
         0 => const HomeView(),
         1 => const ExploreView(),
         2 => WatchlistView(
-          onNavigateToExplore: () => viewModel.setPage(1),
-        ),
+            onNavigateToExplore: () => viewModel.setPage(1),
+          ),
         3 => BookmarksView(
-          onNavigateToExplore: () => viewModel.setPage(1),
-        ),
+            onNavigateToExplore: () => viewModel.setPage(1),
+          ),
         4 => const ProfileView(),
         int() => throw UnimplementedError(),
       },
@@ -38,29 +38,29 @@ class MainView extends StackedView<MainViewModel> {
           // bottom nav bar directory
           selectedIndex: viewModel.currentPage,
           onDestinationSelected: viewModel.setPage,
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: Icon(Icons.home_outlined),
+              icon: const Icon(Icons.home_outlined),
               selectedIcon: Icon(Icons.home, color: kcPrimaryPink),
               label: 'Home',
             ),
             NavigationDestination(
-              icon: Icon(Icons.explore_outlined),
+              icon: const Icon(Icons.explore_outlined),
               selectedIcon: Icon(Icons.explore, color: kcPrimaryPink),
               label: 'Explore',
             ),
             NavigationDestination(
-              icon: Icon(Icons.tv_outlined),
+              icon: const Icon(Icons.tv_outlined),
               selectedIcon: Icon(Icons.connected_tv, color: kcPrimaryPink),
               label: 'Watch List',
             ),
             NavigationDestination(
-              icon: Icon(Icons.bookmark_outline),
+              icon: const Icon(Icons.bookmark_outline),
               selectedIcon: Icon(Icons.bookmark, color: kcPrimaryPink),
               label: 'Bookmarks',
             ),
             NavigationDestination(
-              icon: Icon(Icons.person_outline),
+              icon: const Icon(Icons.person_outline),
               selectedIcon: Icon(Icons.person, color: kcPrimaryPink),
               label: 'Profile',
             ),
@@ -77,11 +77,10 @@ class MainView extends StackedView<MainViewModel> {
       MainViewModel();
 }
 
-// custom pill that is smaller than default
+// custom pill that is smaller than default — unchanged, no color usage
 class NarrowPillIndicator extends ShapeBorder {
   final double customWidth;
-  const NarrowPillIndicator(
-      {this.customWidth = 46.0});
+  const NarrowPillIndicator({this.customWidth = 46.0});
 
   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
