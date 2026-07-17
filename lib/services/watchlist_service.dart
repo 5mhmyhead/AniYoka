@@ -8,8 +8,12 @@ class WatchlistEntry {
   int episodesWatched;
   final int? totalEpisodes;
   final DateTime addedAt;
-  final String? animeStatus;        
+  final String? animeStatus;
   final int? nextAiringEpisode;
+  int score;
+  int rewatchCount;
+  DateTime? startedAt;
+  DateTime? finishedAt;
 
   WatchlistEntry({
     required this.id,
@@ -20,6 +24,10 @@ class WatchlistEntry {
     this.totalEpisodes,
     this.animeStatus,
     this.nextAiringEpisode,
+    this.score = 0,
+    this.rewatchCount = 0,
+    this.startedAt,
+    this.finishedAt,
   });
 
   int? get latestAiredEpisode {
@@ -45,6 +53,10 @@ class WatchlistEntry {
     'addedAt': addedAt.toIso8601String(),
     'animeStatus': animeStatus,
     'nextAiringEpisode': nextAiringEpisode,
+    'score': score,
+    'rewatchCount': rewatchCount,
+    'startedAt': startedAt?.toIso8601String(),
+    'finishedAt': finishedAt?.toIso8601String(),
   };
 
   factory WatchlistEntry.fromJson(Map<String, dynamic> json) => WatchlistEntry(
@@ -56,6 +68,10 @@ class WatchlistEntry {
     addedAt: DateTime.parse(json['addedAt']),
     animeStatus: json['animeStatus'],
     nextAiringEpisode: json['nextAiringEpisode'],
+    score: json['score'] ?? 0,
+    rewatchCount: json['rewatchCount'] ?? 0,
+    startedAt: json['startedAt'] != null ? DateTime.parse(json['startedAt']) : null,
+    finishedAt: json['finishedAt'] != null ? DateTime.parse(json['finishedAt']) : null,
   );
 }
 

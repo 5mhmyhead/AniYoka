@@ -32,7 +32,7 @@ class MainView extends StackedView<MainViewModel> {
         height: MediaQuery.of(context).size.height * 0.11,
         child: NavigationBar(
           // bottom nav bar styling
-          indicatorColor: kcAccentShadePink,
+          indicatorColor: kcDarkPink,
           backgroundColor: kcSurfaceColor,
           indicatorShape: const NarrowPillIndicator(),
           // bottom nav bar directory

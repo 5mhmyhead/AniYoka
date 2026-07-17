@@ -1,22 +1,18 @@
 import 'package:aniyoka/ui/common/app_colors.dart';
-import 'package:aniyoka/ui/views/bookmarks/bookmarks_viewmodel.dart';
 import 'package:aniyoka/ui/widgets/custom_categories_sheet.dart';
 import 'package:aniyoka/ui/views/anime_info/anime_info_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// The Add/Edit-to-Watchlist bottom sheet. Assumes `viewModel.anime` is
-/// already loaded — use this directly when you already have a loaded
-/// AnimeInfoViewModel (e.g. the FAB on AnimeInfoView itself). For
-/// long-press access from anywhere else in the app where only an anime id
-/// is available, use `showWatchlistSheetForAnime` instead.
 void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
   String selectedStatus = viewModel.watchlistEntry?.status ?? 'WATCHING';
   int episodesWatched = viewModel.watchlistEntry?.episodesWatched ?? 0;
   final totalEpisodes = viewModel.totalEpisodes;
 
-  int score = 0;
-  int rewatchCount = 0;
+  int score = viewModel.watchlistEntry?.score ?? 0;
+  int rewatchCount = viewModel.watchlistEntry?.rewatchCount ?? 0;
+  DateTime? startDate = viewModel.watchlistEntry?.startedAt;
+  DateTime? finishDate = viewModel.watchlistEntry?.finishedAt;
 
   final statuses = [
     {'value': 'WATCHING', 'icon': Icons.play_circle_outline},
@@ -91,6 +87,10 @@ void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
                           viewModel.saveToWatchlist(
                             status: selectedStatus,
                             episodesWatched: finalEpisodes,
+                            score: score,
+                            rewatchCount: rewatchCount,
+                            startedAt: startDate,
+                            finishedAt: finishDate,
                           );
                         },
                         child: Container(
@@ -245,6 +245,16 @@ void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
                     if (score < 10) score++;
                   }),
                 ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 15, 20, 0), 
+                  child: LinearProgressIndicator(
+                    value: score / 10,
+                    backgroundColor: kcBackgroundColor,
+                    color: kcPrimaryPink,
+                    minHeight: 6,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
 
                 const SizedBox(height: 20),
                 Padding(
@@ -255,20 +265,32 @@ void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
                 _buildDateRow(
                   icon: Icons.event_outlined,
                   label: 'Start Date',
-                  value: 'Not set',
-                  onEditTap: () {
-                    // TODO: open a date picker once start date is tracked
+                  value: _formatDate(startDate),
+                  onEditTap: () async {
+                    final picked = await _pickDate(context, startDate);
+                    if (picked != null) {
+                      setSheetState(() => startDate = picked);
+                    }
                   },
+                  onClearTap: startDate != null
+                      ? () => setSheetState(() => startDate = null)
+                      : null,
                 ),
                 const SizedBox(height: 16),
 
                 _buildDateRow(
                   icon: Icons.event_available_outlined,
                   label: 'End Date',
-                  value: 'Not set',
-                  onEditTap: () {
-                    // TODO: open a date picker once end date is tracked
+                  value: _formatDate(finishDate),
+                  onEditTap: () async {
+                    final picked = await _pickDate(context, finishDate);
+                    if (picked != null) {
+                      setSheetState(() => finishDate = picked);
+                    }
                   },
+                  onClearTap: finishDate != null
+                      ? () => setSheetState(() => finishDate = null)
+                      : null,
                 ),
                 const SizedBox(height: 20),
 
@@ -290,7 +312,7 @@ void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
 
                 if (viewModel.isInWatchlist)
                   Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                     child: GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
@@ -317,6 +339,37 @@ void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
                       ),
                     ),
                   ),
+
+                if (viewModel.isBookmarked)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        _showRemoveBookmarkDialog(context, viewModel);
+                      },
+                      child: Row(
+                        children: [
+                          SizedBox(
+                              width: 28,
+                              child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Icon(Icons.bookmark_remove_outlined,
+                                      color: kcPrimaryPink, size: 22))),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Remove from Bookmarks',
+                            style: GoogleFonts.inter(
+                              color: kcPrimaryPink,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
                 const SizedBox(height: 32),
               ],
             ),
@@ -327,14 +380,6 @@ void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
   );
 }
 
-/// Convenience entry point for long-press usage anywhere in the app where
-/// only an anime id is available (a card in Discover, Explore, a Watchlist
-/// or Bookmarks row, etc.). Spins up its own AnimeInfoViewModel, loads that
-/// anime's details, then opens the same sheet as showWatchlistSheet.
-///
-/// Shows a brief loading indicator while the anime details are fetched
-/// (usually a short network round-trip to AniList) since the sheet itself
-/// assumes viewModel.anime is already populated.
 Future<void> showWatchlistSheetForAnime(
   BuildContext context, {
   required int animeId,
@@ -357,6 +402,38 @@ Future<void> showWatchlistSheetForAnime(
 
   if (!context.mounted) return;
   showWatchlistSheet(context, viewModel);
+}
+
+Future<DateTime?> _pickDate(BuildContext context, DateTime? initial) {
+  return showDatePicker(
+    context: context,
+    initialDate: initial ?? DateTime.now(),
+    firstDate: DateTime(1980),
+    lastDate: DateTime(2100),
+    builder: (context, child) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.dark(
+            primary: kcPrimaryPink,
+            onPrimary: kcOffWhite,
+            surface: kcSurfaceColor,
+            onSurface: kcOffWhite,
+          ),
+          dialogTheme: const DialogThemeData(backgroundColor: kcSurfaceColor),
+        ),
+        child: child!,
+      );
+    },
+  );
+}
+
+String _formatDate(DateTime? date) {
+  if (date == null) return 'Not set';
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+  return '${months[date.month - 1]} ${date.day}, ${date.year}';
 }
 
 Widget _buildCounterRow({
@@ -431,6 +508,7 @@ Widget _buildDateRow({
   required String label,
   required String value,
   required VoidCallback onEditTap,
+  VoidCallback? onClearTap,
 }) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -460,6 +538,13 @@ Widget _buildDateRow({
             fontSize: 12,
           ),
         ),
+        if (onClearTap != null) ...[
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: onClearTap,
+            child: const Icon(Icons.close, color: kcLightGrey, size: 16),
+          ),
+        ],
         const SizedBox(width: 8),
         GestureDetector(
           onTap: onEditTap,
@@ -681,104 +766,105 @@ void _showDeleteWatchlistDialog(
       ),
     ),
   );
+}
 
-  void _showRemoveDialog(BuildContext context, Map<String, dynamic> anime,
-      BookmarksViewModel viewModel) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: kcSurfaceColor,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.bookmark_remove_outlined,
+void _showRemoveBookmarkDialog(
+    BuildContext context, AnimeInfoViewModel viewModel) {
+  showDialog(
+    context: context,
+    builder: (context) => Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: kcSurfaceColor,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.bookmark_remove_outlined,
+              color: kcTertiaryPink,
+              size: 54,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Remove Bookmark?',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(
                 color: kcTertiaryPink,
-                size: 54,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
               ),
-              const SizedBox(height: 4),
-              Text(
-                'Remove Bookmark?',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.nunito(
-                  color: kcTertiaryPink,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Are you sure you want to delete this entry from your bookmarks?',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(
+                color: kcLightGrey,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
-              const SizedBox(height: 4),
-              Text(
-                'Are you sure you want to delete this entry from your bookmarks?',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.nunito(
-                  color: kcLightGrey,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: kcTertiaryPink,
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: Text(
-                          'No, keep it.',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.nunito(
-                            color: kcSurfaceColor,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                          ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: kcTertiaryPink,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Text(
+                        'No, keep it.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.nunito(
+                          color: kcSurfaceColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        viewModel.removeBookmark(anime['id']);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: kcPrimaryPink,
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: Text(
-                          'Yes, delete!',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.nunito(
-                            color: kcOffWhite,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                          ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      // isBookmarked is true here, so this removes it
+                      viewModel.toggleBookmark();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: kcPrimaryPink,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Text(
+                        'Yes, delete!',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.nunito(
+                          color: kcOffWhite,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }

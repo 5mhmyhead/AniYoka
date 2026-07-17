@@ -93,6 +93,14 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
       );
     }
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final padding = 20.0 * 2; 
+    final gridSpacing = 12.0; 
+    final columnWidth = (screenWidth - padding - gridSpacing) / 2;
+
+    const targetCardHeight = 300.0; 
+    final dynamicAspectRatio = columnWidth / targetCardHeight;
+
     if (list.isEmpty) {
       return RefreshIndicator(
         color: kcPrimaryPink,
@@ -164,11 +172,11 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
       child: GridView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 0.50,
+          childAspectRatio: dynamicAspectRatio,
         ),
         itemCount: list.length,
         itemBuilder: (context, index) =>

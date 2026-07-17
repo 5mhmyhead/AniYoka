@@ -102,47 +102,55 @@ class ProfileView extends StackedView<ProfileViewModel> {
   Widget _buildTabContent(ProfileViewModel viewModel, BuildContext context) {
     return TabBarView(
       children: [
-        _buildMyProfileTab(viewModel),
+        _buildMyProfileTab(context, viewModel),
         _buildRecentActivityTab(context, viewModel),
         _buildSettingsTab(context, viewModel),
       ],
     );
   }
 
-  Widget _buildMyProfileTab(ProfileViewModel viewModel) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.sentiment_dissatisfied_rounded,
-              color: kcPrimaryPink,
-              size: 64,
+  Widget _buildMyProfileTab(BuildContext context, ProfileViewModel viewModel) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.58,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.sentiment_dissatisfied_rounded,
+                  color: kcLightGrey,
+                  size: 54,
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  'Sorry, user-kun',
+                  style: GoogleFonts.nunito(
+                    color: kcOffWhite,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 36),
+                  child: Text(
+                    "We're still working on this one. Thanks for your patience.",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.nunito(
+                      color: kcLightGrey,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            Text(
-              'Sorry, user-kun',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(
-                color: kcPrimaryPink,
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "We're still working on this one. Thanks for your patience.",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(
-                color: kcOffWhite,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -688,7 +696,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
             // _CustomListTile(title: "Score Format", icon: Icons.star_border)
           ],
         ),
-        Divider(color: kcLightGrey),
+        Divider(color: kcSurfaceColor),
         _SingleSection(
           title: "Information",
           children: [
@@ -815,7 +823,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
     );
   }
 
-// Hex color input dialog for app-wide accent color
+  // hex color input dialog for app-wide accent color
   void _showChangeAppColorDialog(BuildContext context) {
     final controller = TextEditingController(
       text: _colorToHex(ThemeService.instance.accentColor),
@@ -833,7 +841,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: kcSurfaceColor,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -858,7 +866,6 @@ class ProfileView extends StackedView<ProfileViewModel> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      // live preview swatch
                       Container(
                         width: 44,
                         height: 44,
@@ -890,8 +897,16 @@ class ProfileView extends StackedView<ProfileViewModel> {
                                 horizontal: 16, vertical: 14),
                             errorText: errorText,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: kcDarkPink, width: 2),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: kcLightGrey),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: kcPrimaryPink, width: 2),
                             ),
                           ),
                           onChanged: (_) =>
@@ -900,65 +915,62 @@ class ProfileView extends StackedView<ProfileViewModel> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color: kcTertiaryPink,
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: Text(
-                              'Cancel',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.nunito(
-                                color: kcSurfaceColor,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kcBackgroundColor,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 28, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50)),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: GoogleFonts.nunito(
+                            color: kcLightGrey,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            final parsed = _tryParseHex(controller.text);
-                            if (parsed == null) {
-                              setDialogState(() {
-                                errorText = 'Enter a valid 6-digit hex code';
-                              });
-                              return;
-                            }
-                            ThemeService.instance.setAccentColor(parsed);
-                            Navigator.pop(context);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color: kcPrimaryPink,
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: Text(
-                              'Apply',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.nunito(
-                                color: kcOffWhite,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                      ElevatedButton(
+                        onPressed: () {
+                          final parsed = _tryParseHex(controller.text);
+                          if (parsed == null) {
+                            setDialogState(() {
+                              errorText = 'Enter a valid 6-digit hex code';
+                            });
+                            return;
+                          }
+                          ThemeService.instance.setAccentColor(parsed);
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kcPrimaryPink,
+                          foregroundColor: kcOffWhite,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Apply',
+                          style: GoogleFonts.nunito(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   Center(
                     child: GestureDetector(
                       onTap: () {
@@ -985,7 +997,6 @@ class ProfileView extends StackedView<ProfileViewModel> {
     );
   }
 
-// Parses a hex string like "FF5733" or "#FF5733" into a Color, or null if invalid
   Color? _tryParseHex(String input) {
     var hex = input.trim().replaceAll('#', '');
     if (hex.length != 6) return null;
@@ -994,7 +1005,6 @@ class ProfileView extends StackedView<ProfileViewModel> {
     return Color(0xFF000000 | value); // force full opacity
   }
 
-// Converts a Color to a 6-digit hex string (no alpha, no #)
   String _colorToHex(Color color) {
     final r = (color.r * 255).round().toRadixString(16).padLeft(2, '0');
     final g = (color.g * 255).round().toRadixString(16).padLeft(2, '0');
@@ -1002,7 +1012,6 @@ class ProfileView extends StackedView<ProfileViewModel> {
     return '$r$g$b'.toUpperCase();
   }
 
-  // Confirmation dialog before leaving the app for Help & Feedback
   void _showHelpFeedbackDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -1103,7 +1112,6 @@ class ProfileView extends StackedView<ProfileViewModel> {
     );
   }
 
-  // About dialog
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -1216,12 +1224,12 @@ class _CustomListTile extends StatelessWidget {
   final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
+  
   const _CustomListTile({
     required this.title,
     required this.icon,
-    this.subtitle,
     this.onTap,
-  }) : trailing = null;
+  }) : subtitle = null, trailing = null;
 
   @override
   Widget build(BuildContext context) {
@@ -1232,24 +1240,29 @@ class _CustomListTile extends StatelessWidget {
       leadingIcon = FaIcon(icon, color: kcPrimaryPink);
     }
 
-    return ListTile(
-      title: Text(
-        title,
-        style: GoogleFonts.inter(
-          color: kcTertiaryPink,
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
+    return Material(
+      color: Colors.transparent, 
+      clipBehavior: Clip.antiAlias, 
+      borderRadius: BorderRadius.circular(12), 
+      child: ListTile(
+        title: Text(
+          title,
+          style: GoogleFonts.inter(
+            color: kcTertiaryPink,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
         ),
+        subtitle: subtitle != null
+            ? Text(
+                subtitle!,
+                style: GoogleFonts.inter(color: kcPrimaryPink, fontSize: 13),
+              )
+            : null,
+        leading: leadingIcon,
+        trailing: trailing,
+        onTap: onTap,
       ),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle!,
-              style: GoogleFonts.inter(color: kcPrimaryPink, fontSize: 13),
-            )
-          : null,
-      leading: leadingIcon,
-      trailing: trailing,
-      onTap: onTap,
     );
   }
 }

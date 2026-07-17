@@ -178,6 +178,14 @@ class _GenresTabState extends State<GenresTab>
       return Center(child: CircularProgressIndicator(color: kcPrimaryPink));
     }
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final padding = 20.0 * 2; 
+    final gridSpacing = 12.0; 
+    final columnWidth = (screenWidth - padding - gridSpacing) / 2;
+
+    const targetCardHeight = 300.0; 
+    final dynamicAspectRatio = columnWidth / targetCardHeight;
+
     return RefreshIndicator(
       color: kcPrimaryPink,
       backgroundColor: kcSurfaceColor,
@@ -295,21 +303,20 @@ class _GenresTabState extends State<GenresTab>
                   ),
                 )
               : SliverPadding(
-                  padding: const EdgeInsets.all(20),
-                  sliver: SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 0.50,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => _buildCard(_animeList[index]),
-                      childCount: _animeList.length,
-                    ),
+                padding: const EdgeInsets.all(20),
+                sliver: SliverGrid(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: dynamicAspectRatio, 
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _buildCard(_animeList[index]),
+                    childCount: _animeList.length,
                   ),
                 ),
+              ),
           if (_isLoadingMore)
             SliverToBoxAdapter(
               child: Padding(

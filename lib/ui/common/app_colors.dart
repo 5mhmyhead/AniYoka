@@ -1,32 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// ─────────────────────────────────────────
-// FIXED colors — not user-customizable
-// ─────────────────────────────────────────
 const Color kcBackgroundColor = Color(0xFF0F0F0F);
 const Color kcSurfaceColor = Color(0xFF1A1A1A);
 const Color kcLightGrey = Color(0xFF7F7F7F);
 const Color kcOffWhite = Color(0xFFFBF5EB);
 
-// ─────────────────────────────────────────
-// ThemeService — holds the user's chosen accent color
-// and derives every "pink" shade from it automatically.
-// Call ThemeService.instance.init() once at app startup,
-// and wrap MaterialApp with AnimatedBuilder listening to it
-// so the whole app rebuilds when the color changes.
-// ─────────────────────────────────────────
 class ThemeService extends ChangeNotifier {
   ThemeService._internal();
   static final ThemeService instance = ThemeService._internal();
 
-  static const Color _defaultAccent =
-      Color(0xFFF45C82); // original kcPrimaryPink
+  static const Color _defaultAccent = Color(0xFFF45C82);
 
   Color _accentColor = _defaultAccent;
   Color get accentColor => _accentColor;
 
-  // Loads the saved accent color (if any) from disk. Call once at startup.
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getInt('accentColor');
@@ -36,61 +24,60 @@ class ThemeService extends ChangeNotifier {
     }
   }
 
-  // Call this from the "Change App Color" hex input screen.
   Future<void> setAccentColor(Color color) async {
     _accentColor = color;
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('accentColor', color.value);
+    await prefs.setInt('accentColor', color.toARGB32());
   }
 
   Future<void> resetToDefault() async {
     await setAccentColor(_defaultAccent);
   }
 
-  // ── Derived shades, generated from the single accent color ──
-  // These replace the old hardcoded constants below.
-
   Color get primaryPink => _accentColor;
 
-  Color get secondaryPink => _lighten(_accentColor, 0.25);
-
-  Color get tertiaryPink => _lighten(_accentColor, 0.42);
-
-  Color get darkPink => _darken(_accentColor, 0.85);
-
-  Color get accentPink => _darken(_accentColor, 0.35);
-
-  Color get accentShadePink => _darken(_accentColor, 0.78);
-
-  Color get accentSurfaceColor => _darken(_accentColor, 0.72);
-
-  Color get secondaryShadePink => _lighten(_accentColor, 0.12);
-
-  // ── HSL-based lighten/darken helpers ──
-  Color _lighten(Color color, double amount) {
-    final hsl = HSLColor.fromColor(color);
-    final lightness = (hsl.lightness + amount).clamp(0.0, 1.0);
-    return hsl.withLightness(lightness).toColor();
+  Color get secondaryPink {
+    if (_accentColor.toARGB32() == _defaultAccent.toARGB32()) {
+      return const Color(0xFFFFB7CB);
+    }
+    return _adjustHsl(_accentColor, sMod: 0.14, lMod: 0.20); 
   }
 
-  Color _darken(Color color, double amount) {
+  Color get tertiaryPink {
+    if (_accentColor.toARGB32() == _defaultAccent.toARGB32()) {
+      return const Color(0xFFFBD8DF);
+    }
+    return _adjustHsl(_accentColor, sMod: 0.10, lMod: 0.27);
+  }
+
+  Color get darkPink {
+    if (_accentColor.toARGB32() == _defaultAccent.toARGB32()) {
+      return const Color(0xFF171316);
+    }
+    return _adjustHsl(_accentColor, sMod: -0.70, lMod: -0.58);
+  }
+
+  Color get accentPink {
+    if (_accentColor.toARGB32() == _defaultAccent.toARGB32()) {
+      return const Color(0xFF663A4B);
+    }
+    return _adjustHsl(_accentColor, sMod: -0.61, lMod: -0.38);
+  }
+
+  Color get accentShadePink => _adjustHsl(_accentColor, sMod: -0.50, lMod: -0.50);
+  Color get accentSurfaceColor => _adjustHsl(_accentColor, sMod: -0.60, lMod: -0.45);
+  Color get secondaryShadePink => _adjustHsl(_accentColor, sMod: 0.05, lMod: 0.08);
+
+  Color _adjustHsl(Color color, {double sMod = 0.0, double lMod = 0.0}) {
     final hsl = HSLColor.fromColor(color);
-    final lightness = (hsl.lightness - amount).clamp(0.0, 1.0);
-    return hsl.withLightness(lightness).toColor();
+    final saturation = (hsl.saturation + sMod).clamp(0.0, 1.0);
+    final lightness = (hsl.lightness + lMod).clamp(0.0, 1.0);
+    return hsl.withSaturation(saturation).withLightness(lightness).toColor();
   }
 }
 
-// ─────────────────────────────────────────
-// Convenience top-level getters — kept with the SAME NAMES
-// as your old constants, so most of your existing code
-// (e.g. `color: kcPrimaryPink`) still works without renaming.
-//
-// ⚠️ IMPORTANT: these are no longer `const`. Any widget that
-// wraps them in a `const` constructor (e.g. `const BoxDecoration(color: kcPrimaryPink)`)
-// will now fail to compile — remove the `const` keyword in
-// those specific spots. We'll fix these file by file.
-// ─────────────────────────────────────────
+// Global mappings remain intact
 Color get kcPrimaryPink => ThemeService.instance.primaryPink;
 Color get kcSecondaryPink => ThemeService.instance.secondaryPink;
 Color get kcTertiaryPink => ThemeService.instance.tertiaryPink;

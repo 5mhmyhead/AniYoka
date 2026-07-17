@@ -77,7 +77,7 @@ class RecentActivityService {
       activities.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return activities;
     } catch (_) {
-      // Clear malformed local data instead of crashing the Profile screen.
+      // clear malformed local data instead of crashing the Profile screen.
       await preferences.remove(_storageKey);
       return [];
     }

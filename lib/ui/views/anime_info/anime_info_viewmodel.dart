@@ -89,8 +89,6 @@ class AnimeInfoViewModel extends BaseViewModel {
     rebuildUi();
   }
 
-  // Re-reads the global category list — call after the Custom Categories
-  // management sheet is closed so renames/deletes/additions show up here.
   Future<void> refreshAvailableCategories() async {
     _availableCategories = await _categoryService.getCategories();
     // a rename/delete may have changed which of the available categories
@@ -109,6 +107,14 @@ class AnimeInfoViewModel extends BaseViewModel {
     } else {
       _selectedCategories.add(category);
     }
+    rebuildUi();
+    await _categoryService.setCategoriesForAnime(
+        _anime!['id'], _selectedCategories);
+  }
+
+  Future<void> autoSelectNewCategories(List<String> newCategories) async {
+    if (_anime == null || newCategories.isEmpty) return;
+    _selectedCategories.addAll(newCategories);
     rebuildUi();
     await _categoryService.setCategoriesForAnime(
         _anime!['id'], _selectedCategories);
@@ -146,15 +152,14 @@ class AnimeInfoViewModel extends BaseViewModel {
   Future<void> saveToWatchlist({
     required String status,
     required int episodesWatched,
+    int? score,
+    int? rewatchCount,
+    DateTime? startedAt,
+    DateTime? finishedAt,
   }) async {
     if (_anime == null) return;
 
     final previousEntry = _watchlistEntry;
-    final normalizedStatus = _normalizeStatus(status);
-    final safeEpisodes = _safeEpisodeCount(
-      episodesWatched,
-      normalizedStatus,
-    );
 
     final entry = WatchlistEntry(
       id: _anime!['id'],
@@ -172,6 +177,10 @@ class AnimeInfoViewModel extends BaseViewModel {
       addedAt: _watchlistEntry?.addedAt ?? DateTime.now(),
       animeStatus: _anime!['status'],
       nextAiringEpisode: _anime!['nextAiringEpisode']?['episode'],
+      score: score ?? _watchlistEntry?.score ?? 0,
+      rewatchCount: rewatchCount ?? _watchlistEntry?.rewatchCount ?? 0,
+      startedAt: startedAt ?? _watchlistEntry?.startedAt,
+      finishedAt: finishedAt ?? _watchlistEntry?.finishedAt,
     );
 
     await _watchlistService.addOrUpdate(entry);
@@ -224,7 +233,7 @@ class AnimeInfoViewModel extends BaseViewModel {
 
     final normalizedStatus = _normalizeStatus(currentEntry.status);
 
-    // only Watching activities display episode progress.
+    // Only Watching activities display episode progress.
     if (normalizedStatus != 'WATCHING' && !statusChanged) {
       return;
     }
@@ -240,20 +249,6 @@ class AnimeInfoViewModel extends BaseViewModel {
       description: description,
       coverImageUrl: _coverForEntry(currentEntry),
     );
-  }
-
-  int _safeEpisodeCount(int requestedEpisodes, String status) {
-    if (status == 'COMPLETED' && totalEpisodes > 0) {
-      return totalEpisodes;
-    }
-
-    final maximumEpisodes = isCurrentlyAiring ? latestEpisode : totalEpisodes;
-
-    if (maximumEpisodes <= 0) {
-      return requestedEpisodes < 0 ? 0 : requestedEpisodes;
-    }
-
-    return requestedEpisodes.clamp(0, maximumEpisodes).toInt();
   }
 
   String _normalizeStatus(String status) {
@@ -465,14 +460,5 @@ class AnimeInfoViewModel extends BaseViewModel {
           RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
           (match) => '${match[1]},',
         );
-  }
-
-  // Auto-selects newly created categories for the current anime
-  Future<void> autoSelectNewCategories(List<String> newCategories) async {
-    if (_anime == null || newCategories.isEmpty) return;
-    _selectedCategories.addAll(newCategories);
-    rebuildUi();
-    await _categoryService.setCategoriesForAnime(
-        _anime!['id'], _selectedCategories);
   }
 }
