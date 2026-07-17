@@ -1,5 +1,6 @@
 import 'package:aniyoka/services/watchlist_service.dart';
 import 'package:aniyoka/ui/common/app_colors.dart';
+import 'package:aniyoka/ui/widgets/watchlist_sheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,6 +21,7 @@ class WatchlistEntryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final anime = entry.id;
     final title = entry.animeData['title']?['english'] ??
         entry.animeData['title']?['romaji'] ??
         '';
@@ -35,6 +37,7 @@ class WatchlistEntryTile extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
+      onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime),
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),

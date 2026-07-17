@@ -2,6 +2,7 @@ import 'package:aniyoka/ui/common/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:aniyoka/ui/widgets/watchlist_sheet.dart';
 
 class AnimeCardRow extends StatelessWidget {
   final List<dynamic> animeList;
@@ -43,6 +44,7 @@ class AnimeCardRow extends StatelessWidget {
 
           return GestureDetector(
             onTap: onAnimeTap != null ? () => onAnimeTap!(anime['id']) : null,
+            onLongPress: () => showWatchlistSheetForAnime(context, animeId: anime['id']),
             child: SizedBox(
               width: 135,
               child: Column(

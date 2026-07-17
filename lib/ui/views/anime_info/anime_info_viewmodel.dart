@@ -224,7 +224,7 @@ class AnimeInfoViewModel extends BaseViewModel {
 
     final normalizedStatus = _normalizeStatus(currentEntry.status);
 
-    // Only Watching activities display episode progress.
+    // only Watching activities display episode progress.
     if (normalizedStatus != 'WATCHING' && !statusChanged) {
       return;
     }

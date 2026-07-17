@@ -41,29 +41,47 @@ class _WatchingTabState extends State<WatchingTab> {
     if (!_hasLoaded) return const SizedBox.shrink();
 
     if (_entries.isEmpty) {
-      return RefreshIndicator(
-        color: kcPrimaryPink,
-        backgroundColor: kcSurfaceColor,
-        onRefresh: _loadWatching,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5,
-              child: Center(
-                child: Text(
-                  "You're not watching anything right now.",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunito(
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.58,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.history_toggle_off_outlined,
                     color: kcLightGrey,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                    size: 54,
                   ),
-                ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'No currently watching yet.',
+                    style: GoogleFonts.nunito(
+                      color: kcOffWhite,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 36),
+                    child: Text(
+                      'Currently watching anime will appear here.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.nunito(
+                        color: kcLightGrey,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
@@ -132,7 +150,6 @@ class _WatchingTabState extends State<WatchingTab> {
 
               if (mounted) {
                 setState(() {
-                  // A completed entry drops out of the WATCHING filter.
                   if (justCompleted) _entries.remove(entry);
                 });
               }
