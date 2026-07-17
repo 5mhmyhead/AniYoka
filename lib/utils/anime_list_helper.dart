@@ -4,15 +4,15 @@ enum AnimeListType {
   nextSeason,
   newlyAdded,
   airingSoon,
-  topRated,   
-  airing,    
-  season,    
+  topRated,
+  airing,
+  season,
 }
 
 class AnimeListFilter {
   final AnimeListType type;
   final String title;
-  final String? season; 
+  final String? season;
 
   const AnimeListFilter({
     required this.type,

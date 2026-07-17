@@ -11,7 +11,7 @@ void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
 
   int score = viewModel.watchlistEntry?.score ?? 0;
   int rewatchCount = viewModel.watchlistEntry?.rewatchCount ?? 0;
-  DateTime? startDate = viewModel.watchlistEntry?.startedAt;
+  DateTime? startDate = viewModel.watchlistEntry?.startedAt ?? DateTime.now();
   DateTime? finishDate = viewModel.watchlistEntry?.finishedAt;
 
   final statuses = [
@@ -246,7 +246,7 @@ void showWatchlistSheet(BuildContext context, AnimeInfoViewModel viewModel) {
                   }),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 15, 20, 0), 
+                  padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
                   child: LinearProgressIndicator(
                     value: score / 10,
                     backgroundColor: kcBackgroundColor,
@@ -430,8 +430,18 @@ Future<DateTime?> _pickDate(BuildContext context, DateTime? initial) {
 String _formatDate(DateTime? date) {
   if (date == null) return 'Not set';
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   return '${months[date.month - 1]} ${date.day}, ${date.year}';
 }

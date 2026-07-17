@@ -41,7 +41,7 @@ class ThemeService extends ChangeNotifier {
     if (_accentColor.toARGB32() == _defaultAccent.toARGB32()) {
       return const Color(0xFFFFB7CB);
     }
-    return _adjustHsl(_accentColor, sMod: 0.14, lMod: 0.20); 
+    return _adjustHsl(_accentColor, sMod: 0.14, lMod: 0.20);
   }
 
   Color get tertiaryPink {
@@ -65,9 +65,12 @@ class ThemeService extends ChangeNotifier {
     return _adjustHsl(_accentColor, sMod: -0.61, lMod: -0.38);
   }
 
-  Color get accentShadePink => _adjustHsl(_accentColor, sMod: -0.50, lMod: -0.50);
-  Color get accentSurfaceColor => _adjustHsl(_accentColor, sMod: -0.60, lMod: -0.45);
-  Color get secondaryShadePink => _adjustHsl(_accentColor, sMod: 0.05, lMod: 0.08);
+  Color get accentShadePink =>
+      _adjustHsl(_accentColor, sMod: -0.50, lMod: -0.50);
+  Color get accentSurfaceColor =>
+      _adjustHsl(_accentColor, sMod: -0.60, lMod: -0.45);
+  Color get secondaryShadePink =>
+      _adjustHsl(_accentColor, sMod: 0.05, lMod: 0.08);
 
   Color _adjustHsl(Color color, {double sMod = 0.0, double lMod = 0.0}) {
     final hsl = HSLColor.fromColor(color);

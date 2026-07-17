@@ -45,34 +45,38 @@ class WatchlistEntry {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'animeData': animeData,
-    'status': status,
-    'episodesWatched': episodesWatched,
-    'totalEpisodes': totalEpisodes,
-    'addedAt': addedAt.toIso8601String(),
-    'animeStatus': animeStatus,
-    'nextAiringEpisode': nextAiringEpisode,
-    'score': score,
-    'rewatchCount': rewatchCount,
-    'startedAt': startedAt?.toIso8601String(),
-    'finishedAt': finishedAt?.toIso8601String(),
-  };
+        'id': id,
+        'animeData': animeData,
+        'status': status,
+        'episodesWatched': episodesWatched,
+        'totalEpisodes': totalEpisodes,
+        'addedAt': addedAt.toIso8601String(),
+        'animeStatus': animeStatus,
+        'nextAiringEpisode': nextAiringEpisode,
+        'score': score,
+        'rewatchCount': rewatchCount,
+        'startedAt': startedAt?.toIso8601String(),
+        'finishedAt': finishedAt?.toIso8601String(),
+      };
 
   factory WatchlistEntry.fromJson(Map<String, dynamic> json) => WatchlistEntry(
-    id: json['id'],
-    animeData: Map<String, dynamic>.from(json['animeData']),
-    status: json['status'],
-    episodesWatched: json['episodesWatched'] ?? 0,
-    totalEpisodes: json['totalEpisodes'],
-    addedAt: DateTime.parse(json['addedAt']),
-    animeStatus: json['animeStatus'],
-    nextAiringEpisode: json['nextAiringEpisode'],
-    score: json['score'] ?? 0,
-    rewatchCount: json['rewatchCount'] ?? 0,
-    startedAt: json['startedAt'] != null ? DateTime.parse(json['startedAt']) : null,
-    finishedAt: json['finishedAt'] != null ? DateTime.parse(json['finishedAt']) : null,
-  );
+        id: json['id'],
+        animeData: Map<String, dynamic>.from(json['animeData']),
+        status: json['status'],
+        episodesWatched: json['episodesWatched'] ?? 0,
+        totalEpisodes: json['totalEpisodes'],
+        addedAt: DateTime.parse(json['addedAt']),
+        animeStatus: json['animeStatus'],
+        nextAiringEpisode: json['nextAiringEpisode'],
+        score: json['score'] ?? 0,
+        rewatchCount: json['rewatchCount'] ?? 0,
+        startedAt: json['startedAt'] != null
+            ? DateTime.parse(json['startedAt'])
+            : null,
+        finishedAt: json['finishedAt'] != null
+            ? DateTime.parse(json['finishedAt'])
+            : null,
+      );
 }
 
 class WatchlistService {
@@ -107,13 +111,15 @@ class WatchlistService {
     } else {
       list.add(entry);
     }
-    await prefs.setStringList(_key, list.map((e) => jsonEncode(e.toJson())).toList());
+    await prefs.setStringList(
+        _key, list.map((e) => jsonEncode(e.toJson())).toList());
   }
 
   Future<void> remove(int id) async {
     final prefs = await SharedPreferences.getInstance();
     final list = await getWatchlist();
     list.removeWhere((e) => e.id == id);
-    await prefs.setStringList(_key, list.map((e) => jsonEncode(e.toJson())).toList());
+    await prefs.setStringList(
+        _key, list.map((e) => jsonEncode(e.toJson())).toList());
   }
 }

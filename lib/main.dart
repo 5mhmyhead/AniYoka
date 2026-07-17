@@ -5,6 +5,7 @@ import 'package:aniyoka/app/app.bottomsheets.dart';
 import 'package:aniyoka/app/app.dialogs.dart';
 import 'package:aniyoka/app/app.locator.dart';
 import 'package:aniyoka/app/app.router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 Future<void> main() async {
@@ -13,11 +14,17 @@ Future<void> main() async {
   setupDialogUi();
   setupBottomSheetUi();
   await ThemeService.instance.init();
-  runApp(const MainApp());
+  
+  final prefs = await SharedPreferences.getInstance();
+  final bool isFirstRun = prefs.getBool('is_first_run') ?? true;
+  
+  runApp(MainApp(isFirstRun: isFirstRun));
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  final bool isFirstRun;
+  
+  const MainApp({super.key, required this.isFirstRun});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +33,8 @@ class MainApp extends StatelessWidget {
       builder: (context, _) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          initialRoute: Routes.mainView,
+          title: 'AniYoka',
+          initialRoute: isFirstRun ? Routes.welcomeView : Routes.mainView,
           onGenerateRoute: StackedRouter().onGenerateRoute,
           navigatorKey: StackedService.navigatorKey,
           navigatorObservers: [StackedService.routeObserver],

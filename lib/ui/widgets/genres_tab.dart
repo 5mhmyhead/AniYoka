@@ -116,11 +116,13 @@ class _GenresTabState extends State<GenresTab>
           page: 1,
         );
         if (result.isNotEmpty) break;
-        if (attempt < retries)
+        if (attempt < retries) {
           await Future.delayed(const Duration(milliseconds: 500));
+        }
       } catch (e) {
-        if (attempt < retries)
+        if (attempt < retries) {
           await Future.delayed(const Duration(milliseconds: 500));
+        }
       }
     }
 
@@ -179,11 +181,11 @@ class _GenresTabState extends State<GenresTab>
     }
 
     final screenWidth = MediaQuery.of(context).size.width;
-    final padding = 20.0 * 2; 
-    final gridSpacing = 12.0; 
+    final padding = 20.0 * 2;
+    final gridSpacing = 12.0;
     final columnWidth = (screenWidth - padding - gridSpacing) / 2;
 
-    const targetCardHeight = 300.0; 
+    const targetCardHeight = 300.0;
     final dynamicAspectRatio = columnWidth / targetCardHeight;
 
     return RefreshIndicator(
@@ -303,20 +305,20 @@ class _GenresTabState extends State<GenresTab>
                   ),
                 )
               : SliverPadding(
-                padding: const EdgeInsets.all(20),
-                sliver: SliverGrid(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: dynamicAspectRatio, 
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => _buildCard(_animeList[index]),
-                    childCount: _animeList.length,
+                  padding: const EdgeInsets.all(20),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: dynamicAspectRatio,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildCard(_animeList[index]),
+                      childCount: _animeList.length,
+                    ),
                   ),
                 ),
-              ),
           if (_isLoadingMore)
             SliverToBoxAdapter(
               child: Padding(

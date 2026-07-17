@@ -45,7 +45,7 @@ class ProfileViewModel extends BaseViewModel {
   Future<void> initialise() async {
     setBusy(true);
 
-    // TODO: Replace these temporary values with a user service later.
+    // replace these temporary values with a user service later.
     await Future.delayed(const Duration(milliseconds: 500));
     _username = 'sanxwich';
     _email = 'sanxwich@gmail.com';

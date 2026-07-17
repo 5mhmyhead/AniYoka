@@ -898,7 +898,8 @@ class ProfileView extends StackedView<ProfileViewModel> {
                             errorText: errorText,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: kcDarkPink, width: 2),
+                              borderSide:
+                                  BorderSide(color: kcDarkPink, width: 2),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -906,7 +907,8 @@ class ProfileView extends StackedView<ProfileViewModel> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: kcPrimaryPink, width: 2),
+                              borderSide:
+                                  BorderSide(color: kcPrimaryPink, width: 2),
                             ),
                           ),
                           onChanged: (_) =>
@@ -954,7 +956,8 @@ class ProfileView extends StackedView<ProfileViewModel> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: kcPrimaryPink,
                           foregroundColor: kcOffWhite,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
                           ),
@@ -1224,12 +1227,13 @@ class _CustomListTile extends StatelessWidget {
   final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
-  
+
   const _CustomListTile({
     required this.title,
     required this.icon,
     this.onTap,
-  }) : subtitle = null, trailing = null;
+  })  : subtitle = null,
+        trailing = null;
 
   @override
   Widget build(BuildContext context) {
@@ -1241,9 +1245,9 @@ class _CustomListTile extends StatelessWidget {
     }
 
     return Material(
-      color: Colors.transparent, 
-      clipBehavior: Clip.antiAlias, 
-      borderRadius: BorderRadius.circular(12), 
+      color: Colors.transparent,
+      clipBehavior: Clip.antiAlias,
+      borderRadius: BorderRadius.circular(12),
       child: ListTile(
         title: Text(
           title,

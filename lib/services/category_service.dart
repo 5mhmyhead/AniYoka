@@ -61,7 +61,8 @@ class CategoryService {
     return assignments[animeId] ?? {};
   }
 
-  Future<void> setCategoriesForAnime(int animeId, Set<String> categories) async {
+  Future<void> setCategoriesForAnime(
+      int animeId, Set<String> categories) async {
     final assignments = await _getAllAssignmentsRaw();
     assignments[animeId] = categories;
     await _saveAllAssignmentsRaw(assignments);
@@ -75,13 +76,15 @@ class CategoryService {
     if (raw == null) return {};
     final decoded = jsonDecode(raw) as Map<String, dynamic>;
     return decoded.map(
-      (key, value) => MapEntry(int.parse(key), (value as List).cast<String>().toSet()),
+      (key, value) =>
+          MapEntry(int.parse(key), (value as List).cast<String>().toSet()),
     );
   }
 
   Future<void> _saveAllAssignmentsRaw(Map<int, Set<String>> assignments) async {
     final prefs = await SharedPreferences.getInstance();
-    final encoded = assignments.map((key, value) => MapEntry(key.toString(), value.toList()));
+    final encoded = assignments
+        .map((key, value) => MapEntry(key.toString(), value.toList()));
     await prefs.setString(_assignmentsKey, jsonEncode(encoded));
   }
 }

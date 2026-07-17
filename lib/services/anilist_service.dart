@@ -244,21 +244,23 @@ class AniListService {
     ''';
 
     try {
-      final result = await _client.query(
-        QueryOptions(
-          document: gql(query),
-          fetchPolicy: FetchPolicy.networkOnly,
-        ),
-      ).timeout(const Duration(seconds: 15));
+      final result = await _client
+          .query(
+            QueryOptions(
+              document: gql(query),
+              fetchPolicy: FetchPolicy.networkOnly,
+            ),
+          )
+          .timeout(const Duration(seconds: 15));
 
       if (result.hasException) return [];
-      
+
       final pageData = result.data?['Page'];
       if (pageData == null) return [];
-      
-      final media = pageData['media']; 
+
+      final media = pageData['media'];
       if (media == null) return [];
-      
+
       return List<dynamic>.from(media);
     } catch (e) {
       return [];
@@ -553,16 +555,19 @@ class AniListService {
         filters = 'type: ANIME, isAdult: false, sort: ID_DESC';
         break;
       case AnimeListType.airingSoon:
-        filters = 'type: ANIME, isAdult: false, sort: START_DATE, status: NOT_YET_RELEASED';
+        filters =
+            'type: ANIME, isAdult: false, sort: START_DATE, status: NOT_YET_RELEASED';
         break;
-        case AnimeListType.topRated:
+      case AnimeListType.topRated:
         filters = 'type: ANIME, isAdult: false, sort: SCORE_DESC';
         break;
       case AnimeListType.airing:
-        filters = 'type: ANIME, isAdult: false, sort: POPULARITY_DESC, status: RELEASING';
+        filters =
+            'type: ANIME, isAdult: false, sort: POPULARITY_DESC, status: RELEASING';
         break;
       case AnimeListType.season:
-        filters = 'type: ANIME, isAdult: false, sort: POPULARITY_DESC, season: ${season ?? SeasonHelper.currentSeason}, seasonYear: ${SeasonHelper.currentYear}';
+        filters =
+            'type: ANIME, isAdult: false, sort: POPULARITY_DESC, season: ${season ?? SeasonHelper.currentSeason}, seasonYear: ${SeasonHelper.currentYear}';
         break;
     }
 

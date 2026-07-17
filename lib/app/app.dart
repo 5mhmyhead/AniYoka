@@ -15,6 +15,7 @@ import 'package:aniyoka/ui/views/anime_list/anime_list_view.dart';
 import 'package:aniyoka/services/bookmark_service.dart';
 import 'package:aniyoka/services/anilist_service.dart';
 import 'package:aniyoka/services/watchlist_service.dart';
+import 'package:aniyoka/ui/views/welcome/welcome_view.dart';
 // @stacked-import
 
 @StackedApp(
@@ -27,6 +28,7 @@ import 'package:aniyoka/services/watchlist_service.dart';
     MaterialRoute(page: ProfileView),
     CustomRoute(page: AnimeInfoView),
     MaterialRoute(page: AnimeListView),
+    MaterialRoute(page: WelcomeView),
 // @stacked-route
   ],
   dependencies: [
