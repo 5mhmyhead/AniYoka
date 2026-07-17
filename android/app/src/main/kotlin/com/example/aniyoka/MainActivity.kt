@@ -1,4 +1,4 @@
-package com.example.aniyoka
+package com.aniyoka.app
 
 import io.flutter.embedding.android.FlutterActivity
 
