@@ -117,7 +117,7 @@ class BookmarksView extends StackedView<BookmarksViewModel> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'bruh',
+                      '(╥﹏╥)',
                       style: GoogleFonts.nunito(
                         color: kcSecondaryPink,
                         fontSize: 42,

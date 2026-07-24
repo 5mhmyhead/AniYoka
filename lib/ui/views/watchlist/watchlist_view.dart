@@ -115,7 +115,7 @@ class WatchlistView extends StackedView<WatchlistViewModel> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'bruh',
+                      '(╥﹏╥)',
                       style: GoogleFonts.nunito(
                         color: kcSecondaryPink,
                         fontSize: 42,

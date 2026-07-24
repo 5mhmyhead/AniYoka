@@ -28,8 +28,8 @@ class MainView extends StackedView<MainViewModel> {
         4 => const ProfileView(),
         int() => throw UnimplementedError(),
       },
-      bottomNavigationBar: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.11,
+      bottomNavigationBar: SafeArea(
+        bottom: false,
         child: NavigationBar(
           // bottom nav bar styling
           indicatorColor: kcDarkPink,
