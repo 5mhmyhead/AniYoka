@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'ui_helpers.dart';
 import 'app_colors.dart';
 
-// gets the main theme for the application
 ThemeData getAppTheme(BuildContext context) {
   const colorScheme = ColorScheme.dark(
     // primary brand colors
@@ -15,6 +14,7 @@ ThemeData getAppTheme(BuildContext context) {
     onSurface: kcOnSurface,
     outline: kcOutline,
     // surface container colors
+    surfaceContainer: kcSurfaceContainer,
     surfaceContainerLow: kcSurfaceContainerLow,
     surfaceContainerHigh: kcSurfaceContainerHigh,
   );
@@ -24,14 +24,15 @@ ThemeData getAppTheme(BuildContext context) {
     colorScheme: colorScheme,
     textTheme: GoogleFonts.interTextTheme(),
     // background and touch splash colors
-    scaffoldBackgroundColor: kcBackground,
+    scaffoldBackgroundColor: kcSurface,
     highlightColor: kcPrimary.withValues(alpha: 0.1),
     splashColor: kcPrimary.withValues(alpha: 0.1),
+    // get widget themes
     navigationBarTheme: getAppNavigationBarTheme(context, colorScheme),
+    tabBarTheme: getTabBarTheme(context, colorScheme),
   );
 }
 
-// app theme for bottom navigation bar getter
 NavigationBarThemeData getAppNavigationBarTheme(BuildContext context, ColorScheme colorScheme) {
   return NavigationBarThemeData(
     iconTheme: WidgetStateProperty.resolveWith((states) {
@@ -60,5 +61,30 @@ NavigationBarThemeData getAppNavigationBarTheme(BuildContext context, ColorSchem
         textStyle: TextStyle(overflow: TextOverflow.ellipsis),
       );
     }),
+  );
+}
+
+// note: splash color of tab bar defaults to the primary color in 0.1 opacity
+TabBarThemeData getTabBarTheme(BuildContext context, ColorScheme colorScheme) {
+  return TabBarThemeData(
+    labelColor: colorScheme.primary,
+    unselectedLabelColor: colorScheme.outline,
+    labelStyle: GoogleFonts.nunito(
+      fontSize: getResponsiveMediumFontSize(context),
+      fontWeight: FontWeight.w800
+    ),
+    unselectedLabelStyle: GoogleFonts.nunito(
+      fontSize: getResponsiveMediumFontSize(context),
+      fontWeight: FontWeight.w600
+    ),
+
+    indicator: UnderlineTabIndicator(
+      borderSide: BorderSide(width: 4.0, color: colorScheme.primary),
+      borderRadius: BorderRadius.all(Radius.circular(4.0)),
+      insets: EdgeInsets.only(bottom: -2.0),
+    ),
+    
+    dividerColor: Colors.transparent,
+    splashBorderRadius: BorderRadius.circular(24.0),
   );
 }

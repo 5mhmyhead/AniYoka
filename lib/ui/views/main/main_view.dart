@@ -13,8 +13,11 @@ class MainView extends StackedView<MainViewModel> {
 
   @override
   Widget builder(BuildContext context, MainViewModel viewModel, Widget? child) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      extendBody: true,
+      backgroundColor: colorScheme.surface,
       body: switch (viewModel.currentPage) {
         0 => const HomeView(),
         1 => const ExploreView(),
@@ -23,40 +26,43 @@ class MainView extends StackedView<MainViewModel> {
         4 => const ProfileView(),
         int() => throw UnimplementedError(),
       },
-      bottomNavigationBar: NavigationBar(
-        // bottom nav bar styling
-        indicatorColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        indicatorShape: const CustomPillIndicator(),
-        // selects destination based on directory
-        selectedIndex: viewModel.currentPage,
-        onDestinationSelected: viewModel.setPage,
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.explore_outlined),
-            selectedIcon: Icon(Icons.explore),
-            label: 'Explore',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.video_library_outlined),
-            selectedIcon: Icon(Icons.video_library),
-            label: 'Library',
-          ),
-          NavigationDestination(
-              icon: Icon(Icons.forum_outlined),
-              selectedIcon: Icon(Icons.forum),
-              label: 'Forum'),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+      bottomNavigationBar: ClipRRect(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+        child: NavigationBar(
+          // bottom nav bar styling
+          indicatorColor: colorScheme.surfaceContainerHigh,
+          backgroundColor: colorScheme.surfaceContainer,
+          indicatorShape: const CustomPillIndicator(),
+          // selects destination based on directory
+          selectedIndex: viewModel.currentPage,
+          onDestinationSelected: viewModel.setPage,
+          destinations: [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.explore_outlined),
+              selectedIcon: Icon(Icons.explore),
+              label: 'Explore',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.video_library_outlined),
+              selectedIcon: Icon(Icons.video_library),
+              label: 'Library',
+            ),
+            NavigationDestination(
+                icon: Icon(Icons.forum_outlined),
+                selectedIcon: Icon(Icons.forum),
+                label: 'Forum'),
+            NavigationDestination(
+              icon: Icon(Icons.person_outline),
+              selectedIcon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -86,7 +92,8 @@ class CustomPillIndicator extends ShapeBorder {
     );
 
     final path = Path();
-    path.addRRect(RRect.fromRectAndRadius(customRect, Radius.circular(rect.height / 2)));
+    path.addRRect(
+        RRect.fromRectAndRadius(customRect, Radius.circular(rect.height / 2)));
     return path;
   }
 
