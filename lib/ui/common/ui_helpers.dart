@@ -1,94 +1,33 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
-const double _tinySize = 5.0;
-const double _smallSize = 10.0;
-const double _mediumSize = 25.0;
-const double _largeSize = 50.0;
-const double _massiveSize = 120.0;
+const double _xsSize = 4.0;
+const double _smSize = 8.0;
+const double _mdSize = 16.0;
+const double _lgSize = 24.0;
+const double _xlSize = 48.0;
 
-const Widget horizontalSpaceTiny = SizedBox(width: _tinySize);
-const Widget horizontalSpaceSmall = SizedBox(width: _smallSize);
-const Widget horizontalSpaceMedium = SizedBox(width: _mediumSize);
-const Widget horizontalSpaceLarge = SizedBox(width: _largeSize);
+const Widget horizontalSpaceXs = SizedBox(width: _xsSize);
+const Widget horizontalSpaceSm = SizedBox(width: _smSize);
+const Widget horizontalSpaceMd = SizedBox(width: _mdSize);
+const Widget horizontalSpaceLg = SizedBox(width: _lgSize);
+const Widget horizontalSpaceXl = SizedBox(width: _xlSize);
 
-const Widget verticalSpaceTiny = SizedBox(height: _tinySize);
-const Widget verticalSpaceSmall = SizedBox(height: _smallSize);
-const Widget verticalSpaceMedium = SizedBox(height: _mediumSize);
-const Widget verticalSpaceLarge = SizedBox(height: _largeSize);
-const Widget verticalSpaceMassive = SizedBox(height: _massiveSize);
+const Widget verticalSpaceXs = SizedBox(height: _xsSize);
+const Widget verticalSpaceSm = SizedBox(height: _smSize);
+const Widget verticalSpaceMd = SizedBox(height: _mdSize);
+const Widget verticalSpaceLg = SizedBox(height: _lgSize);
+const Widget verticalSpaceXl = SizedBox(height: _xlSize);
 
-Widget spacedDivider = const Column(
-  children: <Widget>[
-    verticalSpaceMedium,
-    Divider(color: Colors.blueGrey, height: 5.0),
-    verticalSpaceMedium,
-  ],
-);
+// note: when calling colors, use context.colors.primary
+extension ContextExtensions on BuildContext {
+  ThemeData get theme => Theme.of(this);
+  ColorScheme get colors => Theme.of(this).colorScheme;
+  TextTheme get textTheme => Theme.of(this).textTheme;
 
-Widget verticalSpace(double height) => SizedBox(height: height);
+  Size get screenSize => MediaQuery.sizeOf(this);
+  double get screenWidth => screenSize.width;
+  double get screenHeight => screenSize.height;
 
-double screenWidth(BuildContext context) => MediaQuery.of(context).size.width;
-double screenHeight(BuildContext context) => MediaQuery.of(context).size.height;
-
-double screenHeightFraction(
-  BuildContext context, {
-  int dividedBy = 1,
-  double offsetBy = 0,
-  double max = 3000,
-}) =>
-    min((screenHeight(context) - offsetBy) / dividedBy, max);
-
-double screenWidthFraction(
-  BuildContext context, {
-  int dividedBy = 1,
-  double offsetBy = 0,
-  double max = 3000,
-}) =>
-    min((screenWidth(context) - offsetBy) / dividedBy, max);
-
-double halfScreenWidth(BuildContext context) =>
-    screenWidthFraction(context, dividedBy: 2);
-
-double thirdScreenWidth(BuildContext context) =>
-    screenWidthFraction(context, dividedBy: 3);
-
-double quarterScreenWidth(BuildContext context) =>
-    screenWidthFraction(context, dividedBy: 4);
-
-double getResponsiveHorizontalSpaceMedium(BuildContext context) =>
-    screenWidthFraction(context, dividedBy: 10);
-
-double getResponsiveTinyFontSize(BuildContext context) =>
-    getResponsiveFontSize(context, fontSize: 12, max: 13);
-
-double getResponsiveSmallFontSize(BuildContext context) =>
-    getResponsiveFontSize(context, fontSize: 14, max: 15);
-
-double getResponsiveMediumFontSize(BuildContext context) =>
-    getResponsiveFontSize(context, fontSize: 16, max: 17);
-
-double getResponsiveLargeFontSize(BuildContext context) =>
-    getResponsiveFontSize(context, fontSize: 21, max: 31);
-
-double getResponsiveExtraLargeFontSize(BuildContext context) =>
-    getResponsiveFontSize(context, fontSize: 26, max: 36);
-
-double getResponsiveMassiveFontSize(BuildContext context) =>
-    getResponsiveFontSize(context, fontSize: 31, max: 41);
-
-double getResponsiveFontSize(
-  BuildContext context, {
-  required double fontSize,
-  double min = 12.0,
-  double max = 100.0,
-}) {
-  double screenWidth = MediaQuery.of(context).size.width;
-  double scaleFactor = screenWidth / 375.0;
-
-  double baseSize = (fontSize * scaleFactor).clamp(min, max);
-  double scaledSize = MediaQuery.textScalerOf(context).scale(baseSize);
-
-  return scaledSize.clamp(min, baseSize * 1.2);
+  bool get isLandscape => MediaQuery.orientationOf(this) == Orientation.landscape;
+  void unfocus() => FocusScope.of(this).unfocus();
 }

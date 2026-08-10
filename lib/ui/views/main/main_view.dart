@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
+import 'package:aniyoka/ui/common/ui_helpers.dart';
 import 'package:aniyoka/ui/views/home/home_view.dart';
 import 'package:aniyoka/ui/views/explore/explore_view.dart';
 import 'package:aniyoka/ui/views/library/library_view.dart';
@@ -13,11 +14,10 @@ class MainView extends StackedView<MainViewModel> {
 
   @override
   Widget builder(BuildContext context, MainViewModel viewModel, Widget? child) {
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       extendBody: true,
-      backgroundColor: colorScheme.surface,
+      backgroundColor: context.colors.surface,
       body: switch (viewModel.currentPage) {
         0 => const HomeView(),
         1 => const ExploreView(),
@@ -30,8 +30,8 @@ class MainView extends StackedView<MainViewModel> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
         child: NavigationBar(
           // bottom nav bar styling
-          indicatorColor: colorScheme.surfaceContainerHigh,
-          backgroundColor: colorScheme.surfaceContainer,
+          indicatorColor: context.colors.surfaceContainerHigh,
+          backgroundColor: context.colors.surfaceContainer,
           indicatorShape: const CustomPillIndicator(),
           // selects destination based on directory
           selectedIndex: viewModel.currentPage,
