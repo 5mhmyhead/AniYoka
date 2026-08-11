@@ -17,12 +17,12 @@ class Anime {
     final id = json['id'] as int? ?? 0;
     
     final title = json['title']?['english'] as String? ??
-        json['title']?['romaji'] as String? ??
-        'Unknown Title';
+                  json['title']?['romaji'] as String? ??
+                  'Unknown Title';
 
     final coverImage = json['coverImage']?['extraLarge'] as String? ??
-        json['coverImage']?['large'] as String? ??
-        '';
+                       json['coverImage']?['large'] as String? ??
+                       '';
 
     final format = json['format'] as String? ?? 'TV';
     final rating = ((json['averageScore'] as num?)?.toDouble() ?? 0.0) / 10;

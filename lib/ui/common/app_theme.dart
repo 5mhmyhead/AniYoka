@@ -18,7 +18,7 @@ ThemeData getAppTheme(BuildContext context) {
     surfaceContainerHigh: kcSurfaceContainerHigh,
   );
 
-  final textTheme = getTextTheme();
+  final textTheme = getTextTheme(colorScheme);
 
   return ThemeData(
     useMaterial3: true,
@@ -34,93 +34,91 @@ ThemeData getAppTheme(BuildContext context) {
   );
 }
 
-TextTheme getTextTheme() {
-  // inter is the base text theme for the app
-  final baseTextTheme = GoogleFonts.interTextTheme();
-
-  return baseTextTheme.copyWith(
-    // display values for hero text and banners
+// note: for some reason, overriding these text styles using fontWeight
+// using ?.copyWith() returns some weird display errors
+TextTheme getTextTheme(ColorScheme colorScheme) {
+  return TextTheme(
+    // display
     displayLarge: GoogleFonts.nunito(
-      textStyle: baseTextTheme.displayLarge,
-      fontWeight: FontWeight.w800,
+      fontSize: 48,
+      fontWeight: FontWeight.w900,
     ),
     displayMedium: GoogleFonts.nunito(
-      textStyle: baseTextTheme.displayMedium,
-      fontWeight: FontWeight.w700,
-    ),
-    displaySmall: GoogleFonts.nunito(
-      textStyle: baseTextTheme.displaySmall,
-      fontWeight: FontWeight.w600,
-    ),
-
-    // headline values for screen titles and section headers
-    headlineLarge: GoogleFonts.nunito(
-      textStyle: baseTextTheme.headlineLarge,
-      fontSize: 26,
+      fontSize: 40,
       fontWeight: FontWeight.w800,
     ),
-    headlineMedium: GoogleFonts.nunito(
-      textStyle: baseTextTheme.headlineMedium,
-      fontSize: 22,
-      fontWeight: FontWeight.w700,
-    ),
-    headlineSmall: GoogleFonts.nunito(
-      textStyle: baseTextTheme.headlineSmall,
-      fontSize: 18,
+    displaySmall: GoogleFonts.nunito(
+      fontSize: 32,
       fontWeight: FontWeight.w700,
     ),
 
-    // title values for tab bar text
+    // headline
+    headlineLarge: GoogleFonts.nunito(
+      fontSize: 26,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.5,
+    ),
+    headlineMedium: GoogleFonts.nunito(
+      fontSize: 22,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.5,
+    ),
+    headlineSmall: GoogleFonts.nunito(
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.5,
+    ),
+
+    // title
     titleLarge: GoogleFonts.nunito(
-      textStyle: baseTextTheme.titleLarge,
-      fontSize: 16,
+      fontSize: 20,
       fontWeight: FontWeight.w800,
     ),
     titleMedium: GoogleFonts.nunito(
-      textStyle: baseTextTheme.titleMedium,
-      fontSize: 16,
+      fontSize: 18,
       fontWeight: FontWeight.w600,
     ),
     titleSmall: GoogleFonts.nunito(
-      textStyle: baseTextTheme.titleSmall,
       fontSize: 16,
       fontWeight: FontWeight.w400,
     ),
 
-    // body text values
-    bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+    // body
+    bodyLarge: GoogleFonts.inter(
       fontSize: 16,
       fontWeight: FontWeight.w400,
     ),
-    bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+    bodyMedium: GoogleFonts.inter(
       fontSize: 14,
       fontWeight: FontWeight.w400,
     ),
-    bodySmall: baseTextTheme.bodySmall?.copyWith(
+    bodySmall: GoogleFonts.inter(
       fontSize: 12,
       fontWeight: FontWeight.w400,
     ),
 
-    // label values for buttons and badges, bottom nav bar
+    // label
     labelLarge: GoogleFonts.nunito(
-      textStyle: baseTextTheme.labelLarge,
       fontSize: 16,
       fontWeight: FontWeight.w800,
     ),
     labelMedium: GoogleFonts.nunito(
-      textStyle: baseTextTheme.labelMedium,
       fontSize: 14,
       fontWeight: FontWeight.w600,
     ),
+    // label small for custom tags
     labelSmall: GoogleFonts.nunito(
-      textStyle: baseTextTheme.labelSmall,
       fontSize: 12,
-      fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.w800,
     ),
+  ).apply(
+    bodyColor: colorScheme.onSurface,
+    displayColor: colorScheme.onSurface,
   );
 }
 
-NavigationBarThemeData getAppNavigationBarTheme(ColorScheme colorScheme, TextTheme textTheme) {
+NavigationBarThemeData getAppNavigationBarTheme(
+    ColorScheme colorScheme, TextTheme textTheme) {
   return NavigationBarThemeData(
     iconTheme: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.selected)) {
@@ -152,7 +150,10 @@ TabBarThemeData getTabBarTheme(ColorScheme colorScheme, TextTheme textTheme) {
   return TabBarThemeData(
     labelColor: colorScheme.primary,
     unselectedLabelColor: colorScheme.outline,
-    labelStyle: textTheme.titleLarge,
+    // i'd want the selected label style to have a thicker font weight,
+    // but the font weight only updates AFTER the tab bar animation completes
+    // keep it as is for now
+    labelStyle: textTheme.titleMedium,
     unselectedLabelStyle: textTheme.titleMedium,
 
     indicator: UnderlineTabIndicator(
@@ -160,7 +161,7 @@ TabBarThemeData getTabBarTheme(ColorScheme colorScheme, TextTheme textTheme) {
       borderRadius: BorderRadius.all(Radius.circular(4.0)),
       insets: EdgeInsets.only(bottom: -2.0),
     ),
-    
+
     dividerColor: Colors.transparent,
     splashBorderRadius: BorderRadius.circular(24.0),
   );

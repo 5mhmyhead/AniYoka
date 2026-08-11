@@ -19,6 +19,7 @@ const Widget verticalSpaceLg = SizedBox(height: _lgSize);
 const Widget verticalSpaceXl = SizedBox(height: _xlSize);
 
 // note: when calling colors, use context.colors.primary
+// for text styles, use context.textTheme.titleLarge
 extension ContextExtensions on BuildContext {
   ThemeData get theme => Theme.of(this);
   ColorScheme get colors => Theme.of(this).colorScheme;

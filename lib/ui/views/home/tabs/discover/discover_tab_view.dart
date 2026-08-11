@@ -1,4 +1,7 @@
+import 'package:aniyoka/ui/common/ui_helpers.dart';
+import 'package:aniyoka/ui/widgets/hero_carousel.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:stacked/stacked.dart';
 import 'discover_tab_viewmodel.dart';
 
@@ -6,9 +9,13 @@ class DiscoverTab extends StackedView<DiscoverTabViewModel> {
   const DiscoverTab({super.key});
 
   @override
-  Widget builder(BuildContext context, DiscoverTabViewModel viewModel, Widget? child) {
+  Widget builder(
+      BuildContext context, DiscoverTabViewModel viewModel, Widget? child) {
+    //note: change is busy call to something different later
     if (viewModel.isBusy) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+          child: LoadingAnimationWidget.fourRotatingDots(
+              color: context.colors.primary, size: 50));
     }
 
     if (viewModel.hasError) {
@@ -26,31 +33,21 @@ class DiscoverTab extends StackedView<DiscoverTabViewModel> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      itemCount: viewModel.trendingAnime.length,
-      itemBuilder: (context, index) {
-        final anime = viewModel.trendingAnime[index];
-        return ListTile(
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
-            child: Image.network(
-              anime.coverImage,
-              width: 50,
-              height: 70,
-              fit: BoxFit.cover,
-            ),
-          ),
-          title: Text(anime.title),
-          subtitle: Text('Score: ${anime.rating} ★'),
-        );
-      },
+    return ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        verticalSpaceLg,
+        HeroCarousel(title: 'Trending Anime', listItems: viewModel.trendingAnime),
+        verticalSpaceLg,
+      ],
     );
   }
 
   @override
-  DiscoverTabViewModel viewModelBuilder(BuildContext context) => DiscoverTabViewModel();
+  DiscoverTabViewModel viewModelBuilder(BuildContext context) =>
+      DiscoverTabViewModel();
 
-  @override 
-  void onViewModelReady(DiscoverTabViewModel viewModel) => viewModel.initialise();
+  @override
+  void onViewModelReady(DiscoverTabViewModel viewModel) =>
+      viewModel.initialise();
 }

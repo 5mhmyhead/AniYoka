@@ -1,4 +1,5 @@
 import 'package:aniyoka/models/anime_model.dart';
+import 'package:aniyoka/services/queries/discover_tab_queries.dart';
 import 'package:graphql/client.dart';
 
 class AniListService {
@@ -9,29 +10,9 @@ class AniListService {
     _client = GraphQLClient(link: httpLink, cache: GraphQLCache());
   }
 
-  static const String _trendingQuery = r'''
-    query GetTrending($page: Int, $perPage: Int) {
-      Page(page: $page, perPage: $perPage) {
-        media(type: ANIME, sort: TRENDING_DESC) {
-          id
-          title {
-            english
-            romaji
-          }
-          coverImage {
-            extraLarge
-          }
-          format
-          averageScore
-        }
-      }
-    }
-  ''';
-
-  Future<List<Anime>> fetchTrendingAnime(
-      {int page = 1, int perPage = 10}) async {
+  Future<List<Anime>> fetchTrendingAnime({int page = 1, int perPage = 10}) async {
     final options = QueryOptions(
-      document: gql(_trendingQuery),
+      document: gql(DiscoverTabQueries.getTrending),
       variables: {'page': page, 'perPage': perPage},
     );
 

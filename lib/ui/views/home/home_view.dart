@@ -3,7 +3,6 @@ import 'package:aniyoka/ui/views/home/tabs/calendar/calendar_tab_view.dart';
 import 'package:aniyoka/ui/views/home/tabs/discover/discover_tab_view.dart';
 import 'package:aniyoka/ui/views/home/tabs/feed/feed_tab_view.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
 
 import 'home_viewmodel.dart';
@@ -21,7 +20,6 @@ class HomeView extends StackedView<HomeViewModel> {
           backgroundColor: context.colors.surface,
           body: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
-              // top app bar that shrinks when scrolling down
               SliverAppBar(
                 pinned: true,
                 expandedHeight: 180.0,
@@ -55,9 +53,7 @@ class HomeView extends StackedView<HomeViewModel> {
                   expandedTitleScale: 1.5,
                   title: Text(
                     'Home',
-                    style: context.textTheme.headlineLarge?.copyWith(
-                      color: context.colors.onSurface,
-                    )
+                    style: context.textTheme.headlineLarge
                   ),
                 ),
                 bottom: PreferredSize(
