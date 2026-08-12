@@ -1,6 +1,6 @@
 class DiscoverTabQueries {
-  static const String getTrending = r'''
-    query GetTrending($page: Int, $perPage: Int) {
+  static const String getTrendingAnime = r'''
+    query GetTrendingAnime($page: Int, $perPage: Int) {
       Page(page: $page, perPage: $perPage) {
         media(type: ANIME, sort: TRENDING_DESC) {
           id
@@ -10,6 +10,25 @@ class DiscoverTabQueries {
           }
           coverImage {
             extraLarge
+          }
+          format
+          averageScore
+        }
+      }
+    }
+  ''';
+
+  static const String getSeasonalAnime = r'''
+    query GetSeasonalAnime($season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int) {
+      Page(page: $page, perPage: $perPage) {
+        media(type: ANIME, sort: POPULARITY_DESC, season: $season, seasonYear: $seasonYear) {
+          id
+          title {
+            english
+            romaji
+          }
+          coverImage {
+            large
           }
           format
           averageScore

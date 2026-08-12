@@ -1,5 +1,7 @@
 import 'package:aniyoka/ui/common/ui_helpers.dart';
+import 'package:aniyoka/ui/widgets/card_list_row.dart';
 import 'package:aniyoka/ui/widgets/hero_carousel.dart';
+import 'package:aniyoka/ui/widgets/section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:stacked/stacked.dart';
@@ -37,17 +39,30 @@ class DiscoverTab extends StackedView<DiscoverTabViewModel> {
       padding: EdgeInsets.zero,
       children: [
         verticalSpaceLg,
-        HeroCarousel(title: 'Trending Anime', listItems: viewModel.trendingAnime),
+        SectionHeader(title: 'Trending Anime', onTap: () {}),
+        verticalSpaceMd,
+        HeroCarousel(listItems: viewModel.trendingAnime),
         verticalSpaceLg,
+        SectionHeader(title: 'This Season', onTap: () {}),
+        verticalSpaceMd,
+        CardListRow(listItems: viewModel.thisSeasonAnime),
+        verticalSpaceLg,
+        SectionHeader(title: 'Next Season', onTap: () {}),
+        verticalSpaceMd,
+        CardListRow(listItems: viewModel.nextSeasonAnime),
+        verticalSpaceXl,
+        verticalSpaceXl,
+        verticalSpaceXl,
+        verticalSpaceXl,
+        verticalSpaceXl,
+        verticalSpaceXl,
       ],
     );
   }
 
   @override
-  DiscoverTabViewModel viewModelBuilder(BuildContext context) =>
-      DiscoverTabViewModel();
+  DiscoverTabViewModel viewModelBuilder(BuildContext context) => DiscoverTabViewModel();
 
   @override
-  void onViewModelReady(DiscoverTabViewModel viewModel) =>
-      viewModel.initialise();
+  void onViewModelReady(DiscoverTabViewModel viewModel) => viewModel.initialise();
 }
