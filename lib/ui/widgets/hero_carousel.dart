@@ -4,6 +4,7 @@ import 'package:aniyoka/ui/widgets/custom_tag.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_carousel_widget/flutter_carousel_widget.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HeroCarousel extends StatelessWidget {
   final List<Media> listItems; 
@@ -12,7 +13,7 @@ class HeroCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (listItems.isEmpty) return const SizedBox.shrink(); // TODO: change to no anime found 
+    if (listItems.isEmpty) return const SizedBox.shrink();
 
     return FlutterCarousel.builder(
       itemCount: listItems.length,
@@ -29,13 +30,20 @@ class HeroCarousel extends StatelessWidget {
               // TODO: open anime info bottom sheet here 
             },
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24.0),
+              borderRadius: BorderRadius.circular(AppRadius.xlSize),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   CachedNetworkImage(
                     imageUrl: item.coverImage,
                     fit: BoxFit.cover,
+                    placeholder: (context, url) => Shimmer.fromColors(
+                      baseColor: context.colors.surfaceContainer,
+                      highlightColor: context.colors.surface,
+                      child: Container(
+                        color: context.colors.surface,
+                      )
+                    ),
                     // TODO: add proper errorWidget here
                   ),
                   // overlayed bottom gradient over cover image
@@ -61,15 +69,16 @@ class HeroCarousel extends StatelessWidget {
                           children: [
                             CustomTag(label: Text(item.format), opacity: 0.75),
                             horizontalSpaceSm,
-                            CustomTag(
-                              icon: const Icon(
-                                Icons.star_rounded,
-                                color: Colors.amberAccent,
-                                size: 16,
+                            if(item.rating != null)
+                              CustomTag(
+                                icon: const Icon(
+                                  Icons.star_rounded,
+                                  color: Colors.amberAccent,
+                                  size: 16,
+                                ),
+                                label: Text(item.rating.toString()),
+                                opacity: 0.75,
                               ),
-                              label: Text(item.rating.toStringAsFixed(1)),
-                              opacity: 0.75,
-                            ),
                           ],
                         ),
                         verticalSpaceSm,

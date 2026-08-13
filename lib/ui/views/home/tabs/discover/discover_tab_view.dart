@@ -1,4 +1,5 @@
 import 'package:aniyoka/ui/common/ui_helpers.dart';
+import 'package:aniyoka/ui/helpers/season_helper.dart';
 import 'package:aniyoka/ui/widgets/card_list_row.dart';
 import 'package:aniyoka/ui/widgets/hero_carousel.dart';
 import 'package:aniyoka/ui/widgets/section_header.dart';
@@ -13,13 +14,14 @@ class DiscoverTab extends StackedView<DiscoverTabViewModel> {
   @override
   Widget builder(
       BuildContext context, DiscoverTabViewModel viewModel, Widget? child) {
-    //note: change is busy call to something different later
+    // TODO: change is busy call to something different later
     if (viewModel.isBusy) {
       return Center(
           child: LoadingAnimationWidget.fourRotatingDots(
               color: context.colors.primary, size: 50));
     }
 
+    // TODO: change has error call to something else
     if (viewModel.hasError) {
       return Center(
         child: Column(
@@ -43,18 +45,31 @@ class DiscoverTab extends StackedView<DiscoverTabViewModel> {
         verticalSpaceMd,
         HeroCarousel(listItems: viewModel.trendingAnime),
         verticalSpaceLg,
-        SectionHeader(title: 'This Season', onTap: () {}),
+        SectionHeader(
+          title: 'This Season', 
+          subtitle: SeasonHelper.getCurrentSeasonAsString(),
+          color: context.colors.secondary, 
+          onTap: () {}
+        ),
         verticalSpaceMd,
         CardListRow(listItems: viewModel.thisSeasonAnime),
         verticalSpaceLg,
-        SectionHeader(title: 'Next Season', onTap: () {}),
+        SectionHeader(
+          title: 'Next Season', 
+          subtitle: SeasonHelper.getNextSeasonAsString(),
+          color: context.colors.secondary, 
+          onTap: () {}
+        ),
         verticalSpaceMd,
         CardListRow(listItems: viewModel.nextSeasonAnime),
-        verticalSpaceXl,
-        verticalSpaceXl,
-        verticalSpaceXl,
-        verticalSpaceXl,
-        verticalSpaceXl,
+        verticalSpaceLg,
+        SectionHeader(title: 'Trending Manga', onTap: () {}), 
+        verticalSpaceMd,
+        HeroCarousel(listItems: viewModel.trendingManga),
+        verticalSpaceLg,
+        SectionHeader(title: 'Highest Rated Manga', color: context.colors.secondary, onTap: () {}), 
+        verticalSpaceMd,
+        CardListRow(listItems: viewModel.highestRatedManga),
         verticalSpaceXl,
       ],
     );

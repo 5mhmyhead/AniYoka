@@ -1,5 +1,7 @@
 // linter insists to use lowerCamelCase for enums, but AniList uses uppercase for seasons
 // ignore: constant_identifier_names
+import 'package:aniyoka/ui/common/ui_helpers.dart';
+
 enum Season { WINTER, SPRING, SUMMER, FALL }
 
 class SeasonHelper {
@@ -59,5 +61,19 @@ class SeasonHelper {
     }
 
     return currentYear;
+  }
+
+  static String getCurrentSeasonAsString([DateTime? date]) {
+    final currentSeason = getCurrentSeason(date).name.toString().capitalize();
+    final currentYear = getCurrentSeasonYear(date).toString();
+
+    return '$currentSeason $currentYear';
+  }
+
+  static String getNextSeasonAsString([DateTime? date]) {
+    final currentSeason = getNextSeason(date).name.toString().capitalize();
+    final currentYear = getNextSeasonYear(date).toString();
+
+    return '$currentSeason $currentYear';
   }
 }

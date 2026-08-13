@@ -9,11 +9,17 @@ class DiscoverTabViewModel extends BaseViewModel {
   List<Media> _trendingAnime = [];
   List<Media> get trendingAnime => _trendingAnime;
 
+  List<Media> _trendingManga = [];
+  List<Media> get trendingManga => _trendingManga;
+
   List<Media> _thisSeasonAnime = [];
   List<Media> get thisSeasonAnime => _thisSeasonAnime;
 
   List<Media> _nextSeasonAnime = [];
   List<Media> get nextSeasonAnime => _nextSeasonAnime;
+
+  List<Media> _highestRatedManga = [];
+  List<Media> get highestRatedManga => _highestRatedManga;
 
   Future<void> initialise() async {
     setBusy(true);
@@ -21,8 +27,10 @@ class DiscoverTabViewModel extends BaseViewModel {
     try {
       await Future.wait([
         _fetchTrendingAnime(),
+        _fetchTrendingManga(),
         _fetchThisSeasonAnime(),
         _fetchNextSeasonAnime(),
+        _fetchHighestRatedManga(),
       ]);
     } catch (e) {
       setError(e);
@@ -35,11 +43,19 @@ class DiscoverTabViewModel extends BaseViewModel {
     _trendingAnime = await _aniListService.fetchTrendingAnime();
   }
 
+  Future<void> _fetchTrendingManga() async {
+    _trendingManga = await _aniListService.fetchTrendingManga();
+  }
+
   Future<void> _fetchThisSeasonAnime() async {
     _thisSeasonAnime = await _aniListService.fetchThisSeasonAnime();
   }
 
   Future<void> _fetchNextSeasonAnime() async {
     _nextSeasonAnime = await _aniListService.fetchNextSeasonAnime();
+  }
+
+  Future<void> _fetchHighestRatedManga() async {
+    _highestRatedManga = await _aniListService.fetchHighestRatedManga();
   }
 }

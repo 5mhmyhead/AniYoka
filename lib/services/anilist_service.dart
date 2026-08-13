@@ -32,8 +32,22 @@ class AniListService {
 
   Future<List<Media>> fetchTrendingAnime({int page = 1, int perPage = 10}) {
     return _queryMediaList(
-      queryDocument: DiscoverTabQueries.getTrendingAnime,
-      variables: {'page': page, 'perPage': perPage},
+      queryDocument: DiscoverTabQueries.getTrendingMedia,
+      variables: {'type': 'ANIME', 'page': page, 'perPage': perPage},
+    );
+  }
+
+  Future<List<Media>> fetchTrendingManga({int page = 1, int perPage = 10}) {
+    return _queryMediaList(
+      queryDocument: DiscoverTabQueries.getTrendingMedia,
+      variables: {'type': 'MANGA', 'page': page, 'perPage': perPage},
+    );
+  }
+
+  Future<List<Media>> fetchHighestRatedManga({int page = 1, int perPage = 10}) {
+    return _queryMediaList(
+      queryDocument: DiscoverTabQueries.getHighestRatedMedia,
+      variables: {'type': 'MANGA', 'page': page, 'perPage': perPage},
     );
   }
 

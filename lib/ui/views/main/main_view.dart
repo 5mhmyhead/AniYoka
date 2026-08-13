@@ -14,18 +14,29 @@ class MainView extends StackedView<MainViewModel> {
 
   @override
   Widget builder(BuildContext context, MainViewModel viewModel, Widget? child) {
+    // a big issue with having a rounded bottom navigation bar is that the
+    // content doesn't normally scroll under it, which means content doesn't
+    // show within the small gaps in the rounded corners
+    final double bottomInset = MediaQuery.of(context).padding.bottom + 56.0;
 
+    // this is why extendBody is set to true with a padding to counteract it
+    // 80 (from the nav bar height) - 24 (border radius) to get 56
+    // this means adding 24 bottom padding to circumvent this discrepancy
+    // on the rest of the other screens
     return Scaffold(
       extendBody: true,
       backgroundColor: context.colors.surface,
-      body: switch (viewModel.currentPage) {
-        0 => const HomeView(),
-        1 => const ExploreView(),
-        2 => const LibraryView(),
-        3 => const ForumView(),
-        4 => const ProfileView(),
-        int() => throw UnimplementedError(),
-      },
+      body: Padding(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: switch (viewModel.currentPage) {
+          0 => const HomeView(),
+          1 => const ExploreView(),
+          2 => const LibraryView(),
+          3 => const ForumView(),
+          4 => const ProfileView(),
+          int() => throw UnimplementedError(),
+        },
+      ),
       bottomNavigationBar: ClipRRect(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
         child: NavigationBar(
