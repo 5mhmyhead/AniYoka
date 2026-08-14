@@ -17,14 +17,14 @@ class CardListRow extends StatelessWidget {
   Widget build(BuildContext context) {
     if (listItems.isEmpty) return const SizedBox.shrink();
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      // padding is set to 25.0 left and 5.0 right because the list item
-      // has a padding right of 20.0, so we remove 20.0 padding from the right
-      padding: EdgeInsets.fromLTRB(25.0, 0, 5.0, 0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: listItems.map((item) {
+    return SizedBox(
+      height: _cardHeight + 80.0,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.fromLTRB(25.0, 0, 5.0, 0),
+        itemCount: listItems.length,
+        itemBuilder: (context, index) {
+          final item = listItems[index];
           return Padding(
             padding: const EdgeInsets.only(right: 20.0),
             child: GestureDetector(
@@ -102,7 +102,7 @@ class CardListRow extends StatelessWidget {
               ),
             ),
           );
-        }).toList(),
+        },
       ),
     );
   }

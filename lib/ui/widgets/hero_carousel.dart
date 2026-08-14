@@ -104,17 +104,15 @@ class HeroCarousel extends StatelessWidget {
           ),
         );
       },
+      // disabled autoplay on the hero carousel because it lowers performance
+      // by a lot and is not fine tradeoff to simply just turn off
       options: FlutterCarouselOptions(
         height: 405.0,
         aspectRatio: 16 / 9,
         viewportFraction: 0.8,
         initialPage: 0,
         enableInfiniteScroll: true,
-        // auto play options
-        autoPlay: true,
-        autoPlayInterval: const Duration(seconds: 6),
-        autoPlayAnimationDuration: const Duration(milliseconds: 800),
-        autoPlayCurve: Curves.fastOutSlowIn,
+        autoPlay: false,
         // carousel uses custom indicator
         floatingIndicator: false,
         slideIndicator: CustomSlideIndicator(

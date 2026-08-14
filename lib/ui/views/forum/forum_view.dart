@@ -1,3 +1,4 @@
+import 'package:aniyoka/ui/widgets/empty_state_placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
@@ -12,11 +13,8 @@ class ForumView extends StackedView<ForumViewModel> {
     ForumViewModel viewModel,
     Widget? child,
   ) {
-    return Scaffold(
-      body: Container(
-        padding: const EdgeInsets.only(left: 25.0, right: 25.0),
-        child: const Center(child: Text("ForumView")),
-      ),
+    return EmptyStatePlaceholder(
+      title: 'Forums and Reviews Tab Coming Soon',
     );
   }
 

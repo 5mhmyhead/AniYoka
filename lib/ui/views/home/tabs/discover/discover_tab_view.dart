@@ -8,76 +8,117 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:stacked/stacked.dart';
 import 'discover_tab_viewmodel.dart';
 
-class DiscoverTab extends StackedView<DiscoverTabViewModel> {
+// switching between tabs became costly since it was rebuilt every time 
+// so discover tab was changed to a StatefulWidget to give it 
+// AutomaticKeepAliveClientMixin for improved performance
+class DiscoverTab extends StatefulWidget {
   const DiscoverTab({super.key});
 
   @override
-  Widget builder(
-      BuildContext context, DiscoverTabViewModel viewModel, Widget? child) {
-    // TODO: change is busy call to something different later
-    if (viewModel.isBusy) {
-      return Center(
-          child: LoadingAnimationWidget.fourRotatingDots(
-              color: context.colors.primary, size: 50));
-    }
+  State<DiscoverTab> createState() => _DiscoverTabState();
+}
 
-    // TODO: change has error call to something else
-    if (viewModel.hasError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Something went wrong'),
-            TextButton(
-              onPressed: viewModel.initialise,
-              child: Text('Try again'),
-            )
-          ],
-        ),
-      );
-    }
+class _DiscoverTabState extends State<DiscoverTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
 
-    return ListView(
-      padding: EdgeInsets.zero,
-      children: [
-        verticalSpaceLg,
-        SectionHeader(title: 'Trending Anime', onTap: () {}),
-        verticalSpaceMd,
-        HeroCarousel(listItems: viewModel.trendingAnime),
-        verticalSpaceLg,
-        SectionHeader(
-          title: 'This Season', 
-          subtitle: SeasonHelper.getCurrentSeasonAsString(),
-          color: context.colors.secondary, 
-          onTap: () {}
-        ),
-        verticalSpaceMd,
-        CardListRow(listItems: viewModel.thisSeasonAnime),
-        verticalSpaceLg,
-        SectionHeader(
-          title: 'Next Season', 
-          subtitle: SeasonHelper.getNextSeasonAsString(),
-          color: context.colors.secondary, 
-          onTap: () {}
-        ),
-        verticalSpaceMd,
-        CardListRow(listItems: viewModel.nextSeasonAnime),
-        verticalSpaceLg,
-        SectionHeader(title: 'Trending Manga', onTap: () {}), 
-        verticalSpaceMd,
-        HeroCarousel(listItems: viewModel.trendingManga),
-        verticalSpaceLg,
-        SectionHeader(title: 'Highest Rated Manga', color: context.colors.secondary, onTap: () {}), 
-        verticalSpaceMd,
-        CardListRow(listItems: viewModel.highestRatedManga),
-        verticalSpaceXl,
-      ],
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    return ViewModelBuilder<DiscoverTabViewModel>.reactive(
+      viewModelBuilder: () => DiscoverTabViewModel(),
+      onViewModelReady: (viewModel) => viewModel.initialise(),
+      builder: (context, viewModel, child) {
+        // TODO: change is busy call to something different later
+        if (viewModel.isBusy) {
+          return Center(
+            child: LoadingAnimationWidget.fourRotatingDots(
+              color: context.colors.primary, size: 50
+            ),
+          );
+        }
+
+        // TODO: change has error call to something else
+        if (viewModel.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Something went wrong'),
+                TextButton(
+                  onPressed: viewModel.initialise,
+                  child: Text('Try again'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return SafeArea(
+          top: false,
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              verticalSpaceLg,
+              _buildSection(
+                title: 'Trending Anime',
+                onTap: () {},
+                content: HeroCarousel(listItems: viewModel.trendingAnime),
+              ),
+              _buildSection(
+                title: 'This Season',
+                subtitle: SeasonHelper.getCurrentSeasonAsString(),
+                color: context.colors.secondary,
+                onTap: () {},
+                content: CardListRow(listItems: viewModel.thisSeasonAnime),
+              ),
+              _buildSection(
+                title: 'Next Season',
+                subtitle: SeasonHelper.getNextSeasonAsString(),
+                color: context.colors.secondary,
+                onTap: () {},
+                content: CardListRow(listItems: viewModel.nextSeasonAnime),
+              ),
+              _buildSection(
+                title: 'Trending Manga',
+                onTap: () {},
+                content: HeroCarousel(listItems: viewModel.trendingManga),
+              ),
+              _buildSection(
+                title: 'Highest Rated Manga',
+                color: context.colors.secondary,
+                onTap: () {},
+                content: CardListRow(listItems: viewModel.highestRatedManga),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
-
-  @override
-  DiscoverTabViewModel viewModelBuilder(BuildContext context) => DiscoverTabViewModel();
-
-  @override
-  void onViewModelReady(DiscoverTabViewModel viewModel) => viewModel.initialise();
 }
+
+Widget _buildSection({
+  required String title,
+  required Widget content,
+  String? subtitle,
+  Color? color,
+  VoidCallback? onTap,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SectionHeader(
+        title: title,
+        subtitle: subtitle,
+        color: color,
+        onTap: onTap,
+      ),
+      verticalSpaceMd,
+      content,
+      verticalSpaceLg,
+    ],
+  );
+} 
