@@ -1,7 +1,7 @@
 import 'package:aniyoka/ui/common/ui_helpers.dart';
 import 'package:flutter/material.dart';
 
-// note: i was going to use ChipTheme for custom badges, but had a lot of
+// i was going to use ChipTheme for custom badges, but it had a lot of
 // material 3 quirks that i didn't want to deal with
 class CustomTag extends StatelessWidget {
   final Widget label;

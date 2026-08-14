@@ -10,16 +10,15 @@ class Media {
   final double? rating;
   final String? countryOfOrigin;
 
-  Media({
-    required this.id,
-    required this.type,
-    required this.title,
-    required this.coverImage,
-    required this.format,
-    // nullable parameters
-    this.rating,
-    this.countryOfOrigin
-  });
+  Media(
+      {required this.id,
+      required this.type,
+      required this.title,
+      required this.coverImage,
+      required this.format,
+      // nullable parameters
+      this.rating,
+      this.countryOfOrigin});
 
   factory Media.fromAniListJson(Map<String, dynamic> json) {
     final id = json['id'] as int? ?? 0;
@@ -46,7 +45,7 @@ class Media {
     if (type == 'MANGA') {
       switch (country) {
         case 'KR': format = 'MANHWA'; break;
-        case 'CN': format = 'MANHUA'; break;
+        case 'CN' || 'TW': format = 'MANHUA'; break;
         case 'JP': format = 'MANGA'; break;
         default: format = 'MANGA'; break;
       }

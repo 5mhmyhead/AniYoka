@@ -41,21 +41,35 @@ class CardListRow extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(AppRadius.mdSize),
-                      child: CachedNetworkImage(
-                        imageUrl: item.coverImage,
-                        width: _cardWidth,
-                        height: _cardHeight,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Shimmer.fromColors(
-                          baseColor: context.colors.surfaceContainer,
-                          highlightColor: context.colors.surface,
-                          child: Container(
+                      child: Stack(
+                        children: [
+                          CachedNetworkImage(
+                            imageUrl: item.coverImage,
                             width: _cardWidth,
                             height: _cardHeight,
-                            color: context.colors.surface,
-                          )
-                        ),
-                        // TODO: error widget
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Shimmer.fromColors(
+                              baseColor: context.colors.surfaceContainer,
+                              highlightColor: context.colors.surface,
+                              child: Container(
+                                width: _cardWidth,
+                                height: _cardHeight,
+                                color: context.colors.surface,
+                              )
+                            ),
+                            // TODO: error widget
+                          ),
+                          Positioned.fill(
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                // make sure to add the ontap functions here too
+                                onTap: () {},
+                                onLongPress: () {},
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     verticalSpaceSm,

@@ -22,79 +22,84 @@ class HeroCarousel extends StatelessWidget {
     
         return Container(
           padding: EdgeInsets.symmetric(horizontal: 5.0),
-          child: GestureDetector(
-            onTap: () {
-              // TODO: add anime info view here
-            },
-            onLongPress: () {
-              // TODO: open anime info bottom sheet here 
-            },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.xlSize),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  CachedNetworkImage(
-                    imageUrl: item.coverImage,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Shimmer.fromColors(
-                      baseColor: context.colors.surfaceContainer,
-                      highlightColor: context.colors.surface,
-                      child: Container(
-                        color: context.colors.surface,
-                      )
-                    ),
-                    // TODO: add proper errorWidget here
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.xlSize),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                CachedNetworkImage(
+                  imageUrl: item.coverImage,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Shimmer.fromColors(
+                    baseColor: context.colors.surfaceContainer,
+                    highlightColor: context.colors.surface,
+                    child: Container(
+                      color: context.colors.surface,
+                    )
                   ),
-                  // overlayed bottom gradient over cover image
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.black87],
-                        stops: [0.6, 1.0],
-                      ),
+                  // TODO: add proper errorWidget here
+                ),
+                // overlayed bottom gradient over cover image
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Colors.black87],
+                      stops: [0.6, 1.0],
                     ),
                   ),
-                  Positioned(
-                    bottom: 15,
-                    left: 20,
-                    right: 20,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            CustomTag(label: Text(item.format), opacity: 0.75),
-                            horizontalSpaceSm,
-                            if(item.rating != null)
-                              CustomTag(
-                                icon: const Icon(
-                                  Icons.star_rounded,
-                                  color: Colors.amberAccent,
-                                  size: 16,
-                                ),
-                                label: Text(item.rating.toString()),
-                                opacity: 0.75,
+                ),
+                Positioned(
+                  bottom: 15,
+                  left: 20,
+                  right: 20,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          CustomTag(label: Text(item.format), opacity: 0.75),
+                          horizontalSpaceSm,
+                          if(item.rating != null)
+                            CustomTag(
+                              icon: const Icon(
+                                Icons.star_rounded,
+                                color: Colors.amberAccent,
+                                size: 16,
                               ),
-                          ],
+                              label: Text(item.rating.toString()),
+                              opacity: 0.75,
+                            ),
+                        ],
+                      ),
+                      verticalSpaceSm,
+                      Text(
+                        item.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textTheme.headlineLarge?.copyWith(
+                          height: 1.25,
                         ),
-                        verticalSpaceSm,
-                        Text(
-                          item.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textTheme.headlineLarge?.copyWith(
-                            height: 1.25,
-                          ),
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned.fill(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        // TODO: add anime info view here
+                      },
+                      onLongPress: () {
+                        // TODO: open anime info bottom sheet here 
+                      },
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
@@ -122,7 +127,7 @@ class HeroCarousel extends StatelessWidget {
   }
 }
 
-// note: generated code, will refactor later since
+// generated code, will refactor later since
 // class could use existing SlideIndicatorOptions found in package
 class CustomSlideIndicator implements SlideIndicator {
   final Color activeColor;

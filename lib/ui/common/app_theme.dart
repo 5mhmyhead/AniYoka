@@ -26,16 +26,16 @@ ThemeData getAppTheme(BuildContext context) {
     textTheme: textTheme,
     // background and touch splash colors
     scaffoldBackgroundColor: kcSurface,
-    highlightColor: kcPrimary.withValues(alpha: 0.1),
-    splashColor: kcPrimary.withValues(alpha: 0.1),
+    highlightColor: kcOnSurface.withValues(alpha: 0.1),
+    splashColor: kcOnSurface.withValues(alpha: 0.1),
     // get widget themes
     navigationBarTheme: getAppNavigationBarTheme(colorScheme, textTheme),
     tabBarTheme: getTabBarTheme(colorScheme, textTheme),
   );
 }
 
-// note: overriding these text styles using fontWeight
-// using ?.copyWith() returns some weird material 3 display quirks
+// overriding these text styles using fontWeight using ?.copyWith() 
+// returns some weird material 3 display quirks so override fontSize instead
 TextTheme getTextTheme(ColorScheme colorScheme) {
   return TextTheme(
     // display
@@ -120,6 +120,15 @@ TextTheme getTextTheme(ColorScheme colorScheme) {
 NavigationBarThemeData getAppNavigationBarTheme(
     ColorScheme colorScheme, TextTheme textTheme) {
   return NavigationBarThemeData(
+    overlayColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.pressed) ||
+          states.contains(WidgetState.hovered) ||
+          states.contains(WidgetState.focused)) {
+        return colorScheme.primary.withValues(alpha: 0.1);
+      }
+      return Colors.transparent;
+    }),
+    //
     iconTheme: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.selected)) {
         return IconThemeData(color: colorScheme.primary);
@@ -127,6 +136,7 @@ NavigationBarThemeData getAppNavigationBarTheme(
 
       return IconThemeData(color: colorScheme.outline);
     }),
+    //
     labelTextStyle: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.selected)) {
         return textTheme.labelMedium?.copyWith(
@@ -145,7 +155,7 @@ NavigationBarThemeData getAppNavigationBarTheme(
   );
 }
 
-// note: splash color of tab bar defaults to the primary color in 0.1 opacity
+// splash color of tab bar defaults to the primary color in 0.1 opacity
 TabBarThemeData getTabBarTheme(ColorScheme colorScheme, TextTheme textTheme) {
   return TabBarThemeData(
     labelColor: colorScheme.primary,

@@ -44,7 +44,7 @@ abstract class AppRadius {
 /// horizontal padding for the app is set to 25.0 horizontal
 const EdgeInsets kHorizontalPadding = EdgeInsets.symmetric(horizontal: 25.0);
 
-// note: when calling colors, use context.colors.primary
+// when calling colors, use context.colors.primary
 // for text styles, use context.textTheme.titleLarge
 extension ContextExtensions on BuildContext {
   ThemeData get theme => Theme.of(this);
