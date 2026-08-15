@@ -34,7 +34,7 @@ ThemeData getAppTheme(BuildContext context) {
   );
 }
 
-// overriding these text styles using fontWeight using ?.copyWith() 
+// overriding these text styles using fontWeight using ?.copyWith()
 // returns some weird material 3 display quirks so override fontSize instead
 TextTheme getTextTheme(ColorScheme colorScheme) {
   return TextTheme(

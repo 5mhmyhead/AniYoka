@@ -8,7 +8,15 @@ import 'package:shimmer/shimmer.dart';
 class CardListRow extends StatelessWidget {
   final List<Media> listItems;
 
-  const CardListRow({super.key, required this.listItems});
+  final void Function(int id) onTap;
+  final void Function(int id) onLongPress;
+
+  const CardListRow({
+    super.key, 
+    required this.listItems,
+    required this.onTap,
+    required this.onLongPress,
+  });
 
   static const double _cardWidth = 140.0;
   static const double _cardHeight = 195.0;
@@ -28,12 +36,8 @@ class CardListRow extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(right: 20.0),
             child: GestureDetector(
-              onTap: () {
-                // TODO: add anime info view here
-              },
-              onLongPress: () {
-                // TODO: open anime info bottom sheet here 
-              },
+              onTap: () => onTap(item.id),
+              onLongPress: () => onLongPress(item.id),
               child: SizedBox(
                 width: _cardWidth,
                 child: Column(
@@ -49,23 +53,28 @@ class CardListRow extends StatelessWidget {
                             height: _cardHeight,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Shimmer.fromColors(
-                              baseColor: context.colors.surfaceContainer,
-                              highlightColor: context.colors.surface,
-                              child: Container(
-                                width: _cardWidth,
-                                height: _cardHeight,
-                                color: context.colors.surface,
-                              )
-                            ),
-                            // TODO: error widget
+                                baseColor: context.colors.surfaceContainer,
+                                highlightColor: context.colors.surface,
+                                child: Container(
+                                  width: _cardWidth,
+                                  height: _cardHeight,
+                                  color: context.colors.surface,
+                                )),
+                            errorWidget: (context, url, error) => Shimmer.fromColors(
+                                baseColor: context.colors.surfaceContainer,
+                                highlightColor: context.colors.surface,
+                                child: Container(
+                                  width: _cardWidth,
+                                  height: _cardHeight,
+                                  color: context.colors.surface,
+                                )),
                           ),
                           Positioned.fill(
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                // make sure to add the ontap functions here too
-                                onTap: () {},
-                                onLongPress: () {},
+                                onTap: () => onTap(item.id),
+                                onLongPress: () => onLongPress(item.id),
                               ),
                             ),
                           ),
@@ -86,7 +95,7 @@ class CardListRow extends StatelessWidget {
                       children: [
                         CustomTag(label: Text(item.format)),
                         horizontalSpaceSm,
-                        if(item.rating != null)
+                        if (item.rating != null)
                           CustomTag(
                             icon: const Icon(
                               Icons.star_rounded,

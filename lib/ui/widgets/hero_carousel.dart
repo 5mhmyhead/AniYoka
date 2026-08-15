@@ -7,9 +7,17 @@ import 'package:flutter_carousel_widget/flutter_carousel_widget.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HeroCarousel extends StatelessWidget {
-  final List<Media> listItems; 
+  final List<Media> listItems;
 
-  const HeroCarousel({super.key, required this.listItems});
+  final void Function(int id) onTap;
+  final void Function(int id) onLongPress;
+
+  const HeroCarousel({
+    super.key, 
+    required this.listItems,
+    required this.onTap,
+    required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +27,7 @@ class HeroCarousel extends StatelessWidget {
       itemCount: listItems.length,
       itemBuilder: (context, itemIndex, pageIndex) {
         final item = listItems[itemIndex];
-    
+
         return Container(
           padding: EdgeInsets.symmetric(horizontal: 5.0),
           child: ClipRRect(
@@ -31,13 +39,17 @@ class HeroCarousel extends StatelessWidget {
                   imageUrl: item.coverImage,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: context.colors.surfaceContainer,
-                    highlightColor: context.colors.surface,
-                    child: Container(
-                      color: context.colors.surface,
-                    )
-                  ),
-                  // TODO: add proper errorWidget here
+                      baseColor: context.colors.surfaceContainer,
+                      highlightColor: context.colors.surface,
+                      child: Container(
+                        color: context.colors.surface,
+                      )),
+                  errorWidget: (context, url, error) => Shimmer.fromColors(
+                      baseColor: context.colors.surfaceContainer,
+                      highlightColor: context.colors.surface,
+                      child: Container(
+                        color: context.colors.surface,
+                      )),
                 ),
                 // overlayed bottom gradient over cover image
                 Container(
@@ -62,7 +74,7 @@ class HeroCarousel extends StatelessWidget {
                         children: [
                           CustomTag(label: Text(item.format), opacity: 0.75),
                           horizontalSpaceSm,
-                          if(item.rating != null)
+                          if (item.rating != null)
                             CustomTag(
                               icon: const Icon(
                                 Icons.star_rounded,
@@ -90,12 +102,8 @@ class HeroCarousel extends StatelessWidget {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: () {
-                        // TODO: add anime info view here
-                      },
-                      onLongPress: () {
-                        // TODO: open anime info bottom sheet here 
-                      },
+                      onTap: () => onTap(item.id),
+                      onLongPress: () => onLongPress(item.id),
                     ),
                   ),
                 ),

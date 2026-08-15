@@ -1,3 +1,4 @@
+import 'package:easy_animated_indexed_stack/easy_animated_indexed_stack.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:aniyoka/ui/common/ui_helpers.dart';
@@ -17,14 +18,15 @@ class MainView extends StackedView<MainViewModel> {
     return Scaffold(
       extendBody: true,
       backgroundColor: context.colors.surface,
-      body: IndexedStack(
-        index:viewModel.currentPage,
+      body: EasyAnimatedIndexedStack(
+        duration: const Duration(milliseconds: 150),
+        index: viewModel.currentPage,
         children: [
           const HomeView(),
-            viewModel.hasVisited(1) ? const ExploreView() : const SizedBox(),
-            viewModel.hasVisited(2) ? const LibraryView() : const SizedBox(),
-            viewModel.hasVisited(3) ? const ForumView() : const SizedBox(),
-            viewModel.hasVisited(4) ? const ProfileView() : const SizedBox(),
+          viewModel.hasVisited(1) ? const ExploreView() : const SizedBox(),
+          viewModel.hasVisited(2) ? const LibraryView() : const SizedBox(),
+          viewModel.hasVisited(3) ? const ForumView() : const SizedBox(),
+          viewModel.hasVisited(4) ? const ProfileView() : const SizedBox(),
         ],
       ),
       bottomNavigationBar: ClipRRect(
@@ -54,9 +56,9 @@ class MainView extends StackedView<MainViewModel> {
               label: 'Library',
             ),
             NavigationDestination(
-              icon: Icon(Icons.forum_outlined),
-              selectedIcon: Icon(Icons.forum),
-              label: 'Forum'),
+                icon: Icon(Icons.forum_outlined),
+                selectedIcon: Icon(Icons.forum),
+                label: 'Forum'),
             NavigationDestination(
               icon: Icon(Icons.person_outline),
               selectedIcon: Icon(Icons.person),

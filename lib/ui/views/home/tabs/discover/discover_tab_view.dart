@@ -4,12 +4,11 @@ import 'package:aniyoka/ui/widgets/card_list_row.dart';
 import 'package:aniyoka/ui/widgets/hero_carousel.dart';
 import 'package:aniyoka/ui/widgets/section_header.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:stacked/stacked.dart';
 import 'discover_tab_viewmodel.dart';
 
-// switching between tabs became costly since it was rebuilt every time 
-// so discover tab was changed to a StatefulWidget to give it 
+// switching between tabs became costly since it was rebuilt every time
+// so discover tab was changed to a StatefulWidget to give it
 // AutomaticKeepAliveClientMixin for improved performance
 class DiscoverTab extends StatefulWidget {
   const DiscoverTab({super.key});
@@ -34,9 +33,7 @@ class _DiscoverTabState extends State<DiscoverTab>
         // TODO: change is busy call to something different later
         if (viewModel.isBusy) {
           return Center(
-            child: LoadingAnimationWidget.fourRotatingDots(
-              color: context.colors.primary, size: 50
-            ),
+            child: CircularProgressIndicator(),
           );
         }
 
@@ -65,32 +62,52 @@ class _DiscoverTabState extends State<DiscoverTab>
               _buildSection(
                 title: 'Trending Anime',
                 onTap: () {},
-                content: HeroCarousel(listItems: viewModel.trendingAnime),
+                content: HeroCarousel(
+                  listItems: viewModel.trendingAnime,
+                  onTap: (id) => viewModel.onMediaTap(id),
+                  onLongPress: (id) => viewModel.onMediaLongPress(id),
+                ),
               ),
               _buildSection(
                 title: 'This Season',
                 subtitle: SeasonHelper.getCurrentSeasonAsString(),
                 color: context.colors.secondary,
                 onTap: () {},
-                content: CardListRow(listItems: viewModel.thisSeasonAnime),
+                content: CardListRow(
+                  listItems: viewModel.thisSeasonAnime,
+                  onTap: (id) => viewModel.onMediaTap(id),
+                  onLongPress: (id) => viewModel.onMediaLongPress(id),
+                ),
               ),
               _buildSection(
                 title: 'Next Season',
                 subtitle: SeasonHelper.getNextSeasonAsString(),
                 color: context.colors.secondary,
                 onTap: () {},
-                content: CardListRow(listItems: viewModel.nextSeasonAnime),
+                content: CardListRow(
+                  listItems: viewModel.nextSeasonAnime,
+                  onTap: (id) => viewModel.onMediaTap(id),
+                  onLongPress: (id) => viewModel.onMediaLongPress(id),
+                ),
               ),
               _buildSection(
                 title: 'Trending Manga',
                 onTap: () {},
-                content: HeroCarousel(listItems: viewModel.trendingManga),
+                content: HeroCarousel(
+                  listItems: viewModel.trendingManga,
+                  onTap: (id) => viewModel.onMediaTap(id),
+                  onLongPress: (id) => viewModel.onMediaLongPress(id),
+                ),
               ),
               _buildSection(
                 title: 'Highest Rated Manga',
                 color: context.colors.secondary,
                 onTap: () {},
-                content: CardListRow(listItems: viewModel.highestRatedManga),
+                content: CardListRow(
+                  listItems: viewModel.highestRatedManga,
+                  onTap: (id) => viewModel.onMediaTap(id),
+                  onLongPress: (id) => viewModel.onMediaLongPress(id),
+                ),
               ),
             ],
           ),
@@ -121,4 +138,4 @@ Widget _buildSection({
       verticalSpaceLg,
     ],
   );
-} 
+}

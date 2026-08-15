@@ -1,5 +1,6 @@
 import 'package:aniyoka/models/media_model.dart';
 import 'package:aniyoka/services/queries/discover_tab_queries.dart';
+import 'package:aniyoka/services/queries/media_detail_queries.dart';
 import 'package:aniyoka/ui/helpers/season_helper.dart';
 import 'package:graphql/client.dart';
 
@@ -89,5 +90,21 @@ class AniListService {
         'perPage': perPage,
       },
     );
+  }
+
+  Future<Media> fetchAnimeDetails(int id) async {
+    final options = QueryOptions(
+      document: gql(MediaDetailQueries.getMediaDetails),
+      variables: {'id': id},
+    );
+
+    final result = await _client.query(options);
+
+    if (result.hasException) {
+      throw Exception(result.exception.toString());
+    }
+
+    final Map<String, dynamic> media = result.data?['Media'];
+    return Media.fromAniListJson(media);
   }
 }

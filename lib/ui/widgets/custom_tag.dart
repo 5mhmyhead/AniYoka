@@ -8,7 +8,8 @@ class CustomTag extends StatelessWidget {
   final Widget? icon;
   final double? opacity;
 
-  const CustomTag({super.key, required this.label, this.icon, this.opacity = 1.0});
+  const CustomTag(
+      {super.key, required this.label, this.icon, this.opacity = 1.0});
 
   @override
   Widget build(BuildContext context) {

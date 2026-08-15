@@ -14,4 +14,3 @@ const Color kcOnSurface = Color(0xFFFBF5EB);
 const Color kcSurfaceContainer = Color(0xFF1A1A1A);
 const Color kcSurfaceContainerLow = Color(0xFF171316);
 const Color kcSurfaceContainerHigh = Color(0xFF292023);
-

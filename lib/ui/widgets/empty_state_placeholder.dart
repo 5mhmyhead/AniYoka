@@ -47,13 +47,11 @@ class _EmptyStatePlaceholderState extends State<EmptyStatePlaceholder>
           ),
           SizedBox(
             width: 170,
-            child: Text(
-              widget.title,
-              textAlign: TextAlign.center,
-              style: context.textTheme.titleMedium?.copyWith(
-                height: 1.25,
-              )
-            ),
+            child: Text(widget.title,
+                textAlign: TextAlign.center,
+                style: context.textTheme.titleMedium?.copyWith(
+                  height: 1.25,
+                )),
           ),
         ],
       ),

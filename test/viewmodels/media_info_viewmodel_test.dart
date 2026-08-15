@@ -4,7 +4,7 @@ import 'package:aniyoka/app/app.locator.dart';
 import '../helpers/test_helpers.dart';
 
 void main() {
-  group('HomeViewmodel Tests -', () {
+  group('MediaInfoViewModel Tests -', () {
     setUp(() => registerServices());
     tearDown(() => locator.reset());
   });

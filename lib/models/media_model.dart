@@ -6,6 +6,7 @@ class Media {
   final String title;
   final String coverImage;
   final String format;
+  // nullable parameters
   // if unreleased, rating is made null
   final double? rating;
   final String? countryOfOrigin;
@@ -44,10 +45,18 @@ class Media {
     final String format;
     if (type == 'MANGA') {
       switch (country) {
-        case 'KR': format = 'MANHWA'; break;
-        case 'CN' || 'TW': format = 'MANHUA'; break;
-        case 'JP': format = 'MANGA'; break;
-        default: format = 'MANGA'; break;
+        case 'KR':
+          format = 'MANHWA';
+          break;
+        case 'CN' || 'TW':
+          format = 'MANHUA';
+          break;
+        case 'JP':
+          format = 'MANGA';
+          break;
+        default:
+          format = 'MANGA';
+          break;
       }
     } else {
       format = rawFormat;

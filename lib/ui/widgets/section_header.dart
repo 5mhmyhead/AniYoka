@@ -42,7 +42,7 @@ class SectionHeader extends StatelessWidget {
                           text: title,
                           style: context.textTheme.headlineLarge,
                         ),
-                        if (subtitle != null && subtitle!.isNotEmpty) ... [
+                        if (subtitle != null && subtitle!.isNotEmpty) ...[
                           TextSpan(
                             text: '  $subtitle',
                             style: context.textTheme.headlineLarge?.copyWith(

@@ -12,10 +12,9 @@ class HomeView extends StackedView<HomeViewModel> {
 
   @override
   Widget builder(BuildContext context, HomeViewModel viewModel, Widget? child) {
-
     return Scaffold(
       body: DefaultTabController(
-        length: 3, 
+        length: 3,
         child: Scaffold(
           backgroundColor: context.colors.surface,
           body: NestedScrollView(
@@ -27,22 +26,18 @@ class HomeView extends StackedView<HomeViewModel> {
                 surfaceTintColor: Colors.transparent,
                 shadowColor: Colors.transparent,
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(24.0)),
+                  borderRadius:
+                      BorderRadius.vertical(bottom: Radius.circular(24.0)),
                 ),
                 elevation: 0,
                 actions: [
                   IconButton(
-                    icon: Icon(
-                      Icons.search, 
-                      color: context.colors.onSurface
-                    ),
+                    icon: Icon(Icons.search, color: context.colors.onSurface),
                     onPressed: () {},
                   ),
                   IconButton(
-                    icon: Icon(
-                      Icons.notifications_none_outlined, 
-                      color: context.colors.onSurface
-                    ),
+                    icon: Icon(Icons.notifications_none_outlined,
+                        color: context.colors.onSurface),
                     onPressed: () {},
                   ),
                   horizontalSpaceSm,
@@ -51,10 +46,7 @@ class HomeView extends StackedView<HomeViewModel> {
                   background: Container(color: context.colors.surface),
                   titlePadding: const EdgeInsets.only(left: 25.0, bottom: 60.0),
                   expandedTitleScale: 1.5,
-                  title: Text(
-                    'Home',
-                    style: context.textTheme.headlineLarge
-                  ),
+                  title: Text('Home', style: context.textTheme.headlineLarge),
                 ),
                 bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(48.0),
@@ -68,14 +60,12 @@ class HomeView extends StackedView<HomeViewModel> {
                   ),
                 ),
               ),
-            ], 
-            body: TabBarView(
-              children: [
-                DiscoverTab(),
-                CalendarTab(),
-                FeedTab(),
-              ]
-            ),
+            ],
+            body: TabBarView(children: [
+              DiscoverTab(),
+              CalendarTab(),
+              FeedTab(),
+            ]),
           ),
         ),
       ),

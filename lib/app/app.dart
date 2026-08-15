@@ -9,6 +9,7 @@ import 'package:aniyoka/ui/views/library/library_view.dart';
 import 'package:aniyoka/ui/views/forum/forum_view.dart';
 import 'package:aniyoka/ui/views/profile/profile_view.dart';
 import 'package:aniyoka/services/anilist_service.dart';
+import 'package:aniyoka/ui/views/media_info/media_info_view.dart';
 // @stacked-import
 
 @StackedApp(
@@ -19,13 +20,14 @@ import 'package:aniyoka/services/anilist_service.dart';
     MaterialRoute(page: LibraryView),
     MaterialRoute(page: ForumView),
     MaterialRoute(page: ProfileView),
-    // @stacked-route
+    MaterialRoute(page: MediaInfoView),
+// @stacked-route
   ],
   dependencies: [
     LazySingleton(classType: BottomSheetService),
     LazySingleton(classType: DialogService),
     LazySingleton(classType: NavigationService),
-    LazySingleton(classType: AniListService)
+    LazySingleton(classType: AniListService),
     // @stacked-service
   ],
   bottomsheets: [
