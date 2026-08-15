@@ -1,8 +1,10 @@
 import 'package:aniyoka/ui/common/ui_helpers.dart';
 import 'package:aniyoka/ui/helpers/season_helper.dart';
 import 'package:aniyoka/ui/widgets/card_list_row.dart';
+import 'package:aniyoka/ui/widgets/error_state_widget.dart';
 import 'package:aniyoka/ui/widgets/hero_carousel.dart';
 import 'package:aniyoka/ui/widgets/section_header.dart';
+import 'package:aniyoka/ui/widgets/skeletons/discover_tab_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'discover_tab_viewmodel.dart';
@@ -30,26 +32,16 @@ class _DiscoverTabState extends State<DiscoverTab>
       viewModelBuilder: () => DiscoverTabViewModel(),
       onViewModelReady: (viewModel) => viewModel.initialise(),
       builder: (context, viewModel, child) {
-        // TODO: change is busy call to something different later
         if (viewModel.isBusy) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
+          return const DiscoverTabSkeleton();
         }
 
-        // TODO: change has error call to something else
         if (viewModel.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Something went wrong'),
-                TextButton(
-                  onPressed: viewModel.initialise,
-                  child: Text('Try again'),
-                ),
-              ],
-            ),
+          return ErrorStateWidget(
+            title: '૮(˶ㅠ︿ㅠ)ა',
+            subtitle: 'An error has occurred. Please tap the button below to try again.',
+            buttonText: 'Reload Content',
+            onTap: viewModel.initialise,
           );
         }
 
