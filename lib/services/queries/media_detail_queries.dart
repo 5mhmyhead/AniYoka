@@ -12,6 +12,7 @@ class MediaDetailQueries {
           extraLarge
         }
         format
+        countryOfOrigin
       }
     }
   ''';

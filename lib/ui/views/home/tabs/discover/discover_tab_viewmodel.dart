@@ -25,8 +25,8 @@ class DiscoverTabViewModel extends BaseViewModel {
   List<Media> get highestRatedManga => _highestRatedManga;
 
   Future<void> initialise() async {
+    clearErrors();
     setBusy(true);
-
     try {
       await Future.wait([
         _fetchTrendingAnime(),
@@ -40,6 +40,22 @@ class DiscoverTabViewModel extends BaseViewModel {
     } finally {
       setBusy(false);
     }
+  }
+
+  Future<void> refresh() async {
+    try {
+      await Future.wait([
+        _fetchTrendingAnime(),
+        _fetchTrendingManga(),
+        _fetchThisSeasonAnime(),
+        _fetchNextSeasonAnime(),
+        _fetchHighestRatedManga(),
+      ]);
+    } catch (e) {
+      setError(e);
+    }
+
+    rebuildUi();
   }
 
   Future<void> _fetchTrendingAnime() async {

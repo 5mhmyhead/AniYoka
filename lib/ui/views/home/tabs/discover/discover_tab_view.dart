@@ -45,63 +45,67 @@ class _DiscoverTabState extends State<DiscoverTab>
           );
         }
 
-        return SafeArea(
-          top: false,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              verticalSpaceLg,
-              _buildSection(
-                title: 'Trending Anime',
-                onTap: () {},
-                content: HeroCarousel(
-                  listItems: viewModel.trendingAnime,
-                  onTap: (id) => viewModel.onMediaTap(id),
-                  onLongPress: (id) => viewModel.onMediaLongPress(id),
+        return RefreshIndicator(
+          onRefresh: viewModel.refresh,
+          child: SafeArea(
+            top: false,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              children: [
+                verticalSpaceLg,
+                _buildSection(
+                  title: 'Trending Anime',
+                  onTap: () {},
+                  content: HeroCarousel(
+                    listItems: viewModel.trendingAnime,
+                    onTap: (id) => viewModel.onMediaTap(id),
+                    onLongPress: (id) => viewModel.onMediaLongPress(id),
+                  ),
                 ),
-              ),
-              _buildSection(
-                title: 'This Season',
-                subtitle: SeasonHelper.getCurrentSeasonAsString(),
-                color: context.colors.secondary,
-                onTap: () {},
-                content: CardListRow(
-                  listItems: viewModel.thisSeasonAnime,
-                  onTap: (id) => viewModel.onMediaTap(id),
-                  onLongPress: (id) => viewModel.onMediaLongPress(id),
+                _buildSection(
+                  title: 'This Season',
+                  subtitle: SeasonHelper.getCurrentSeasonAsString(),
+                  color: context.colors.secondary,
+                  onTap: () {},
+                  content: CardListRow(
+                    listItems: viewModel.thisSeasonAnime,
+                    onTap: (id) => viewModel.onMediaTap(id),
+                    onLongPress: (id) => viewModel.onMediaLongPress(id),
+                  ),
                 ),
-              ),
-              _buildSection(
-                title: 'Next Season',
-                subtitle: SeasonHelper.getNextSeasonAsString(),
-                color: context.colors.secondary,
-                onTap: () {},
-                content: CardListRow(
-                  listItems: viewModel.nextSeasonAnime,
-                  onTap: (id) => viewModel.onMediaTap(id),
-                  onLongPress: (id) => viewModel.onMediaLongPress(id),
+                _buildSection(
+                  title: 'Next Season',
+                  subtitle: SeasonHelper.getNextSeasonAsString(),
+                  color: context.colors.secondary,
+                  onTap: () {},
+                  content: CardListRow(
+                    listItems: viewModel.nextSeasonAnime,
+                    onTap: (id) => viewModel.onMediaTap(id),
+                    onLongPress: (id) => viewModel.onMediaLongPress(id),
+                  ),
                 ),
-              ),
-              _buildSection(
-                title: 'Trending Manga',
-                onTap: () {},
-                content: HeroCarousel(
-                  listItems: viewModel.trendingManga,
-                  onTap: (id) => viewModel.onMediaTap(id),
-                  onLongPress: (id) => viewModel.onMediaLongPress(id),
+                _buildSection(
+                  title: 'Trending Manga',
+                  onTap: () {},
+                  content: HeroCarousel(
+                    listItems: viewModel.trendingManga,
+                    onTap: (id) => viewModel.onMediaTap(id),
+                    onLongPress: (id) => viewModel.onMediaLongPress(id),
+                  ),
                 ),
-              ),
-              _buildSection(
-                title: 'Highest Rated Manga',
-                color: context.colors.secondary,
-                onTap: () {},
-                content: CardListRow(
-                  listItems: viewModel.highestRatedManga,
-                  onTap: (id) => viewModel.onMediaTap(id),
-                  onLongPress: (id) => viewModel.onMediaLongPress(id),
+                _buildSection(
+                  title: 'Highest Rated Manga',
+                  color: context.colors.secondary,
+                  onTap: () {},
+                  content: CardListRow(
+                    listItems: viewModel.highestRatedManga,
+                    onTap: (id) => viewModel.onMediaTap(id),
+                    onLongPress: (id) => viewModel.onMediaLongPress(id),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

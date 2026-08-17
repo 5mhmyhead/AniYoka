@@ -1,6 +1,7 @@
 import 'package:aniyoka/models/media_model.dart';
 import 'package:aniyoka/ui/common/ui_helpers.dart';
 import 'package:aniyoka/ui/widgets/custom_tag.dart';
+import 'package:aniyoka/ui/widgets/shimmer_placeholder.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -52,22 +53,8 @@ class CardListRow extends StatelessWidget {
                             width: _cardWidth,
                             height: _cardHeight,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => Shimmer.fromColors(
-                                baseColor: context.colors.surfaceContainer,
-                                highlightColor: context.colors.surface,
-                                child: Container(
-                                  width: _cardWidth,
-                                  height: _cardHeight,
-                                  color: context.colors.surface,
-                                )),
-                            errorWidget: (context, url, error) => Shimmer.fromColors(
-                                baseColor: context.colors.surfaceContainer,
-                                highlightColor: context.colors.surface,
-                                child: Container(
-                                  width: _cardWidth,
-                                  height: _cardHeight,
-                                  color: context.colors.surface,
-                                )),
+                            placeholder: (context, url) => const ShimmerPlaceholder(),
+                            errorWidget: (context, url, error) => const ShimmerPlaceholder(),
                           ),
                           Positioned.fill(
                             child: Material(
