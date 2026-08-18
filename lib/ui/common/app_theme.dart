@@ -40,15 +40,15 @@ TextTheme getTextTheme(ColorScheme colorScheme) {
   return TextTheme(
     // display
     displayLarge: GoogleFonts.nunito(
-      fontSize: 48,
+      fontSize: 40,
       fontWeight: FontWeight.w900,
     ),
     displayMedium: GoogleFonts.nunito(
-      fontSize: 40,
+      fontSize: 32,
       fontWeight: FontWeight.w800,
     ),
     displaySmall: GoogleFonts.nunito(
-      fontSize: 32,
+      fontSize: 24,
       fontWeight: FontWeight.w700,
     ),
 

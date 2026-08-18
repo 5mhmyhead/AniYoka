@@ -1,5 +1,8 @@
 import 'package:aniyoka/ui/common/ui_helpers.dart';
 import 'package:aniyoka/ui/views/media_info/media_header_delegate.dart';
+import 'package:aniyoka/ui/views/media_info/tabs/details/details_tab_view.dart';
+import 'package:aniyoka/ui/views/media_info/tabs/overview/overview_tab_view.dart';
+import 'package:aniyoka/ui/views/media_info/tabs/socials/socials_tab_view.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'media_info_viewmodel.dart';
@@ -46,15 +49,15 @@ class MediaInfoView extends StackedView<MediaInfoViewModel> {
                 screenWidth: context.screenWidth,
                 onFavoritePressed: () {},
                 onSharePressed: () {},
-                textTheme: context.textTheme,
+                titleStyle: context.textTheme.displayMedium?.copyWith(height: 1.0),
               ),
             ),
           ],
           body: const TabBarView(
             children: [
-              Center(child: Text('Overview Content')),
-              Center(child: Text('Details Content')),
-              Center(child: Text('Social Content')),
+              OverviewTab(),
+              DetailsTab(),
+              SocialsTab(),
             ],
           ),
         ),

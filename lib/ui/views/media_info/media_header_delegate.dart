@@ -12,22 +12,30 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
   final double screenWidth;
   final VoidCallback onFavoritePressed;
   final VoidCallback onSharePressed;
-  final TextTheme textTheme;
+  final TextStyle? titleStyle;
 
-  const MediaHeaderDelegate({
+  MediaHeaderDelegate({
     required this.media,
     required this.tabBar,
     required this.topPadding,
     required this.screenWidth,
     required this.onFavoritePressed,
     required this.onSharePressed,
-    required this.textTheme,
+    required this.titleStyle,
   });
+
+  double? _cachedMaxExtent;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double collapseRatio = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
     final bool isCollapsed = collapseRatio >= 0.95;
+
+    final metadata = [
+      media.startDate?.formattedYear,
+      media.format,
+      media.status,
+    ].where((item) => item != null && item.isNotEmpty).join(' ● ');
 
     return Stack(
       fit: StackFit.expand,
@@ -57,12 +65,14 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
                     imageUrl: media.coverImage,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => const ShimmerPlaceholder(),
-                    errorWidget: (context, url, error) => const ShimmerPlaceholder(),
+                    errorWidget: (context, url, error) =>
+                        const ShimmerPlaceholder(),
                   ),
                   BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
                     child: Container(
-                      color: context.colors.surfaceContainer.withValues(alpha: 0.25),
+                      color: context.colors.surfaceContainer
+                          .withValues(alpha: 0.25),
                     ),
                   ),
                   Container(
@@ -72,7 +82,8 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          context.colors.surfaceContainer.withValues(alpha: 0.5),
+                          context.colors.surfaceContainer
+                              .withValues(alpha: 0.5),
                           context.colors.surfaceContainer,
                         ],
                         stops: const [0.3, 0.5, 0.7],
@@ -87,7 +98,8 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
                     child: Transform.translate(
                       offset: Offset(0, -shrinkOffset),
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(25.0, topPadding + 80.0, 25.0, 48.0),
+                        padding: EdgeInsets.fromLTRB(
+                            25.0, topPadding + 80.0, 25.0, 48.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,35 +108,39 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
                               width: 175,
                               height: 250,
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(AppRadius.lgSize),
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.lgSize),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: context.colors.surface.withValues(alpha: 0.4),
+                                    color: context.colors.surface
+                                        .withValues(alpha: 0.4),
                                     blurRadius: 10.0,
                                     offset: const Offset(0, 6),
                                   ),
                                 ],
                               ),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(AppRadius.lgSize),
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.lgSize),
                                 child: CachedNetworkImage(
                                   imageUrl: media.coverImage,
                                   fit: BoxFit.cover,
-                                  placeholder: (context, url) => const ShimmerPlaceholder(),
-                                  errorWidget: (context, url, error) => const ShimmerPlaceholder(),
+                                  placeholder: (context, url) =>
+                                      const ShimmerPlaceholder(),
+                                  errorWidget: (context, url, error) =>
+                                      const ShimmerPlaceholder(),
                                 ),
                               ),
                             ),
                             verticalSpaceLg,
                             Text(
                               media.title,
-                              style: context.textTheme.displayMedium?.copyWith(
-                                height: 1.0,
-                              ),
+                              style: titleStyle ??
+                                  const TextStyle(fontSize: 28, height: 1.0),
                             ),
                             verticalSpaceSm,
                             Text(
-                              media.format,
+                              metadata,
                               style: context.textTheme.headlineSmall?.copyWith(
                                 color: context.colors.outline,
                               ),
@@ -155,7 +171,7 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
               horizontalSpaceSm,
               Expanded(
                 child: AnimatedOpacity(
-                  opacity: isCollapsed ? 1.0 : 0.0, 
+                  opacity: isCollapsed ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 150),
                   child: Text(
                     media.title,
@@ -173,7 +189,7 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
               ),
               horizontalSpaceSm,
               _buildCircleIconButton(
-                context, 
+                context,
                 icon: Icons.share_outlined,
                 onPressed: onSharePressed,
               ),
@@ -187,7 +203,8 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
           bottom: 0,
           child: Container(
             decoration: BoxDecoration(
-              color: context.colors.surfaceContainer.withValues(alpha: collapseRatio),
+              color: context.colors.surfaceContainer
+                  .withValues(alpha: collapseRatio),
               borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(AppRadius.xlSize),
               ),
@@ -201,6 +218,8 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   double get maxExtent {
+    if (_cachedMaxExtent != null) return _cachedMaxExtent!;
+
     const double fixedHeight = 450.0;
     // subtract 50 from screenWidth for horizontal padding
     final double textWidth = screenWidth - 50.0;
@@ -208,14 +227,15 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
     final TextPainter titlePainter = TextPainter(
       text: TextSpan(
         text: media.title,
-        style: textTheme.displayMedium?.copyWith(height: 1.0),
+        style: titleStyle ?? const TextStyle(fontSize: 28, height: 1.0),
       ),
       textDirection: TextDirection.ltr,
     );
 
     titlePainter.layout(maxWidth: textWidth);
     // calculate the total extent for the layout boundary
-    return topPadding + fixedHeight + titlePainter.height;
+    _cachedMaxExtent = topPadding + fixedHeight + titlePainter.height;
+    return _cachedMaxExtent!;
   }
 
   @override
@@ -244,7 +264,7 @@ Widget _buildCircleIconButton(
       icon: Icon(
         icon,
         color: context.colors.onSurface,
-        size: 20,
+        size: 22,
       ),
       onPressed: onPressed,
     ),

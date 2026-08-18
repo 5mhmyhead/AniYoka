@@ -4,7 +4,6 @@ import 'package:aniyoka/ui/widgets/custom_tag.dart';
 import 'package:aniyoka/ui/widgets/shimmer_placeholder.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 class CardListRow extends StatelessWidget {
   final List<Media> listItems;

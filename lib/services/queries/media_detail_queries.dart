@@ -12,7 +12,16 @@ class MediaDetailQueries {
           extraLarge
         }
         format
+        bannerImage
         countryOfOrigin
+        status
+        season
+        seasonYear
+        startDate {
+          year
+          month
+          day
+        }
       }
     }
   ''';
