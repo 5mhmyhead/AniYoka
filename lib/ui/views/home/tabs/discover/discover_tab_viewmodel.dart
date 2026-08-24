@@ -53,9 +53,9 @@ class DiscoverTabViewModel extends BaseViewModel {
       ]);
     } catch (e) {
       setError(e);
+    } finally {
+      rebuildUi();
     }
-
-    rebuildUi();
   }
 
   Future<void> _fetchTrendingAnime() async {

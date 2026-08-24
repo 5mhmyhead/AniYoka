@@ -52,8 +52,8 @@ class CardListRow extends StatelessWidget {
                             width: _cardWidth,
                             height: _cardHeight,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => const ShimmerPlaceholder(),
-                            errorWidget: (context, url, error) => const ShimmerPlaceholder(),
+                            placeholder: (_, __) => const ShimmerPlaceholder(),
+                            errorWidget: (_, __, ___) => const ShimmerPlaceholder(),
                           ),
                           Positioned.fill(
                             child: Material(

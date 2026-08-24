@@ -19,6 +19,7 @@ class AniListService {
     final options = QueryOptions(
       document: gql(queryDocument),
       variables: variables,
+      fetchPolicy: FetchPolicy.networkOnly,
     );
 
     final result = await _client.query(options);

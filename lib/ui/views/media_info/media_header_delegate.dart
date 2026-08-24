@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:aniyoka/models/media_model.dart';
 import 'package:aniyoka/ui/common/ui_helpers.dart';
+import 'package:aniyoka/ui/views/media_info/image_viewer_view.dart';
 import 'package:aniyoka/ui/widgets/shimmer_placeholder.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
       media.startDate?.formattedYear,
       media.format,
       media.status,
-    ].where((item) => item != null && item.isNotEmpty).join(' ● ');
+    ].where((item) => item != null && item.isNotEmpty).join(' · ');
 
     return Stack(
       fit: StackFit.expand,
@@ -64,9 +65,8 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
                   CachedNetworkImage(
                     imageUrl: media.coverImage,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => const ShimmerPlaceholder(),
-                    errorWidget: (context, url, error) =>
-                        const ShimmerPlaceholder(),
+                    placeholder: (_, __) => const ShimmerPlaceholder(),
+                    errorWidget: (_, __, ___) => const ShimmerPlaceholder(),
                   ),
                   BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
@@ -98,37 +98,38 @@ class MediaHeaderDelegate extends SliverPersistentHeaderDelegate {
                     child: Transform.translate(
                       offset: Offset(0, -shrinkOffset),
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                            25.0, topPadding + 80.0, 25.0, 48.0),
+                        padding: EdgeInsets.fromLTRB(25.0, topPadding + 80.0, 25.0, 48.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 175,
-                              height: 250,
-                              decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.lgSize),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: context.colors.surface
-                                        .withValues(alpha: 0.4),
-                                    blurRadius: 10.0,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
+                            GestureDetector(
+                              onTap: () => ImageViewerView.show(
+                                context,
+                                coverImage: media.coverImage,
+                                bannerImage: media.bannerImage,
                               ),
-                              child: ClipRRect(
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.lgSize),
-                                child: CachedNetworkImage(
-                                  imageUrl: media.coverImage,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) =>
-                                      const ShimmerPlaceholder(),
-                                  errorWidget: (context, url, error) =>
-                                      const ShimmerPlaceholder(),
+                              child: Container(
+                                width: 175,
+                                height: 250,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(AppRadius.lgSize),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: context.colors.surface.withValues(alpha: 0.4),
+                                      blurRadius: 10.0,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(AppRadius.lgSize),
+                                  child: CachedNetworkImage(
+                                    imageUrl: media.coverImage,
+                                    fit: BoxFit.cover,
+                                    placeholder: (_, __) => const ShimmerPlaceholder(),
+                                    errorWidget: (_, __, ___) => const ShimmerPlaceholder(),
+                                  ),
                                 ),
                               ),
                             ),
