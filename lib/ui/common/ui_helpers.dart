@@ -92,3 +92,21 @@ extension StringCasingExtension on String {
     return replaceAll('_', ' ').capitalize();
   }
 }
+
+void showUnimplementedSnackBar(BuildContext context) {
+  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        'Sorry! This feature is not yet implemented.',
+        style: TextStyle(color: context.colors.onSurface),
+      ),
+      backgroundColor: context.colors.surfaceContainer,
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.mdSize),
+      ),
+    ),
+  );
+}

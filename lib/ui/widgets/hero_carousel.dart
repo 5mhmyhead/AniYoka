@@ -1,5 +1,6 @@
 import 'package:aniyoka/models/media_model.dart';
 import 'package:aniyoka/ui/common/ui_helpers.dart';
+import 'package:aniyoka/ui/widgets/custom_slide_indicator.dart';
 import 'package:aniyoka/ui/widgets/custom_tag.dart';
 import 'package:aniyoka/ui/widgets/shimmer_placeholder.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -103,7 +104,7 @@ class HeroCarousel extends StatelessWidget {
         );
       },
       // disabled autoplay on the hero carousel because it lowers performance
-      // by a lot and is not fine tradeoff to simply just turn off
+      // by a lot and is not worth the tradeoff
       options: FlutterCarouselOptions(
         height: 405.0,
         aspectRatio: 16 / 9,
@@ -117,71 +118,6 @@ class HeroCarousel extends StatelessWidget {
           activeColor: context.colors.primary,
           inactiveColor: context.colors.surfaceContainer,
           activeDotWidth: 20.0,
-        ),
-      ),
-    );
-  }
-}
-
-// generated code, will refactor later since
-// class could use existing SlideIndicatorOptions found in package
-class CustomSlideIndicator implements SlideIndicator {
-  final Color activeColor;
-  final Color inactiveColor;
-  final double dotHeight;
-  final double dotWidth;
-  final double activeDotWidth;
-  final double spacing;
-  final Alignment geometry;
-
-  CustomSlideIndicator({
-    required this.activeColor,
-    required this.inactiveColor,
-    this.dotHeight = 8.0,
-    this.dotWidth = 8.0,
-    this.activeDotWidth = 16.0,
-    this.spacing = 6.0,
-    this.geometry = Alignment.bottomCenter,
-  });
-
-  @override
-  Widget build(int currentPage, double pageDelta, int itemCount) {
-    if (itemCount < 2) return const SizedBox.shrink();
-
-    return Align(
-      alignment: geometry,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(itemCount, (index) {
-            final isCurrent = index == currentPage;
-            final isNext = index == (currentPage + 1) % itemCount;
-
-            double width = dotWidth;
-            Color color = inactiveColor;
-
-            if (isCurrent) {
-              width =
-                  activeDotWidth - ((activeDotWidth - dotWidth) * pageDelta);
-              color = Color.lerp(activeColor, inactiveColor, pageDelta)!;
-            } else if (isNext) {
-              // expands to double width during scroll
-              width = dotWidth + ((activeDotWidth - dotWidth) * pageDelta);
-              color = Color.lerp(inactiveColor, activeColor, pageDelta)!;
-            }
-
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              margin: EdgeInsets.symmetric(horizontal: spacing / 2),
-              width: width,
-              height: dotHeight,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(dotHeight / 2),
-              ),
-            );
-          }),
         ),
       ),
     );

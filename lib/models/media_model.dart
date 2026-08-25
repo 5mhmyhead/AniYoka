@@ -12,12 +12,23 @@ class Media {
   // nullable parameters
   // if unreleased, rating is made null
   final String? bannerImage;
+  final String? description;
   final String? countryOfOrigin;
-  final double? rating;
   final String? status;
   final String? season;
+  final String? source;
+  final double? rating;
   final int? seasonYear;
+  final int? episodes;
+  final int? duration;
+  final int? chapters;
+  final int? volumes;
+  final int? meanScore;
+  final int? averageScore;
+  final int? popularity;
+  final int? favourites;
   final FuzzyDate? startDate;
+  final FuzzyDate? endDate;
 
   Media({
     required this.id,
@@ -27,12 +38,23 @@ class Media {
     required this.format,
     // nullable parameters
     this.bannerImage,
+    this.description,
     this.countryOfOrigin,
-    this.rating,
     this.status,
     this.season,
+    this.source,
+    this.rating,
+    this.episodes,
+    this.duration,
+    this.chapters,
+    this.volumes,
+    this.meanScore,
+    this.averageScore,
+    this.popularity,
+    this.favourites,
     this.seasonYear,
     this.startDate,
+    this.endDate,
   });
 
   factory Media.fromAniListJson(Map<String, dynamic> json) {
@@ -73,6 +95,7 @@ class Media {
     }
 
     final bannerImage = json['bannerImage'] as String?;
+    final description = json['description'] as String?;
 
     final rawScore = (json['averageScore'] as num?)?.toDouble();
     final double? rating = rawScore != null ? rawScore / 10 : null;
@@ -83,10 +106,28 @@ class Media {
     final rawSeason = json['season'] as String?;
     final season = rawSeason?.capitalize();
 
+    final episodes = json['episodes'] as int?;
+    final duration = json['duration'] as int?;
+    final chapters = json['chapters'] as int?;
+    final volumes = json['volumes'] as int?;
+
+    final rawSource = json['source'] as String?;
+    final source = rawSource?.formatString();
+
     final seasonYear = json['seasonYear'] as int?;
+    final popularity = json['popularity'] as int?;
+    final favourites = json['favourites'] as int?;
+
+    final meanScore = json['meanScore'] as int?;
+    final averageScore = json['averageScore'] as int?;
 
     final rawStartDate = json['startDate'] as Map<String, dynamic>?;
-    final startDate = rawStartDate != null ? FuzzyDate.fromJson(rawStartDate) : null;
+    final startDate =
+        rawStartDate != null ? FuzzyDate.fromJson(rawStartDate) : null;
+
+    final rawEndDate = json['endDate'] as Map<String, dynamic>?;
+    final endDate =
+        rawStartDate != null ? FuzzyDate.fromJson(rawEndDate) : null;
 
     return Media(
       id: id,
@@ -95,12 +136,23 @@ class Media {
       coverImage: coverImage,
       format: format,
       bannerImage: bannerImage,
+      description: description,
       countryOfOrigin: country,
-      rating: rating,
       status: status,
       season: season,
+      source: source,
+      rating: rating,
+      episodes: episodes,
+      duration: duration,
+      chapters: chapters,
+      volumes: volumes,
+      meanScore: meanScore,
+      averageScore: averageScore,
+      popularity: popularity,
+      favourites: favourites,
       seasonYear: seasonYear,
       startDate: startDate,
+      endDate: endDate,
     );
   }
 }

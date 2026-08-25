@@ -53,9 +53,9 @@ class MediaInfoView extends StackedView<MediaInfoViewModel> {
               ),
             ),
           ],
-          body: const TabBarView(
+          body: TabBarView(
             children: [
-              OverviewTab(),
+              OverviewTab(media: media),
               DetailsTab(),
               SocialsTab(),
             ],

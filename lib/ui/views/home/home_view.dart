@@ -30,12 +30,12 @@ class HomeView extends StackedView<HomeViewModel> {
               actions: [
                 IconButton(
                   icon: Icon(Icons.search, color: context.colors.onSurface),
-                  onPressed: () {},
+                  onPressed: () => showUnimplementedSnackBar(context), // TODO: add quick search
                 ),
                 IconButton(
                   icon: Icon(Icons.notifications_none_outlined,
                       color: context.colors.onSurface),
-                  onPressed: () {},
+                  onPressed: () => showUnimplementedSnackBar(context), // TODO: add notifications
                 ),
                 horizontalSpaceSm,
               ],

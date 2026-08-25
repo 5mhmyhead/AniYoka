@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:aniyoka/ui/common/ui_helpers.dart';
-import 'package:aniyoka/ui/widgets/shimmer_placeholder.dart';
+import 'package:aniyoka/ui/widgets/custom_slide_indicator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tilt/flutter_tilt.dart';
@@ -24,12 +24,22 @@ class ImageViewerView extends StatefulWidget {
       PageRouteBuilder(
         opaque: false,
         barrierColor: Colors.transparent,
-        transitionDuration: const Duration(milliseconds: 200),
-        reverseTransitionDuration: const Duration(milliseconds: 200),
+        transitionDuration: const Duration(milliseconds: 100),
+        reverseTransitionDuration: const Duration(milliseconds: 100),
         pageBuilder: (_, __, ___) => ImageViewerView(
           coverImage: coverImage,
           bannerImage: bannerImage,
         ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOut,
+              reverseCurve: Curves.easeIn,
+            ),
+            child: child,
+          );
+        },
       ),
     );
   }
@@ -40,7 +50,9 @@ class ImageViewerView extends StatefulWidget {
 
 class _ImageViewerViewState extends State<ImageViewerView> {
   late final PageController _pageController;
+
   int _currentIndex = 0;
+  double _pageDelta = 0.0;
 
   List<String> get _images => [
         widget.coverImage,
@@ -51,6 +63,13 @@ class _ImageViewerViewState extends State<ImageViewerView> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    _pageController.addListener(() {
+      final page = _pageController.page ?? 0;
+      setState(() {
+        _currentIndex = page.floor();
+        _pageDelta = page - page.floor();
+      });
+    });
   }
 
   @override
@@ -80,7 +99,6 @@ class _ImageViewerViewState extends State<ImageViewerView> {
           PageView.builder(
               controller: _pageController,
               itemCount: images.length,
-              onPageChanged: (index) => setState(() => _currentIndex = index),
               itemBuilder: (context, index) {
                 return Center(
                   child: Padding(
@@ -123,41 +141,28 @@ class _ImageViewerViewState extends State<ImageViewerView> {
                 _buildIconButton(
                   context,
                   icon: Icons.file_download_outlined,
-                  onPressed: () {}, // TODO: add download
+                  onPressed: () => showUnimplementedSnackBar(context), // TODO: add download
                 ),
                 horizontalSpaceSm,
                 _buildIconButton(
                   context,
                   icon: Icons.share_outlined,
-                  onPressed: () {}, // TODO: add share
+                  onPressed: () => showUnimplementedSnackBar(context), // TODO: add share
                 ),
                 horizontalSpaceSm,
               ],
             ),
           ),
-          // TODO: change indicator to match hero carousel indicator
           if (images.length > 1)
             Positioned(
-              bottom: MediaQuery.of(context).padding.bottom + 24.0,
+              bottom: MediaQuery.of(context).padding.bottom + 16.0,
               left: 0,
               right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(images.length, (index) {
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    margin: const EdgeInsets.symmetric(horizontal: 3.0),
-                    width: _currentIndex == index ? 20.0 : 8.0,
-                    height: 8.0,
-                    decoration: BoxDecoration(
-                      color: _currentIndex == index
-                          ? context.colors.primary
-                          : context.colors.surfaceContainer,
-                      borderRadius: BorderRadius.circular(4.0),
-                    ),
-                  );
-                }),
-              ),
+              child: CustomSlideIndicator(
+                activeColor: context.colors.primary,
+                inactiveColor: context.colors.surfaceContainer,
+                activeDotWidth: 20.0,
+              ).build(_currentIndex, _pageDelta, images.length),
             ),
         ],
       ),

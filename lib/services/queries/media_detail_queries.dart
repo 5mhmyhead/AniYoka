@@ -13,11 +13,26 @@ class MediaDetailQueries {
         }
         format
         bannerImage
+        description
         countryOfOrigin
         status
         season
         seasonYear
+        episodes
+        duration
+        chapters
+        volumes
+        source
+        meanScore
+        averageScore
+        popularity
+        favourites
         startDate {
+          year
+          month
+          day
+        }
+        endDate {
           year
           month
           day
