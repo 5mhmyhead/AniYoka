@@ -1,7 +1,7 @@
 // this was originally separated into two anime and manga models,
 // but anilist has a dedicated media type that holds both anime and manga.
 import 'package:aniyoka/ui/common/ui_helpers.dart';
-import 'package:aniyoka/ui/helpers/fuzzy_date.dart';
+import 'package:aniyoka/ui/helpers/media_classes.dart';
 
 class Media {
   final int id;
@@ -29,6 +29,7 @@ class Media {
   final int? favourites;
   final FuzzyDate? startDate;
   final FuzzyDate? endDate;
+  final NextAiring? nextAiringEpisode;
 
   Media({
     required this.id,
@@ -55,6 +56,7 @@ class Media {
     this.seasonYear,
     this.startDate,
     this.endDate,
+    this.nextAiringEpisode,
   });
 
   factory Media.fromAniListJson(Map<String, dynamic> json) {
@@ -122,12 +124,14 @@ class Media {
     final averageScore = json['averageScore'] as int?;
 
     final rawStartDate = json['startDate'] as Map<String, dynamic>?;
-    final startDate =
-        rawStartDate != null ? FuzzyDate.fromJson(rawStartDate) : null;
+    final startDate = rawStartDate != null ? FuzzyDate.fromJson(rawStartDate) : null;
 
     final rawEndDate = json['endDate'] as Map<String, dynamic>?;
-    final endDate =
-        rawStartDate != null ? FuzzyDate.fromJson(rawEndDate) : null;
+    final endDate = rawEndDate != null ? FuzzyDate.fromJson(rawEndDate) : null;
+
+    final rawNextAiring = json['nextAiringEpisode'] as Map<String, dynamic>?;
+    final nextAiringEpisode = rawNextAiring != null
+        ? NextAiring.fromJson(rawNextAiring) : null;
 
     return Media(
       id: id,
@@ -153,6 +157,7 @@ class Media {
       seasonYear: seasonYear,
       startDate: startDate,
       endDate: endDate,
+      nextAiringEpisode: nextAiringEpisode,
     );
   }
 }

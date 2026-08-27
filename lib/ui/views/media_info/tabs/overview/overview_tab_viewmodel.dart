@@ -1,6 +1,11 @@
 import 'package:stacked/stacked.dart';
 
 class OverviewTabViewModel extends BaseViewModel {
-  Future<void> initialise() async {}
-  Future<void> refresh() async {}
+  bool _isDescriptionExpanded = false;
+  bool get isDescriptionExpanded => _isDescriptionExpanded;
+  
+  void toggleDescription() {
+    _isDescriptionExpanded = !_isDescriptionExpanded;
+    rebuildUi();
+  }
 }

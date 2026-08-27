@@ -27,6 +27,11 @@ class MediaDetailQueries {
         averageScore
         popularity
         favourites
+        nextAiringEpisode {
+          airingAt
+          timeUntilAiring
+          episode
+        }
         startDate {
           year
           month

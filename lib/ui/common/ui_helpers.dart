@@ -93,6 +93,22 @@ extension StringCasingExtension on String {
   }
 }
 
+extension IntFormatting on int {
+  // format from 10304 to 10,304
+  String get formatted => 
+    toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]},',
+    );
+
+  // format from 10304 to 10.3K
+  String get compact {
+    if (this >= 1000000) return '${(this / 1000000).toStringAsFixed(1)}M';
+    if (this >= 1000) return '${(this / 1000).toStringAsFixed(1)}K';
+    return toString();
+  }
+}
+
 void showUnimplementedSnackBar(BuildContext context) {
   ScaffoldMessenger.of(context).hideCurrentSnackBar();
   ScaffoldMessenger.of(context).showSnackBar(

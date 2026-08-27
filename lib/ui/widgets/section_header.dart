@@ -60,8 +60,12 @@ class SectionHeader extends StatelessWidget {
               ],
             ),
           ),
-          if (onTap != null)
-            IconButton(
+          Visibility(
+            visible: onTap != null,
+            maintainSize: true,
+            maintainAnimation: true,
+            maintainState: true,
+            child: IconButton(
               onPressed: onTap,
               icon: Icon(
                 Icons.arrow_forward_rounded,
@@ -69,6 +73,7 @@ class SectionHeader extends StatelessWidget {
                 color: context.colors.outline,
               ),
             ),
+          ),   
         ],
       ),
     );
