@@ -4,6 +4,7 @@ import 'package:aniyoka/ui/views/media_info/tabs/overview/overview_tab_viewmodel
 import 'package:aniyoka/ui/widgets/section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:html/parser.dart';
 import 'package:stacked/stacked.dart';
 
 class OverviewTab extends StatefulWidget {
@@ -39,15 +40,13 @@ class _OverviewTabState extends State<OverviewTab>
                 verticalSpaceMd,
                 _buildSection(
                   title: 'Synopsis',
-                  onTap: () {},
+                  onTap: null,
                   content: _buildSynopsis(
                     context, 
-                    description: media.description ?? 'No description available.', 
+                    description: parse(media.description).body?.text ?? 'No description available.', 
                     isExpanded: viewModel.isDescriptionExpanded, 
                     onToggle: () => viewModel.toggleDescription(),
-                    onCopy: () => Clipboard.setData(
-                      ClipboardData(text: media.description ?? ''),
-                    ),
+                    onCopy: () => Clipboard.setData(ClipboardData(text: media.description ?? '')),
                   ),
                 ),
               ],
@@ -57,20 +56,42 @@ class _OverviewTabState extends State<OverviewTab>
   }
 }
 
-Widget _buildStatsRow(BuildContext context, Media media) {
-  final pills = <({String value, String label})>[
-    if (media.nextAiringEpisode != null)
-      (value: media.nextAiringEpisode!.formattedCountdown, label: 'next episode'),
-    if (media.meanScore != null) 
-      (value: '${media.meanScore}%', label: 'mean score'),
-    if (media.episodes != null) 
-      (value: '${media.episodes}', label: 'episodes'),
-    if (media.popularity != null) 
-      (value: media.popularity!.formatted, label: 'popularity'),
-    if (media.favourites != null) 
-      (value: media.favourites!.formatted, label: 'favorites'),
-  ];
+List<({String value, String label})> _getStatistics(Media media) {
+  final pills = <({String value, String label})>[];
 
+  if (media.nextAiringEpisode != null) {
+    pills.add((value: media.nextAiringEpisode!.formattedCountdown, label: 'next episode'));
+  }
+
+  if (media.meanScore != null) {
+    pills.add((value: '${media.meanScore}%', label: 'mean score'));
+  }
+
+  if (media.episodes != null) {
+    pills.add((value: '${media.episodes}', label: 'episodes'));
+  }
+
+  if (media.volumes != null) {
+    pills.add((value: '${media.volumes}', label: 'volumes'));
+  }
+
+  if (media.chapters != null) {
+    pills.add((value: '${media.chapters}', label: 'chapters'));
+  }
+
+  if (media.popularity != null) {
+    pills.add((value: media.popularity!.formatted, label: 'popularity'));
+  }
+
+  if (media.favourites != null) {
+    pills.add((value: media.favourites!.formatted, label: 'favorites'));
+  }
+
+  return pills;
+}
+
+Widget _buildStatsRow(BuildContext context, Media media) {
+  final pills = _getStatistics(media);
   if (pills.isEmpty) return const SizedBox.shrink();
 
   return SizedBox(
@@ -155,54 +176,52 @@ Widget _buildSynopsis(
   required VoidCallback onToggle,
   required VoidCallback onCopy,
 }) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: kHorizontalPadding,
-        child: Text(
-          description,
-          textAlign: TextAlign.justify,
-          maxLines: isExpanded ? null : 5,
-          overflow: isExpanded ? null : TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium,
+  return Padding(
+    padding: kHorizontalPadding,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOutCubic,
+          alignment: Alignment.topCenter,
+          child: Text(
+            description,
+            textAlign: TextAlign.justify,
+            maxLines: isExpanded ? null : 5,
+            overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            style: context.textTheme.bodyMedium,
+          ),
         ),
-      ),
-      verticalSpaceMd,
-      Padding(
-        padding: kHorizontalPadding,
-        child: Row(
+        verticalSpaceMd,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Expanded(child: SizedBox.shrink()),
-            Expanded(
-              child: GestureDetector(
-                onTap: onToggle,
+            SizedBox(width: 24),
+            GestureDetector(
+              onTap: onToggle,
+              child: AnimatedRotation(
+                turns: isExpanded ? 0.5 : 0.0,
+                duration: const Duration(milliseconds: 300),
                 child: Icon(
-                  isExpanded
-                      ? Icons.arrow_circle_up_outlined
-                      : Icons.arrow_circle_down_outlined,
+                  Icons.arrow_circle_down_outlined,
                   color: context.colors.onSurface,
                   size: 24,
                 ),
               ),
             ),
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: onCopy,
-                  child: Icon(
-                    Icons.copy,
-                    color: context.colors.onSurface,
-                    size: 24,
-                  ),
-                ),
+            GestureDetector(
+              onTap: onCopy,
+              child: Icon(
+                Icons.copy,
+                color: context.colors.onSurface,
+                size: 24,
               ),
             ),
           ],
         ),
-      ),
-      verticalSpaceMd,
-    ],
+        verticalSpaceMd,
+      ],
+    ),
   );
 }
