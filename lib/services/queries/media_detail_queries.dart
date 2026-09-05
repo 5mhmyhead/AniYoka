@@ -27,6 +27,47 @@ class MediaDetailQueries {
         averageScore
         popularity
         favourites
+        genres
+        tags {
+          name
+          isMediaSpoiler
+          rank
+        }
+        relations {
+          edges {
+            relationType
+            node {
+              id
+              type
+              title { 
+                english 
+                romaji 
+              }
+              coverImage { 
+                large 
+              }
+              format
+              meanScore
+            }
+          }
+        }
+        recommendations(perPage: 10) {
+          nodes {
+            mediaRecommendation {
+              id
+              type
+              title { 
+                english 
+                romaji 
+              }
+              coverImage { 
+                large 
+              }
+              format
+              meanScore
+            }
+          }
+        }
         nextAiringEpisode {
           airingAt
           timeUntilAiring

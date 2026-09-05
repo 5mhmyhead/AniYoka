@@ -27,6 +27,8 @@ class Media {
   final int? averageScore;
   final int? popularity;
   final int? favourites;
+  final List<String>? genres;
+  final List<MediaTag>? tags;
   final FuzzyDate? startDate;
   final FuzzyDate? endDate;
   final NextAiring? nextAiringEpisode;
@@ -53,6 +55,8 @@ class Media {
     this.averageScore,
     this.popularity,
     this.favourites,
+    this.genres,
+    this.tags,
     this.seasonYear,
     this.startDate,
     this.endDate,
@@ -123,15 +127,24 @@ class Media {
     final meanScore = json['meanScore'] as int?;
     final averageScore = json['averageScore'] as int?;
 
+    final genres = (json['genres'] as List?)
+        ?.map((e) => e as String)
+        .toList();
+
+    final tags = (json['tags'] as List?)
+        ?.map((e) => MediaTag.fromJson(e as Map<String, dynamic>))
+        .toList();
+
     final rawStartDate = json['startDate'] as Map<String, dynamic>?;
-    final startDate = rawStartDate != null ? FuzzyDate.fromJson(rawStartDate) : null;
+    final startDate =
+        rawStartDate != null ? FuzzyDate.fromJson(rawStartDate) : null;
 
     final rawEndDate = json['endDate'] as Map<String, dynamic>?;
     final endDate = rawEndDate != null ? FuzzyDate.fromJson(rawEndDate) : null;
 
     final rawNextAiring = json['nextAiringEpisode'] as Map<String, dynamic>?;
-    final nextAiringEpisode = rawNextAiring != null
-        ? NextAiring.fromJson(rawNextAiring) : null;
+    final nextAiringEpisode =
+        rawNextAiring != null ? NextAiring.fromJson(rawNextAiring) : null;
 
     return Media(
       id: id,
@@ -155,6 +168,8 @@ class Media {
       popularity: popularity,
       favourites: favourites,
       seasonYear: seasonYear,
+      genres: genres,
+      tags: tags,
       startDate: startDate,
       endDate: endDate,
       nextAiringEpisode: nextAiringEpisode,

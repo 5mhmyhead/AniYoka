@@ -92,3 +92,23 @@ class NextAiring {
     }
   }
 }
+
+class MediaTag {
+  final String name;
+  final bool isMediaSpoiler;
+  final int rank;
+
+  const MediaTag({
+    required this.name,
+    required this.isMediaSpoiler,
+    required this.rank,
+  });
+
+  factory MediaTag.fromJson(Map<String, dynamic> json) {
+    return MediaTag(
+      name: json['name'] as String? ?? '',
+      isMediaSpoiler: json['isMediaSpoiler'] as bool? ?? false,
+      rank: json['rank'] as int? ?? 0,
+    );
+  }
+}

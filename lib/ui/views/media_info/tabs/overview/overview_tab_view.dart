@@ -1,5 +1,6 @@
 import 'package:aniyoka/models/media_model.dart';
 import 'package:aniyoka/ui/common/ui_helpers.dart';
+import 'package:aniyoka/ui/helpers/media_classes.dart';
 import 'package:aniyoka/ui/views/media_info/tabs/overview/overview_tab_viewmodel.dart';
 import 'package:aniyoka/ui/widgets/section_header.dart';
 import 'package:flutter/material.dart';
@@ -42,11 +43,30 @@ class _OverviewTabState extends State<OverviewTab>
                   title: 'Synopsis',
                   onTap: null,
                   content: _buildSynopsis(
-                    context, 
-                    description: parse(media.description).body?.text ?? 'No description available.', 
-                    isExpanded: viewModel.isDescriptionExpanded, 
+                    context,
+                    description: parse(media.description).body?.text ??
+                        'No description available.',
+                    isExpanded: viewModel.isDescriptionExpanded,
                     onToggle: () => viewModel.toggleDescription(),
-                    onCopy: () => Clipboard.setData(ClipboardData(text: media.description ?? '')),
+                    onCopy: () => Clipboard.setData(
+                        ClipboardData(text: media.description ?? '')),
+                  ),
+                ),
+                _buildSection(
+                  title: 'Genres and Tags',
+                  onTap: null,
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildGenres(context, genres: media.genres ?? []),
+                      verticalSpaceMd,
+                      _buildTags(
+                        context,
+                        tags: media.tags?.take(10).toList() ?? [],
+                        showSpoilers: viewModel.showSpoilerTags,
+                        onToggleSpoilers: viewModel.toggleSpoilerTags,
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -60,7 +80,10 @@ List<({String value, String label})> _getStatistics(Media media) {
   final pills = <({String value, String label})>[];
 
   if (media.nextAiringEpisode != null) {
-    pills.add((value: media.nextAiringEpisode!.formattedCountdown, label: 'next episode'));
+    pills.add((
+      value: media.nextAiringEpisode!.formattedCountdown,
+      label: 'next episode'
+    ));
   }
 
   if (media.meanScore != null) {
@@ -146,29 +169,6 @@ Widget _buildStatPill(
   );
 }
 
-Widget _buildSection({
-  required String title,
-  required Widget content,
-  String? subtitle,
-  Color? color,
-  VoidCallback? onTap,
-}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      SectionHeader(
-        title: title,
-        subtitle: subtitle,
-        color: color,
-        onTap: onTap,
-      ),
-      verticalSpaceMd,
-      content,
-      verticalSpaceLg,
-    ],
-  );
-}
-
 Widget _buildSynopsis(
   BuildContext context, {
   required String description,
@@ -220,8 +220,169 @@ Widget _buildSynopsis(
             ),
           ],
         ),
-        verticalSpaceMd,
       ],
     ),
+  );
+}
+
+Widget _buildGenres(
+  BuildContext context, {
+  required List<dynamic> genres,
+}) {
+  return Padding(
+    padding: kHorizontalPadding,
+    child: Wrap(
+      spacing: 8.0,
+      runSpacing: 8.0,
+      children: genres.map((genre) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: context.colors.surfaceContainerHigh,
+            border: Border.all(color: context.colors.primary),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            genre,
+            style: context.textTheme.bodySmall,
+          ),
+        );
+      }).toList(),
+    ),
+  );
+}
+
+Widget _buildTags(
+  BuildContext context, {
+  required List<MediaTag> tags,
+  required bool showSpoilers,
+  required VoidCallback onToggleSpoilers,
+}) {
+  final visibleTags = showSpoilers ? tags : tags.where((t) => !t.isMediaSpoiler).toList();
+  final spoilerCount = tags.where((t) => t.isMediaSpoiler).length;
+
+  return Padding(
+    padding: kHorizontalPadding,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8.0,
+          runSpacing: 8.0,
+          children: visibleTags.map((tag) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: tag.isMediaSpoiler
+                    ? context.colors.surfaceContainerHigh
+                    : context.colors.surfaceContainer,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (tag.isMediaSpoiler) ...[
+                    Icon(Icons.warning_amber_rounded,
+                        color: context.colors.primary, size: 14),
+                    horizontalSpaceXs,
+                  ],
+                  Text(
+                    tag.name,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: tag.isMediaSpoiler
+                          ? context.colors.primary
+                          : context.colors.onSurface,
+                    ),
+                  ),
+                  horizontalSpaceXs,
+                  Text(
+                    '${tag.rank}%',
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: context.colors.outline,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+        if (spoilerCount > 0) ...[
+          verticalSpaceLg,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GestureDetector(
+                onTap: onToggleSpoilers,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: showSpoilers
+                        ? context.colors.primary
+                        : context.colors.surfaceContainer,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: context.colors.primary),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        showSpoilers ? Icons.visibility : Icons.visibility_off,
+                        color: showSpoilers
+                            ? context.colors.onSurface
+                            : context.colors.primary,
+                        size: 15,
+                      ),
+                      horizontalSpaceSm,
+                      Text(
+                        showSpoilers ? 'Hide spoilers' : 'Show spoilers',
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: showSpoilers
+                              ? context.colors.onSurface
+                              : context.colors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              AnimatedOpacity(
+                opacity: (spoilerCount > 0 && !showSpoilers) ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 150),
+                child: Text(
+                  '$spoilerCount spoiler tag${spoilerCount > 1 ? 's' : ''} hidden',
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: context.colors.outline,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+Widget _buildSection({
+  required String title,
+  required Widget content,
+  String? subtitle,
+  Color? color,
+  VoidCallback? onTap,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SectionHeader(
+        title: title,
+        subtitle: subtitle,
+        color: color,
+        onTap: onTap,
+      ),
+      verticalSpaceMd,
+      content,
+      verticalSpaceLg,
+    ],
   );
 }
