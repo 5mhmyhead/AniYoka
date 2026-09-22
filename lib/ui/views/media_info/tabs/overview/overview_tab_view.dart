@@ -2,6 +2,7 @@ import 'package:aniyoka/models/media_model.dart';
 import 'package:aniyoka/ui/common/ui_helpers.dart';
 import 'package:aniyoka/ui/helpers/media_classes.dart';
 import 'package:aniyoka/ui/views/media_info/tabs/overview/overview_tab_viewmodel.dart';
+import 'package:aniyoka/ui/widgets/card_list_row.dart';
 import 'package:aniyoka/ui/widgets/section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -67,6 +68,15 @@ class _OverviewTabState extends State<OverviewTab>
                         onToggleSpoilers: viewModel.toggleSpoilerTags,
                       ),
                     ],
+                  ),
+                ),
+                _buildSection(
+                  title: 'Related', 
+                  onTap: null,
+                  content: CardListRow(
+                    listItems: media.relatedMedia,
+                    onTap: (id) => viewModel.onMediaTap(id),
+                    onLongPress: (id) => viewModel.onMediaLongPress(id),
                   ),
                 ),
               ],

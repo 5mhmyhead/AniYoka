@@ -12,14 +12,15 @@ class AniListService {
     _client = GraphQLClient(link: httpLink, cache: GraphQLCache());
   }
 
-  Future<List<Media>> _queryMediaList({
+  Future<Map<String, dynamic>?> _executeQuery({
     required String queryDocument,
     required Map<String, dynamic> variables,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheFirst,
   }) async {
     final options = QueryOptions(
       document: gql(queryDocument),
       variables: variables,
-      fetchPolicy: FetchPolicy.networkOnly,
+      fetchPolicy: fetchPolicy,
     );
 
     final result = await _client.query(options);
@@ -28,8 +29,39 @@ class AniListService {
       throw Exception(result.exception.toString());
     }
 
-    final List list = result.data?['Page']?['media'] ?? [];
-    return list.map((item) => Media.fromAniListJson(item)).toList();
+    return result.data;
+  }
+
+  Future<List<Media>> _queryMediaList({
+    required String queryDocument,
+    required Map<String, dynamic> variables,
+  }) async {
+    final data = await _executeQuery(
+      queryDocument: queryDocument,
+      variables: variables,
+    );
+    return _parseMediaList(data?['Page']?['media']);
+  }
+
+  Future<Map<String, List<Media>>> fetchDiscoverTab({int perPage = 10}) async {
+    final data = await _executeQuery(
+        queryDocument: DiscoverTabQueries.getDiscoverTab, 
+        variables: {
+          'season': SeasonHelper.getCurrentSeason().name,
+          'seasonYear': SeasonHelper.getCurrentSeasonYear(),
+          'nextSeason': SeasonHelper.getNextSeason().name,
+          'nextSeasonYear': SeasonHelper.getNextSeasonYear(),
+          'perPage': perPage,
+        },
+    );
+
+    return {
+      'trendingAnime': _parseMediaList(data?['trendingAnime']?['media']),
+      'trendingManga': _parseMediaList(data?['trendingManga']?['media']),
+      'thisSeason': _parseMediaList(data?['thisSeason']?['media']),
+      'nextSeason': _parseMediaList(data?['nextSeason']?['media']),
+      'highestRatedManga': _parseMediaList(data?['highestRatedManga']?['media']),
+    };
   }
 
   Future<List<Media>> fetchTrendingAnime({int page = 1, int perPage = 10}) {
@@ -94,18 +126,20 @@ class AniListService {
   }
 
   Future<Media> fetchAnimeDetails(int id) async {
-    final options = QueryOptions(
-      document: gql(MediaDetailQueries.getMediaDetails),
+    final data = await _executeQuery(
+      queryDocument: MediaDetailQueries.getMediaDetails,
       variables: {'id': id},
+      fetchPolicy: FetchPolicy.cacheFirst,
     );
 
-    final result = await _client.query(options);
+    final mediaJson = data?['Media'] as Map<String, dynamic>?;
+    if (mediaJson == null) throw Exception('Media not found');
+    
+    return Media.fromAniListJson(mediaJson);
+  }
 
-    if (result.hasException) {
-      throw Exception(result.exception.toString());
-    }
-
-    final Map<String, dynamic> media = result.data?['Media'];
-    return Media.fromAniListJson(media);
+  List<Media> _parseMediaList(dynamic list) {
+    if (list == null) return [];
+    return (list as List).map((item) => Media.fromAniListJson(item)).toList();
   }
 }

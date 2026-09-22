@@ -29,6 +29,7 @@ class Media {
   final int? favourites;
   final List<String>? genres;
   final List<MediaTag>? tags;
+  final List<MediaRelation>? relations;
   final FuzzyDate? startDate;
   final FuzzyDate? endDate;
   final NextAiring? nextAiringEpisode;
@@ -57,11 +58,14 @@ class Media {
     this.favourites,
     this.genres,
     this.tags,
+    this.relations,
     this.seasonYear,
     this.startDate,
     this.endDate,
     this.nextAiringEpisode,
   });
+
+  List<Media> get relatedMedia => relations?.map((relation) => relation.media).toList() ?? [];
 
   factory Media.fromAniListJson(Map<String, dynamic> json) {
     final id = json['id'] as int? ?? 0;
@@ -135,6 +139,12 @@ class Media {
         ?.map((e) => MediaTag.fromJson(e as Map<String, dynamic>))
         .toList();
 
+    final rawRelations = json['relations']?['edges'] as List?;
+    final relations = rawRelations
+        ?.whereType<Map<String, dynamic>>()
+        .map((edge) => MediaRelation.fromMap(edge))
+        .toList();
+
     final rawStartDate = json['startDate'] as Map<String, dynamic>?;
     final startDate =
         rawStartDate != null ? FuzzyDate.fromJson(rawStartDate) : null;
@@ -170,6 +180,7 @@ class Media {
       seasonYear: seasonYear,
       genres: genres,
       tags: tags,
+      relations: relations,
       startDate: startDate,
       endDate: endDate,
       nextAiringEpisode: nextAiringEpisode,

@@ -1,5 +1,8 @@
 // object classes to help parse data from the API
 // fuzzy date for start date and end date
+import 'package:aniyoka/models/media_model.dart';
+import 'package:aniyoka/ui/common/ui_helpers.dart';
+
 class FuzzyDate {
   final int? year;
   final int? month;
@@ -109,6 +112,23 @@ class MediaTag {
       name: json['name'] as String? ?? '',
       isMediaSpoiler: json['isMediaSpoiler'] as bool? ?? false,
       rank: json['rank'] as int? ?? 0,
+    );
+  }
+}
+
+class MediaRelation {
+  final Media media;
+  final String relationType;
+
+  MediaRelation({
+    required this.media,
+    required this.relationType,
+  });
+
+  factory MediaRelation.fromMap(Map<String, dynamic> map) {
+    return MediaRelation(
+      relationType: (map['relationType'] as String? ?? '').formatString(),
+      media: Media.fromAniListJson(map['node'] as Map<String, dynamic>? ?? {}),
     );
   }
 }
