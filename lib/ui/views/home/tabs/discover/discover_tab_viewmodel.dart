@@ -24,9 +24,13 @@ class DiscoverTabViewModel extends BaseViewModel {
   List<Media> _highestRatedManga = [];
   List<Media> get highestRatedManga => _highestRatedManga;
 
+  bool _hasLoaded = false;
+
   Future<void> initialise() async {
+    if (_hasLoaded) return;
     clearErrors();
     setBusy(true);
+
     try {
       await Future.wait([
         _fetchTrendingAnime(),
@@ -40,6 +44,8 @@ class DiscoverTabViewModel extends BaseViewModel {
     } finally {
       setBusy(false);
     }
+
+    _hasLoaded = true;
   }
 
   Future<void> refresh() async {

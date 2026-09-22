@@ -43,27 +43,6 @@ class AniListService {
     return _parseMediaList(data?['Page']?['media']);
   }
 
-  Future<Map<String, List<Media>>> fetchDiscoverTab({int perPage = 10}) async {
-    final data = await _executeQuery(
-        queryDocument: DiscoverTabQueries.getDiscoverTab, 
-        variables: {
-          'season': SeasonHelper.getCurrentSeason().name,
-          'seasonYear': SeasonHelper.getCurrentSeasonYear(),
-          'nextSeason': SeasonHelper.getNextSeason().name,
-          'nextSeasonYear': SeasonHelper.getNextSeasonYear(),
-          'perPage': perPage,
-        },
-    );
-
-    return {
-      'trendingAnime': _parseMediaList(data?['trendingAnime']?['media']),
-      'trendingManga': _parseMediaList(data?['trendingManga']?['media']),
-      'thisSeason': _parseMediaList(data?['thisSeason']?['media']),
-      'nextSeason': _parseMediaList(data?['nextSeason']?['media']),
-      'highestRatedManga': _parseMediaList(data?['highestRatedManga']?['media']),
-    };
-  }
-
   Future<List<Media>> fetchTrendingAnime({int page = 1, int perPage = 10}) {
     return _queryMediaList(
       queryDocument: DiscoverTabQueries.getTrendingMedia,

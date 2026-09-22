@@ -23,11 +23,17 @@ class OverviewTabViewModel extends BaseViewModel {
   }
 
   void onMediaTap(int id) {
-    _navigationService.navigateToMediaInfoView(mediaId: id);
+    _navigationService.navigateToMediaInfoView(
+      mediaId: id,
+      preventDuplicates: false,
+    );
   }
 
   void onMediaLongPress(int id) {
     // TODO: change this to have another long press functionality
-    _navigationService.navigateToMediaInfoView(mediaId: id);
+    _navigationService.navigateToMediaInfoView(
+      mediaId: id,
+      preventDuplicates: false,
+    );
   }
 }

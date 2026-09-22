@@ -89,36 +89,13 @@ class _OverviewTabState extends State<OverviewTab>
 List<({String value, String label})> _getStatistics(Media media) {
   final pills = <({String value, String label})>[];
 
-  if (media.nextAiringEpisode != null) {
-    pills.add((
-      value: media.nextAiringEpisode!.formattedCountdown,
-      label: 'next episode'
-    ));
-  }
-
-  if (media.meanScore != null) {
-    pills.add((value: '${media.meanScore}%', label: 'mean score'));
-  }
-
-  if (media.episodes != null) {
-    pills.add((value: '${media.episodes}', label: 'episodes'));
-  }
-
-  if (media.volumes != null) {
-    pills.add((value: '${media.volumes}', label: 'volumes'));
-  }
-
-  if (media.chapters != null) {
-    pills.add((value: '${media.chapters}', label: 'chapters'));
-  }
-
-  if (media.popularity != null) {
-    pills.add((value: media.popularity!.formatted, label: 'popularity'));
-  }
-
-  if (media.favourites != null) {
-    pills.add((value: media.favourites!.formatted, label: 'favorites'));
-  }
+  if (media.nextAiringEpisode != null) pills.add((value: media.nextAiringEpisode!.formattedCountdown,label: 'next episode'));
+  if (media.meanScore != null) pills.add((value: '${media.meanScore}%', label: 'mean score'));
+  if (media.episodes != null) pills.add((value: '${media.episodes}', label: 'episodes'));
+  if (media.volumes != null) pills.add((value: '${media.volumes}', label: 'volumes'));
+  if (media.chapters != null) pills.add((value: '${media.chapters}', label: 'chapters'));
+  if (media.popularity != null) pills.add((value: media.popularity!.formatted, label: 'popularity'));
+  if (media.favourites != null) pills.add((value: media.favourites!.formatted, label: 'favorites'));
 
   return pills;
 }
